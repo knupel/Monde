@@ -20,8 +20,8 @@ ROPE - Romanesco processing environment –
 
 void setup() {
   background(0);
-  // fullScreen(2);
-  size(800,800);
+  fullScreen(2);
+  //size(800,800);
   init_street_map();
 }
 
@@ -29,8 +29,9 @@ void setup() {
 void draw() {
   background(0);
   map();
-  show_urbanist();
+  urbanist();
   show_center_world();
+  boussole(Vec2(grid_nodes_monde.get(0).get_pos()),80);
 }
 
 
