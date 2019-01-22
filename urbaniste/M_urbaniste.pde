@@ -14,11 +14,8 @@ boussole : compass
 ArrayList<Intersection> grid_nodes_monde;
 ArrayList<Segment> segment_monde;
 Urbanist urbanist;
-// float angle_town;
-
 float angle_tracer;
 float speed;
-Vec2 destination;
 void init_street_map() {
 	// init data if nececary
 	if( grid_nodes_monde == null) {
@@ -30,25 +27,22 @@ void init_street_map() {
 	}
 
 	// reset data
-	// angle_town = 0;
 	grid_nodes_monde.clear();
 	segment_monde.clear();
   
   // set data
 	Vec2 start_pos = Vec2(random(width),random(height));
 	int range_start = 30;
-	destination = Vec2(start_pos.x+random(-range_start,range_start),start_pos.y+random(-range_start,range_start));
+	Vec2 destination = Vec2(start_pos.x+random(-range_start,range_start),start_pos.y+random(-range_start,range_start));
   urbanist = new Urbanist();
   urbanist.set_pos(start_pos);
+  urbanist.set_destination(destination);
   
   angle_tracer = angle(start_pos,destination);
   Intersection intersection = new Intersection(start_pos,destination.copy()); // copy() it's nessacy to don't point on a same Object
   grid_nodes_monde.add(intersection);
   Segment segment = new Segment(start_pos,destination.copy());
   segment_monde.add(segment);
-  // angle_town = segment.get_angle();
-  // if(angle_town > PI) angle_town -= PI;
- 
   println("new street map",urbanist.get_pos());
 }
 
@@ -61,7 +55,7 @@ void init_street_map() {
 
 void urbanist() {
 	// update
-	urbanist.set_pos(follow(destination,.8));
+	urbanist.set_pos(follow(urbanist.get_destination(),.8));
 	// display
 	stroke(255);
   noFill();
@@ -75,7 +69,6 @@ void boussole(Vec2 pos,int size) {
 	iVec2 west = iVec2(-1,0).mult(size);
 	iVec2 east = iVec2(1,0).mult(size);
   
-
   float angle = 0;
   int div = 0;
   for(Segment s : segment_monde) {
@@ -91,8 +84,6 @@ void boussole(Vec2 pos,int size) {
 	push();
 	translate(pos);
 	rotate(PI/4+angle);
-	// textMode(CENTER);
-	// text("NORTH",north.x,north.y -5);
 	line(north,south);
 	line(west,east);
 	pop();
@@ -111,20 +102,15 @@ void show_center_world() {
 
 void map() {
 	Vec2 area = Vec2(2);
-	if(compare(Vec2(urbanist.get_pos()),destination,area)) {
-		// float min_dist = width *.1;
+	if(compare(Vec2(urbanist.get_pos()),Vec2(urbanist.get_destination()),area)) {
 		float min_dist = 10;
 		float max_dist = 100;
-		/*
-		Vec2 ref = Vec2( grid_nodes_monde.get(0).get_pos());
-		float max_dist = dist(ref,destination);
-		*/
 		Vec2 range_dist = Vec2(min_dist,max_dist);
 
-		Vec2 new_destination = goto_next(urbanist,destination,angle_tracer,range_dist,Vec2(0),Vec2(width,height));
-		Vec2 from = destination.copy();
-		destination.set(new_destination);
-		angle_tracer = angle(Vec2(urbanist.get_pos()),destination);
+		Vec2 new_destination = goto_next(urbanist,angle_tracer,range_dist,Vec2(0),Vec2(width,height));
+		Vec2 from = Vec2(urbanist.get_destination()).copy();
+		urbanist.set_destination(new_destination);
+		angle_tracer = angle(Vec2(urbanist.get_pos()),Vec2(urbanist.get_destination()));
     
     if(!intersection_is()) {
     	Intersection intersection = new Intersection(new_destination,from);
@@ -133,7 +119,6 @@ void map() {
 
       Segment segment = new Segment(new_destination,from);
       segment_monde.add(segment);
-      // angle_town = angle_town+ segment.get_angle() / segment_monde.size();
       println("new segment, total is",new_destination,from,segment_monde.size());  
     } else {
       int inter_rank = urbanist.get_intersection();
@@ -144,7 +129,6 @@ void map() {
 	}
 
   // draw road map
-  
 	stroke(r.BLOOD);
 	noFill();
 	strokeWeight(1);
@@ -169,12 +153,16 @@ void map() {
 
 
 
+
+
 public class Urbanist {
 	private Vec3 pos;
+	private Vec3 dst;
 	private int intersection ;
 	
 	public Urbanist() {
 		this.pos = Vec3();
+		this.dst = Vec3();
 	}
 
 	public void set_intersection(int intersection) {
@@ -185,12 +173,22 @@ public class Urbanist {
 		return intersection;
 	}
 
+
+
 	public void set_pos(Vec pos) {
 		this.pos.set(pos);
 	}
 
+	public void set_destination(Vec dst) {
+		this.dst.set(dst);
+	}
+
 	public Vec3 get_pos() {
 		return this.pos;
+	}
+
+	public Vec3 get_destination() {
+		return dst;
 	}
 }
 
@@ -199,7 +197,7 @@ public class Urbanist {
 
 
 
-Vec2 goto_next(Urbanist urbanist, Vec2 previous_pos, float previous_direction, Vec2 range, Vec2 canvas_min, Vec2 canvas_max) {
+Vec2 goto_next(Urbanist urbanist, float previous_direction, Vec2 range, Vec2 canvas_min, Vec2 canvas_max) {
 	float angle = random_next_gaussian(3);
 	// new angle
 	angle = map(angle,-1,1,0,PI);
@@ -214,9 +212,9 @@ Vec2 goto_next(Urbanist urbanist, Vec2 previous_pos, float previous_direction, V
 	float dist = map(ratio_center,0,1,range.x,range.y);
 	
 	// check if the new destination is in the window
-	Vec2 pos = to_cartesian_2D(angle,dist).add(previous_pos);
+	Vec2 pos = to_cartesian_2D(angle,dist).add(Vec2(urbanist.get_destination()));
 	if(!all(greaterThan(pos,canvas_min)) || !all(lessThan(pos,canvas_max))) {
-		pos = goto_next(urbanist,previous_pos,previous_direction,range,canvas_min,canvas_max);
+		pos = goto_next(urbanist,previous_direction,range,canvas_min,canvas_max);
 	}
 	// check if the new target is close to carrefour, if it is the plotter must go on it
 	urbanist.set_intersection(-1);
@@ -355,3 +353,6 @@ public class Segment {
 		this.direction = direction;
 	}
 }
+
+
+
