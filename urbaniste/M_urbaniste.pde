@@ -63,9 +63,9 @@ void init_street_map() {
 
 
 void urbanist() {
-	float speed = .1;
-	int min = 20;
-	int max = 400;
+	float speed = .8;
+	int min = 5;
+	int max = 100;
 	// update
 	urbanist.set_pos(follow(urbanist.get_destination(),speed));
 	urbanist.set_range(min,max);
@@ -130,7 +130,7 @@ void map() {
 	Vec2 area = Vec2(10);
 	Vec6 canvas_birth = Vec6(0,0,-width,   width,height,width);
 	if(compare(Vec2(urbanist.get_pos()),Vec2(urbanist.get_destination()),area)) {
-
+  img_urbanist_setting();
 	Vec2 new_destination = goto_next(urbanist,canvas_birth);
 	int id_inter = rank_intersection(urbanist,urbanist.get_pos());
   if(id_inter >= 0) {
@@ -141,9 +141,8 @@ void map() {
 	}
     
     if(!intersection_is()) {
-    	int num = num_branch_by_intersection(2,12);
-    	println("num branch",num,frameCount);
-    	add_intersection(urbanist,num);
+      img_map_setting();
+      //classic_map_seeting();
     }
 
     // check to build segment
@@ -156,7 +155,7 @@ void map() {
   // draw road map
 	stroke(r.BLOOD);
 	noFill();
-	strokeWeight(2);
+	strokeWeight(1);
 
 	// show segment
 	for(Segment s : segment_monde) {
@@ -172,6 +171,28 @@ void map() {
 	*/
 	
 }
+void img_urbanist_setting() {
+	iVec2 pos = iVec2(urbanist.get_pos());
+	float density = brightness(img.get(pos.x,pos.y));
+	float min = map(density,0,g.colorModeZ,15,150);
+	float max = map(density,0,g.colorModeZ,100,400);
+	// println(density);
+	urbanist.set_range(min,max);
+}
+void img_map_setting() {
+	iVec2 pos = iVec2(urbanist.get_pos());
+	float density = brightness(img.get(pos.x,pos.y));
+	int num = (int)map(density,0,g.colorModeZ,10,2);
+	add_intersection(urbanist,num);
+}
+
+void classic_map_seeting() {
+	int min_branch = 2;
+	int max_branch = 5;
+	int num = num_branch_by_intersection(min_branch,max_branch);
+	// println("num branch",num,frameCount);
+  add_intersection(urbanist,num);
+}
 
 
 void add_intersection(Urbanist urb, int max_branch) {
@@ -186,25 +207,19 @@ void add_segment(Urbanist urb, boolean build_anytime) {
 	boolean dst_is = false;
   
   int id_from = rank_intersection(urb,urb.get_from());
-  // println("from id", id_from,urb.get_from());
   Intersection inter;
   if(id_from >= 0) {
   	inter = grid_nodes_monde.get(id_from);
 	  if(inter.get_branch_available() > 0) {
-	  	//println("id from",inter.get_id(),"branch",inter.get_branch(),"free",inter.get_branch_available(), "list",inter.get_destination().length);
-	  	// println("from",inter_from.get_branch_available(),inter_from.get_branch());
 	  	from_is = true;
 	  }
   }
 
 
   int id_dst = rank_intersection(urb,urb.get_destination());
-  // println("dst id", id_dst);
   if(id_dst >= 0) {
 	  inter = grid_nodes_monde.get(id_dst);
 	  if(inter.get_branch_available() > 0) {
-	  	//println("id dst",inter.get_id(),"branch",inter.get_branch(),"free",inter.get_branch_available(), "list",inter.get_destination().length);
-	  	// println("dst",inter_dst.get_branch_available(),inter_dst.get_branch());
 	  	dst_is = true;
 	  }
   }
