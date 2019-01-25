@@ -1,11 +1,11 @@
 /**
 * Urbaniste
-v 0.0.2
+v 0.1.0
 * Copyleft (c) 2019-2019
 * @author Stan le Punk
 * @see http://stanlepunk.xyz/
 * @see https://github.com/StanLepunK/Monde
-* build with Processing 3.5.1
+* build with Processing 3.5.2
 */
 /**
 french guide
@@ -29,6 +29,7 @@ void init_street_map() {
 	// reset data
 	grid_nodes_monde.clear();
 	segment_monde.clear();
+	inter_id = 0;
   
   // set data
   int marge = width/10;
@@ -63,8 +64,8 @@ void init_street_map() {
 
 void urbanist() {
 	float speed = .1;
-	int min = 50;
-	int max = 200;
+	int min = 20;
+	int max = 400;
 	// update
 	urbanist.set_pos(follow(urbanist.get_destination(),speed));
 	urbanist.set_range(min,max);
@@ -130,19 +131,24 @@ void map() {
 	Vec6 canvas_birth = Vec6(0,0,-width,   width,height,width);
 	if(compare(Vec2(urbanist.get_pos()),Vec2(urbanist.get_destination()),area)) {
 
-		Vec2 new_destination = goto_next(urbanist,canvas_birth);
-		Vec2 from = Vec2(urbanist.get_destination()).copy();
+	Vec2 new_destination = goto_next(urbanist,canvas_birth);
+	int id_inter = rank_intersection(urbanist,urbanist.get_pos());
+  if(id_inter >= 0) {
+  	Intersection inter = grid_nodes_monde.get(id_inter);
+		urbanist.set_destination(new_destination,inter);
+	} else {
 		urbanist.set_destination(new_destination);
+	}
     
     if(!intersection_is()) {
-    	// int num = num_branch_by_intersection(int min, int max);
-    	int num = 3;
-    	add_intersection(urbanist,new_destination,from,num);
+    	int num = num_branch_by_intersection(2,12);
+    	println("num branch",num,frameCount);
+    	add_intersection(urbanist,num);
     }
 
     // check to build segment
     boolean build_anytime_is = false;
-    add_segment(urbanist,new_destination,from,build_anytime_is);
+    add_segment(urbanist,build_anytime_is);
 
     intersection_is(false);
 	}
@@ -167,33 +173,38 @@ void map() {
 	
 }
 
-void add_intersection(Urbanist urb, Vec dst, Vec from, int max_branch) {
-	Intersection inter = new Intersection(dst,from);
+
+void add_intersection(Urbanist urb, int max_branch) {
+	Intersection inter = new Intersection(urb.get_destination(),urb.get_from());
 	inter.set_branch(max_branch);
 	inter.set_id(inter_id++);
 	grid_nodes_monde.add(inter);
 }
 
-
-void add_segment(Urbanist urb, Vec dst, Vec from, boolean build_anytime) {
+void add_segment(Urbanist urb, boolean build_anytime) {
 	boolean from_is = false;
 	boolean dst_is = false;
   
-  int id_from = rank_intersection(urb,from);
+  int id_from = rank_intersection(urb,urb.get_from());
+  // println("from id", id_from,urb.get_from());
+  Intersection inter;
   if(id_from >= 0) {
-  	Intersection inter_from = grid_nodes_monde.get(id_from);
-	  if(inter_from.get_branch_available() > 0) {
-	  	println("from",inter_from.get_branch_available(),inter_from.get_branch());
+  	inter = grid_nodes_monde.get(id_from);
+	  if(inter.get_branch_available() > 0) {
+	  	//println("id from",inter.get_id(),"branch",inter.get_branch(),"free",inter.get_branch_available(), "list",inter.get_destination().length);
+	  	// println("from",inter_from.get_branch_available(),inter_from.get_branch());
 	  	from_is = true;
 	  }
   }
 
 
-  int id_dst = rank_intersection(urb,dst);
+  int id_dst = rank_intersection(urb,urb.get_destination());
+  // println("dst id", id_dst);
   if(id_dst >= 0) {
-	  Intersection inter_dst = grid_nodes_monde.get(id_dst);
-	  if(inter_dst.get_branch_available() > 0) {
-	  	println("dst",inter_dst.get_branch_available(),inter_dst.get_branch());
+	  inter = grid_nodes_monde.get(id_dst);
+	  if(inter.get_branch_available() > 0) {
+	  	//println("id dst",inter.get_id(),"branch",inter.get_branch(),"free",inter.get_branch_available(), "list",inter.get_destination().length);
+	  	// println("dst",inter_dst.get_branch_available(),inter_dst.get_branch());
 	  	dst_is = true;
 	  }
   }
@@ -201,39 +212,18 @@ void add_segment(Urbanist urb, Vec dst, Vec from, boolean build_anytime) {
 
   noStroke();
   fill(r.WHITE);
-  ellipse(Vec2(from),20,20);
-  ellipse(Vec2(dst),20,20);
-  // println("from",from);
-  // println("dst",dst);
-  // println(id_from,id_dst);
-  /*
-  if(!from_is || !dst_is) {
-  	Intersection inter;
-  	if(id_from >= 0) {
-  		inter = grid_nodes_monde.get(id_from);
-	  	println(inter.get_id(),"from",from_is,from_is,inter.get_branch_available(),inter.get_branch());
-	  	println("pos",inter.get_pos());
-	  	printArray(inter.get_destination());
-	  }
-	  if(id_dst >= 0) {
-	  	inter = grid_nodes_monde.get(id_dst);
-	  	println(inter.get_id(),"dst",dst_is,inter.get_branch_available(),inter.get_branch());
-	  	println("pos",inter.get_pos());
-	  	printArray(inter.get_destination());
-	  }
-	  println(" ");
-  }
-  */
-
+  ellipse(Vec2(urb.get_from()),20,20);
+  ellipse(Vec2(urb.get_destination()),20,20);
 
   if(build_anytime || (from_is && dst_is)) {
-  	Segment segment = new Segment(dst,from);
+  	Segment segment = new Segment(urb.get_destination(),urb.get_from());
   	segment_monde.add(segment);
-  	grid_nodes_monde.get(id_from).add_destination(from);
-  	grid_nodes_monde.get(id_dst).add_destination(dst);
-
+  	grid_nodes_monde.get(id_from).add_destination(urb.get_destination());
+  	grid_nodes_monde.get(id_dst).add_destination(urb.get_from());
   } 
 }
+
+
 
 int rank_intersection(Urbanist urb, Vec target) {
 	int rank = -1;
@@ -328,26 +318,25 @@ void intersection_is(boolean is) {
 
 /**
 URBANIST
-v 0.0.3
+v 0.0.4
 */
 public class Urbanist {
 	private Vec3 pos;
 	private Vec3 dst;
+	private Vec3 from;
 	private int intersection ;
 	private Vec2 range;
 	
 	public Urbanist() {
 		this.pos = Vec3();
+		this.from = Vec3();
 		this.dst = Vec3();
 		this.range = Vec2(0,height);
 	}
-
+  
+  // set
 	public void set_intersection(int intersection) {
 		this.intersection = intersection;
-	}
-
-	public int get_intersection() {
-		return intersection;
 	}
 
 	public void set_range(float min, float max) {
@@ -359,8 +348,29 @@ public class Urbanist {
 	}
 
 	public void set_destination(Vec dst) {
-		this.dst.set(dst);
+		set_destination(dst,null);
+
 	}
+
+	public void set_destination(Vec dst, Intersection intersection) {
+		// check if there is free slot on this intersection
+		if(intersection == null || intersection.get_branch_available() > 0) {
+			this.from.set(this.dst);
+			this.dst.set(dst);
+		} else {
+			this.from.set(this.dst);
+			// select destination in the pnal of destination of this intersection
+			int which = floor(random(intersection.get_branch()));
+			this.dst.set(intersection.get_destination()[which]);
+		}
+
+	}
+  
+  // get
+  public int get_intersection() {
+		return intersection;
+	}
+
 
 	public Vec2 get_range() {
 		return this.range;
@@ -368,6 +378,10 @@ public class Urbanist {
 
 	public Vec3 get_pos() {
 		return this.pos;
+	}
+
+	public Vec3 get_from() {
+		return this.from;
 	}
 
 	public Vec3 get_destination() {
@@ -399,27 +413,23 @@ public class Intersection {
 		this.pos = Vec3(pos);
 		dest_list = new ArrayList<Vec3>();
 		dest_list.add(Vec3(from));
-		// println("class Intersection: new Intersection build");
 	}
 
 
 	public boolean add_destination(Vec dst) {
-		// println("size()",dest_list.size(),"max",branch);
 		if(dest_list.size() < branch && !all(equal(get_pos(),Vec3(dst)))) {
-			boolean add_dst_is = false;
+			boolean equal_is = false;
 			Vec3 [] list = get_destination();
 			for(int i = 0 ; i < list.length ; i++) {
-				if(!all(equal(list[i],Vec3(dst)))) {
-					dest_list.add(Vec3(dst));
-					add_dst_is = true;
-					break;
+				if(all(equal(list[i],Vec3(dst)))) {
+					equal_is = true;
 				}
 			}
-			
-			// println("class Intersection method add_destination():\nnew destination added");
-			return add_dst_is;
+			if(!equal_is) {
+				dest_list.add(Vec3(dst));
+			}
+			return !equal_is;
 		} else {
-			// println("class Intersection method add_destination():\nno more slot available to add new destination");
 			return false;
 		}
 	}
@@ -427,11 +437,8 @@ public class Intersection {
   // set
   public void set_destination(Vec3 pos) {
 		if(dest_list.size() < branch) {
-			// println("class Intersection",id,"add destination",pos,"to branch");
 			dest_list.add(pos);
-		} else {
-			// println("class Intersection",id,"has no more branches available");
-		}
+		} 
 	}
 
 	public void set_id(int id) {
@@ -439,16 +446,9 @@ public class Intersection {
 	}
 
 	public void set_branch(int branch) {
-		// println(branch,dest_list.size());
 		if(branch > 1 && branch > dest_list.size()) {
 			this.branch = branch;
-		} else {
-			if(branch < 1) {
-				// printErr("class Intersection method set_branch():\nthe num of branches must be upper or equal to 1");
-			} else if(branch < dest_list.size()) {
-				// printErr("class Intersection method set_branch():\nthe num of branches must be upper or equal of existing branches here",dest_list.size());
-			}
-		}
+		} 
 	}
 
   
