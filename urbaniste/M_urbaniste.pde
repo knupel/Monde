@@ -14,8 +14,8 @@ boussole : compass
 ArrayList<Intersection> grid_nodes_monde;
 ArrayList<Segment> segment_monde;
 Urbanist urbanist;
-float angle_tracer;
 float speed;
+int inter_id;
 void init_street_map() {
 	// init data if nececary
 	if( grid_nodes_monde == null) {
@@ -31,16 +31,20 @@ void init_street_map() {
 	segment_monde.clear();
   
   // set data
-	Vec2 start_pos = Vec2(random(width),random(height));
+  int marge = width/10;
+	Vec2 start_pos = Vec2(random(marge,width -marge),random(marge,height -marge));
 	int range_start = 30;
 	Vec2 destination = Vec2(start_pos.x+random(-range_start,range_start),start_pos.y+random(-range_start,range_start));
   urbanist = new Urbanist();
   urbanist.set_pos(start_pos);
   urbanist.set_destination(destination);
   
-  angle_tracer = angle(start_pos,destination);
-  Intersection intersection = new Intersection(start_pos,destination.copy()); // copy() it's nessacy to don't point on a same Object
-  grid_nodes_monde.add(intersection);
+  // angle_tracer = angle(start_pos,destination);
+  Intersection inter = new Intersection(start_pos,destination.copy()); // copy() it's nessacy to don't point on a same Object
+  inter.set_branch(8); // the start need a lot of branches
+  inter.set_id(inter_id++);
+
+  grid_nodes_monde.add(inter);
   Segment segment = new Segment(start_pos,destination.copy());
   segment_monde.add(segment);
   println("new street map",urbanist.get_pos());
@@ -53,9 +57,17 @@ void init_street_map() {
 
 
 
+
+
+
+
 void urbanist() {
+	float speed = .1;
+	int min = 50;
+	int max = 200;
 	// update
-	urbanist.set_pos(follow(urbanist.get_destination(),.8));
+	urbanist.set_pos(follow(urbanist.get_destination(),speed));
+	urbanist.set_range(min,max);
 	// display
 	stroke(255);
   noFill();
@@ -63,7 +75,7 @@ void urbanist() {
   point(urbanist.get_pos());
 }
 
-void boussole(Vec2 pos,int size) {
+void boussole(Vec2 pos, int size) {
 	iVec2 north = iVec2(0,-1).mult(size);
 	iVec2 south = iVec2(0,1).mult(size);
 	iVec2 west = iVec2(-1,0).mult(size);
@@ -80,7 +92,7 @@ void boussole(Vec2 pos,int size) {
 
   noFill();
   stroke(r.WHITE);
-  strokeWeight(2);
+  strokeWeight(1);
 	push();
 	translate(pos);
 	rotate(PI/4+angle);
@@ -94,44 +106,51 @@ void boussole(Vec2 pos,int size) {
 
 void show_center_world() {
 	strokeWeight(2);
-  if( grid_nodes_monde.size() > 0) {
+  if(grid_nodes_monde.size() > 0) {
   	ellipse(grid_nodes_monde.get(0).get_pos(),50,50);
+  }
+}
+
+void show_intersection() {
+	strokeWeight(4);
+	stroke(255);
+	noFill();
+  if(grid_nodes_monde.size() > 0) {
+  	for(Intersection inter : grid_nodes_monde) {
+  		textMode(CENTER);
+  		text(inter.get_id(),inter.get_pos());
+  		// point(inter.get_pos());
+  	}
   }
 }
 
 
 void map() {
-	Vec2 area = Vec2(2);
+	Vec2 area = Vec2(10);
+	Vec6 canvas_birth = Vec6(0,0,-width,   width,height,width);
 	if(compare(Vec2(urbanist.get_pos()),Vec2(urbanist.get_destination()),area)) {
-		float min_dist = 10;
-		float max_dist = 100;
-		Vec2 range_dist = Vec2(min_dist,max_dist);
 
-		Vec2 new_destination = goto_next(urbanist,angle_tracer,range_dist,Vec2(0),Vec2(width,height));
+		Vec2 new_destination = goto_next(urbanist,canvas_birth);
 		Vec2 from = Vec2(urbanist.get_destination()).copy();
 		urbanist.set_destination(new_destination);
-		angle_tracer = angle(Vec2(urbanist.get_pos()),Vec2(urbanist.get_destination()));
     
     if(!intersection_is()) {
-    	Intersection intersection = new Intersection(new_destination,from);
-      grid_nodes_monde.add(intersection);
-      println("new intersection, total is",new_destination,grid_nodes_monde.size());
-
-      Segment segment = new Segment(new_destination,from);
-      segment_monde.add(segment);
-      println("new segment, total is",new_destination,from,segment_monde.size());  
-    } else {
-      int inter_rank = urbanist.get_intersection();
-      Intersection inter = grid_nodes_monde.get(inter_rank);
-    	println("The urbanist is on an existing carrefour",inter_rank,"\nthere is",inter.get_branch_available(),"on",inter.get_branch());
+    	// int num = num_branch_by_intersection(int min, int max);
+    	int num = 3;
+    	add_intersection(urbanist,new_destination,from,num);
     }
+
+    // check to build segment
+    boolean build_anytime_is = false;
+    add_segment(urbanist,new_destination,from,build_anytime_is);
+
     intersection_is(false);
 	}
 
   // draw road map
 	stroke(r.BLOOD);
 	noFill();
-	strokeWeight(1);
+	strokeWeight(2);
 
 	// show segment
 	for(Segment s : segment_monde) {
@@ -148,57 +167,102 @@ void map() {
 	
 }
 
+void add_intersection(Urbanist urb, Vec dst, Vec from, int max_branch) {
+	Intersection inter = new Intersection(dst,from);
+	inter.set_branch(max_branch);
+	inter.set_id(inter_id++);
+	grid_nodes_monde.add(inter);
+}
 
 
+void add_segment(Urbanist urb, Vec dst, Vec from, boolean build_anytime) {
+	boolean from_is = false;
+	boolean dst_is = false;
+  
+  int id_from = rank_intersection(urb,from);
+  if(id_from >= 0) {
+  	Intersection inter_from = grid_nodes_monde.get(id_from);
+	  if(inter_from.get_branch_available() > 0) {
+	  	println("from",inter_from.get_branch_available(),inter_from.get_branch());
+	  	from_is = true;
+	  }
+  }
 
 
+  int id_dst = rank_intersection(urb,dst);
+  if(id_dst >= 0) {
+	  Intersection inter_dst = grid_nodes_monde.get(id_dst);
+	  if(inter_dst.get_branch_available() > 0) {
+	  	println("dst",inter_dst.get_branch_available(),inter_dst.get_branch());
+	  	dst_is = true;
+	  }
+  }
 
 
+  noStroke();
+  fill(r.WHITE);
+  ellipse(Vec2(from),20,20);
+  ellipse(Vec2(dst),20,20);
+  // println("from",from);
+  // println("dst",dst);
+  // println(id_from,id_dst);
+  /*
+  if(!from_is || !dst_is) {
+  	Intersection inter;
+  	if(id_from >= 0) {
+  		inter = grid_nodes_monde.get(id_from);
+	  	println(inter.get_id(),"from",from_is,from_is,inter.get_branch_available(),inter.get_branch());
+	  	println("pos",inter.get_pos());
+	  	printArray(inter.get_destination());
+	  }
+	  if(id_dst >= 0) {
+	  	inter = grid_nodes_monde.get(id_dst);
+	  	println(inter.get_id(),"dst",dst_is,inter.get_branch_available(),inter.get_branch());
+	  	println("pos",inter.get_pos());
+	  	printArray(inter.get_destination());
+	  }
+	  println(" ");
+  }
+  */
 
-public class Urbanist {
-	private Vec3 pos;
-	private Vec3 dst;
-	private int intersection ;
-	
-	public Urbanist() {
-		this.pos = Vec3();
-		this.dst = Vec3();
+
+  if(build_anytime || (from_is && dst_is)) {
+  	Segment segment = new Segment(dst,from);
+  	segment_monde.add(segment);
+  	grid_nodes_monde.get(id_from).add_destination(from);
+  	grid_nodes_monde.get(id_dst).add_destination(dst);
+
+  } 
+}
+
+int rank_intersection(Urbanist urb, Vec target) {
+	int rank = -1;
+	for(int i = 0 ; i < grid_nodes_monde.size() ; i++) {
+		Vec3 p = grid_nodes_monde.get(i).get_pos();
+		if(compare(Vec2(target),Vec2(p.x,p.y),Vec2(5))) {
+			rank = i;
+			break;
+		}
 	}
-
-	public void set_intersection(int intersection) {
-		this.intersection = intersection;
-	}
-
-	public int get_intersection() {
-		return intersection;
-	}
+	return rank;
+}
 
 
-
-	public void set_pos(Vec pos) {
-		this.pos.set(pos);
-	}
-
-	public void set_destination(Vec dst) {
-		this.dst.set(dst);
-	}
-
-	public Vec3 get_pos() {
-		return this.pos;
-	}
-
-	public Vec3 get_destination() {
-		return dst;
-	}
+int num_branch_by_intersection(int min, int max) {
+	int num = (ceil(map(random_next_gaussian(1),-1,1,0,max)));
+	if(num == 0 || num == (min-1)) num = min; // we can choic 1 for the future to create a cul-de-sac
+	return num;
 }
 
 
 
 
-
-
-Vec2 goto_next(Urbanist urbanist, float previous_direction, Vec2 range, Vec2 canvas_min, Vec2 canvas_max) {
+Vec2 goto_next(Urbanist urb, Vec6 canvas) {
 	float angle = random_next_gaussian(3);
+	Vec3 canvas_min = Vec3(canvas.a,canvas.b,canvas.c);
+	Vec3 canvas_max = Vec3(canvas.d,canvas.e,canvas.f);
+	float previous_direction = angle(Vec2(urb.get_pos()),Vec2(urb.get_destination()));
+
 	// new angle
 	angle = map(angle,-1,1,0,PI);
 	angle += previous_direction;
@@ -209,26 +273,25 @@ Vec2 goto_next(Urbanist urbanist, float previous_direction, Vec2 range, Vec2 can
   
   // new distance
 	float ratio_center = abs(random_next_gaussian(2));
-	float dist = map(ratio_center,0,1,range.x,range.y);
+	float dist = map(ratio_center,0,1,urb.get_range().x,urb.get_range().y);
 	
 	// check if the new destination is in the window
-	Vec2 pos = to_cartesian_2D(angle,dist).add(Vec2(urbanist.get_destination()));
-	if(!all(greaterThan(pos,canvas_min)) || !all(lessThan(pos,canvas_max))) {
-		pos = goto_next(urbanist,previous_direction,range,canvas_min,canvas_max);
+	Vec2 pos = to_cartesian_2D(angle,dist).add(Vec2(urb.get_destination()));
+	if(!all(greaterThan(pos,Vec2(canvas_min))) || !all(lessThan(pos,Vec2(canvas_max)))) {
+		pos = goto_next(urb,canvas);
 	}
 	// check if the new target is close to carrefour, if it is the plotter must go on it
-	urbanist.set_intersection(-1);
+	urb.set_intersection(-1);
 
 	/*
 	start to 1 is good or what ?????
-
 	*/
 	for(int i = 1 ; i < grid_nodes_monde.size() ; i++) {
 		Vec3 p = grid_nodes_monde.get(i).get_pos();
-		if(compare(pos,Vec2(p.x,p.y),Vec2(range.x))) {
+		if(compare(pos,Vec2(p.x,p.y),Vec2(urb.get_range().x))) {
 			intersection_is(true);
 			pos = Vec2(p.x,p.y);
-			urbanist.set_intersection(i);
+			urb.set_intersection(i);
 			break;
 		}
 	}
@@ -249,60 +312,164 @@ void intersection_is(boolean is) {
 
 
 
-class Intersection {
-	Vec3 pos;
-	ArrayList<Vec3> dest_list;
-	int branch = 2;
-	int id;
 
-	Intersection(Vec pos, Vec from) {
-		this.id = (int)random(MAX_INT);
-		this.pos = Vec3(pos.x,pos.y,pos.z);
-		dest_list = new ArrayList<Vec3>();
-		dest_list.add(Vec3(from.x,from.y,from.z));
-		branch = (ceil(map(random_next_gaussian(1),-1,1,0,8)));
-		if(branch == 0 || branch == 1) branch = 2; // we can choic 1 for the future to create a cul-de-sac
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+URBANIST
+v 0.0.3
+*/
+public class Urbanist {
+	private Vec3 pos;
+	private Vec3 dst;
+	private int intersection ;
+	private Vec2 range;
+	
+	public Urbanist() {
+		this.pos = Vec3();
+		this.dst = Vec3();
+		this.range = Vec2(0,height);
 	}
 
-	boolean add_destination(Vec3 dst) {
-		if(dest_list.size() < branch) {
-			dest_list.add(dst);
-			println("new destination added");
-			return true;
+	public void set_intersection(int intersection) {
+		this.intersection = intersection;
+	}
+
+	public int get_intersection() {
+		return intersection;
+	}
+
+	public void set_range(float min, float max) {
+		this.range.set(min,max);
+	}
+
+	public void set_pos(Vec pos) {
+		this.pos.set(pos);
+	}
+
+	public void set_destination(Vec dst) {
+		this.dst.set(dst);
+	}
+
+	public Vec2 get_range() {
+		return this.range;
+	}
+
+	public Vec3 get_pos() {
+		return this.pos;
+	}
+
+	public Vec3 get_destination() {
+		return dst;
+	}
+}
+
+
+
+
+
+
+
+
+
+
+/**
+INTERSECTION
+v 0.0.3
+*/
+public class Intersection {
+	private Vec3 pos;
+	private ArrayList<Vec3> dest_list;
+	private int branch = 4;
+	private int id;
+
+	public Intersection(Vec pos, Vec from) {
+		this.id = (int)random(MAX_INT);
+		this.pos = Vec3(pos);
+		dest_list = new ArrayList<Vec3>();
+		dest_list.add(Vec3(from));
+		// println("class Intersection: new Intersection build");
+	}
+
+
+	public boolean add_destination(Vec dst) {
+		// println("size()",dest_list.size(),"max",branch);
+		if(dest_list.size() < branch && !all(equal(get_pos(),Vec3(dst)))) {
+			boolean add_dst_is = false;
+			Vec3 [] list = get_destination();
+			for(int i = 0 ; i < list.length ; i++) {
+				if(!all(equal(list[i],Vec3(dst)))) {
+					dest_list.add(Vec3(dst));
+					add_dst_is = true;
+					break;
+				}
+			}
+			
+			// println("class Intersection method add_destination():\nnew destination added");
+			return add_dst_is;
 		} else {
-			println("no more slot available to add new destination");
+			// println("class Intersection method add_destination():\nno more slot available to add new destination");
 			return false;
 		}
 	}
-
-	int get_branch() {
-		return branch;
-	}
-
-	int get_branch_available() {
-		return branch - dest_list.size();
-	}
-
-	void set_destination(Vec3 pos) {
+  
+  // set
+  public void set_destination(Vec3 pos) {
 		if(dest_list.size() < branch) {
-			println("class Intersection",id,"add destination",pos,"to branch");
+			// println("class Intersection",id,"add destination",pos,"to branch");
 			dest_list.add(pos);
 		} else {
-			println("class Intersection",id,"has no more branches available");
+			// println("class Intersection",id,"has no more branches available");
 		}
 	}
 
-
-  
-	void set_branch(int branch) {
-		this.branch = branch;
+	public void set_id(int id) {
+		this.id = id;
 	}
 
-	Vec3 [] get_destination() {
+	public void set_branch(int branch) {
+		// println(branch,dest_list.size());
+		if(branch > 1 && branch > dest_list.size()) {
+			this.branch = branch;
+		} else {
+			if(branch < 1) {
+				// printErr("class Intersection method set_branch():\nthe num of branches must be upper or equal to 1");
+			} else if(branch < dest_list.size()) {
+				// printErr("class Intersection method set_branch():\nthe num of branches must be upper or equal of existing branches here",dest_list.size());
+			}
+		}
+	}
+
+  
+  // get
+	public int get_id() {
+		return id;
+	}
+
+	public int get_branch() {
+		return branch;
+	}
+
+	public int get_branch_available() {
+		return branch - dest_list.size();
+	}
+
+	public Vec3 [] get_destination() {
 		return dest_list.toArray(new Vec3[dest_list.size()]);
 	}
 
-	Vec3 get_pos() {
+	public Vec3 get_pos() {
 		return pos;
 	}
 }
@@ -327,6 +494,7 @@ public class Segment {
 		this.end = Vec3(end.x,end.y,end.z);
 		this.angle = angle(Vec2(this.start),Vec2(this.end));
 		this.dist = dist(this.start,this.end);
+		// println("class Segment: new Segment build");
 	}
 
 	public Vec3 get_start() {

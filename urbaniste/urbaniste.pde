@@ -20,8 +20,8 @@ ROPE - Romanesco processing environment –
 
 void setup() {
   background(0);
-  fullScreen(2);
-  //size(800,800);
+  fullScreen(P2D,2);
+  // size(800,800);
   init_street_map();
 }
 
@@ -30,17 +30,34 @@ void draw() {
   background(0);
   map();
   urbanist();
-  show_center_world();
-  boussole(Vec2(grid_nodes_monde.get(0).get_pos()),80);
+  if(show_info_is) {
+  	show_center_world();
+  	boussole(Vec2(grid_nodes_monde.get(0).get_pos()),80);
+    show_intersection();
+  }
+
 }
 
 
 
-
+boolean show_info_is = true;
 void keyPressed() {
 	if(key == 'n') {
 		init_street_map();
 	}
+
+  if(key == ' '){
+    freeze();
+  }
+
+	if(key == 'i') {
+		if(show_info_is) {
+			show_info_is = false;
+		} else {
+			show_info_is = true;
+		}
+	}
+
 }
 
 
