@@ -21,15 +21,16 @@ PImage img ;
 void setup() {
   background(0);
   // fullScreen(P2D,2);
-  size(800,800);
+  size(1300,800);
   init_street_map();
   img = loadImage("petit_vinci_la_dame_à_l_hermine.jpg");
-  surface.setSize(img.width,img.height);
+  //surface.setSize(img.width,img.height);
 }
 
 
 void draw() {
-  // background(img);
+
+  
   background(0);
   map();
   urbanist();
@@ -38,7 +39,6 @@ void draw() {
   	boussole(Vec2(grid_nodes_monde.get(0).get_pos()),80);
     show_intersection();
   }
-
 }
 
 

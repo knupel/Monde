@@ -1,6 +1,6 @@
 /**
 * Urbaniste
-v 0.1.0
+v 0.1.1
 * Copyleft (c) 2019-2019
 * @author Stan le Punk
 * @see http://stanlepunk.xyz/
@@ -63,8 +63,8 @@ void init_street_map() {
 
 
 void urbanist() {
-	float speed = .8;
-	int min = 5;
+	float speed = .2;
+	int min = 20;
 	int max = 100;
 	// update
 	urbanist.set_pos(follow(urbanist.get_destination(),speed));
@@ -118,7 +118,7 @@ void show_intersection() {
 	noFill();
   if(grid_nodes_monde.size() > 0) {
   	for(Intersection inter : grid_nodes_monde) {
-  		textMode(CENTER);
+  		textAlign(CENTER);
   		text(inter.get_id(),inter.get_pos());
   		// point(inter.get_pos());
   	}
@@ -129,20 +129,21 @@ void show_intersection() {
 void map() {
 	Vec2 area = Vec2(10);
 	Vec6 canvas_birth = Vec6(0,0,-width,   width,height,width);
+	boolean show_info_destination = true;
 	if(compare(Vec2(urbanist.get_pos()),Vec2(urbanist.get_destination()),area)) {
-  img_urbanist_setting();
-	Vec2 new_destination = goto_next(urbanist,canvas_birth);
-	int id_inter = rank_intersection(urbanist,urbanist.get_pos());
-  if(id_inter >= 0) {
-  	Intersection inter = grid_nodes_monde.get(id_inter);
-		urbanist.set_destination(new_destination,inter);
-	} else {
-		urbanist.set_destination(new_destination);
-	}
+	  // img_urbanist_setting();
+		Vec2 new_destination = goto_next(urbanist,canvas_birth,segment_monde,show_info_destination);
+		int id_inter = rank_intersection(urbanist,urbanist.get_pos());
+	  if(id_inter >= 0) {
+	  	Intersection inter = grid_nodes_monde.get(id_inter);
+			urbanist.set_destination(new_destination,inter);
+		} else {
+			urbanist.set_destination(new_destination);
+		}
     
     if(!intersection_is()) {
-      img_map_setting();
-      //classic_map_seeting();
+      // img_map_setting();
+      classic_map_seeting();
     }
 
     // check to build segment
@@ -169,20 +170,27 @@ void map() {
 	}
 	endShape();
 	*/
+	count_segment_meeting = 0;
 	
 }
+
+
 void img_urbanist_setting() {
 	iVec2 pos = iVec2(urbanist.get_pos());
 	float density = brightness(img.get(pos.x,pos.y));
-	float min = map(density,0,g.colorModeZ,15,150);
-	float max = map(density,0,g.colorModeZ,100,400);
+	// float min = map(density,0,g.colorModeZ,5,15);
+	// float max = map(density,0,g.colorModeZ,25,400);
+	float min = 100;
+	float max = 300;
 	// println(density);
 	urbanist.set_range(min,max);
 }
+
+
 void img_map_setting() {
 	iVec2 pos = iVec2(urbanist.get_pos());
 	float density = brightness(img.get(pos.x,pos.y));
-	int num = (int)map(density,0,g.colorModeZ,10,2);
+	int num = (int)map(density,0,g.colorModeZ,12,2);
 	add_intersection(urbanist,num);
 }
 
@@ -261,30 +269,34 @@ int num_branch_by_intersection(int min, int max) {
 
 
 
+int count_segment_meeting = 0;
+Vec2 goto_next(Urbanist urb, Vec6 canvas, ArrayList<Segment> seg_list, boolean show_info) {
+	Vec2 angle_range = Vec2(0,PI/6);
+	Vec2 pos = compute_pos(urb,canvas,angle_range);
 
-Vec2 goto_next(Urbanist urb, Vec6 canvas) {
-	float angle = random_next_gaussian(3);
-	Vec3 canvas_min = Vec3(canvas.a,canvas.b,canvas.c);
-	Vec3 canvas_max = Vec3(canvas.d,canvas.e,canvas.f);
-	float previous_direction = angle(Vec2(urb.get_pos()),Vec2(urb.get_destination()));
+	// check if the urbanist don't meet an other segment
+	Segment urb_seg = new Segment(urb.get_pos(),pos);
+	boolean meet_is = false;
 
-	// new angle
-	angle = map(angle,-1,1,0,PI);
-	angle += previous_direction;
-
-	// other side direction
-	float goto_left = random(1);
-	if(goto_left < .5) angle *= -1;
-  
-  // new distance
-	float ratio_center = abs(random_next_gaussian(2));
-	float dist = map(ratio_center,0,1,urb.get_range().x,urb.get_range().y);
-	
-	// check if the new destination is in the window
-	Vec2 pos = to_cartesian_2D(angle,dist).add(Vec2(urb.get_destination()));
-	if(!all(greaterThan(pos,Vec2(canvas_min))) || !all(lessThan(pos,Vec2(canvas_max)))) {
-		pos = goto_next(urb,canvas);
-	}
+  for(Segment s : seg_list) {
+  	if(show_info) {
+  		strokeWeight(1);
+  		stroke(255);
+  		noFill();
+  		Vec2 meet_pos = urb_seg.meet_at(s);
+  		line(urb_seg.get_start(),urb_seg.get_end());
+  		if(meet_pos != null) ellipse(meet_pos,30,30);
+  	}
+  	if(urb_seg.meet_is(s) && count_segment_meeting < 100) {
+  		count_segment_meeting ++;
+  		meet_is = true;
+  		break;
+  	}
+  }
+  if(meet_is) {
+  	//println(count_segment_meeting);
+  	// pos = goto_next(urb,canvas,seg_list,show_info);
+  }
 	// check if the new target is close to carrefour, if it is the plotter must go on it
 	urb.set_intersection(-1);
 
@@ -299,6 +311,29 @@ Vec2 goto_next(Urbanist urb, Vec6 canvas) {
 			urb.set_intersection(i);
 			break;
 		}
+	}
+	return pos;
+}
+
+Vec2 compute_pos(Urbanist urb, Vec6 canvas, Vec2 range_angle) {
+	float angle = random_next_gaussian(3);
+	float previous_direction = angle(Vec2(urb.get_pos()),Vec2(urb.get_destination()));
+	float ratio_center = abs(random_next_gaussian(2));
+	float dist = map(ratio_center,0,1,urb.get_range().x,urb.get_range().y);
+	// new angle
+	angle = map(angle,-1,1,range_angle.x,range_angle.y);
+	angle += previous_direction;
+	// other side direction
+	float goto_left = random(1);
+	if(goto_left < .5) angle *= -1;
+	Vec3 canvas_min = Vec3(canvas.a,canvas.b,canvas.c);
+	Vec3 canvas_max = Vec3(canvas.d,canvas.e,canvas.f);
+	Vec2 pos = to_cartesian_2D(angle,dist).add(Vec2(urb.get_destination()));
+
+	if(!all(greaterThan(pos,Vec2(canvas_min))) || !all(lessThan(pos,Vec2(canvas_max)))) {
+		count_segment_meeting ++;
+		// loop method until is good
+		pos = compute_pos(urb,canvas,range_angle); 
 	}
 	return pos;
 }
@@ -496,7 +531,10 @@ public class Intersection {
 
 
 
-
+/**
+SEGMENT
+v 0.0.2
+*/
 public class Segment {
 	private Vec3 start;
 	private Vec3 end;
@@ -535,6 +573,54 @@ public class Segment {
 	public void set_direction(boolean direction) {
 		this.direction = direction;
 	}
+
+
+
+	private Vec2 line_intersection(Segment one, Segment two) {
+    float x1 = one.get_start().x;
+    float y1 = one.get_start().y;
+    float x2 = one.get_end().x;
+    float y2 = one.get_end().y;
+    
+    float x3 = two.get_start().x;
+    float y3 = two.get_start().y;
+    float x4 = two.get_end().x;
+    float y4 = two.get_end().y;
+    
+    float bx = x2 - x1;
+    float by = y2 - y1;
+    float dx = x4 - x3;
+    float dy = y4 - y3;
+   
+    float b_dot_d_perp = bx * dy - by * dx;
+   
+    if(b_dot_d_perp == 0) {
+    	return null;
+    }
+   
+    float cx = x3 - x1;
+    float cy = y3 - y1;
+   
+    float t = (cx * dy - cy * dx) / b_dot_d_perp;
+    if(t < 0 || t > 1) return null;
+   
+    float u = (cx * by - cy * bx) / b_dot_d_perp;
+    if(u < 0 || u > 1) return null;
+   
+    return Vec2(x1+t*bx, y1+t*by);
+  }
+  
+  public Vec2 meet_at(Segment target) {
+    return line_intersection(this,target);
+  }
+
+  public boolean meet_is(Segment target) {
+  	if(meet_at(target) == null) {
+  		return false;
+  	} else {
+  		return true;
+  	}
+  }
 }
 
 
