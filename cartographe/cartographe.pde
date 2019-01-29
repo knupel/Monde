@@ -20,8 +20,8 @@ ROPE - Romanesco processing environment –
 PImage img ;
 void setup() {
   background(0);
-  // fullScreen(P2D,2);
-  size(1300,800);
+  fullScreen(P2D,2);
+  // size(1300,800);
   init_street_map();
   img = loadImage("petit_vinci_la_dame_à_l_hermine.jpg");
   //surface.setSize(img.width,img.height);

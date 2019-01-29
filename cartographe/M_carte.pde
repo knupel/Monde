@@ -65,11 +65,12 @@ void init_street_map() {
 
 void urbanist() {
 	float speed = .2;
-	int min = 20;
-	int max = 100;
+	int min = 5;
+	int max = 200;
 	// update
 	urbanist.set_pos(follow(urbanist.get_destination(),speed));
 	urbanist.set_range(min,max);
+	urbanist.set_angle(-PI/4,PI/4);
 	// display
 	stroke(255);
   noFill();
@@ -150,6 +151,10 @@ void map() {
       cycle_add_is = add_segment(urbanist,build_anytime_is,show_info);
       if(cycle_add_is) {
       	add_intersection();
+      } else {
+      	Vec2 back_to_center_pos = Vec2(grid_nodes_monde.get(0).get_pos());
+      	urbanist.set_destination(back_to_center_pos);
+
       }
     }
     
@@ -315,8 +320,8 @@ v 0.1.0
 * is a main method to give the next destination point for urbanist
 */
 Vec2 goto_next(Urbanist urb, Vec6 canvas, ArrayList<Intersection> inter_list, ArrayList<Segment> seg_list, boolean show_info) {
-	Vec2 angle_range = Vec2(0,PI/6);
-	Vec2 pos = compute_pos(urb,canvas,inter_list,angle_range);
+	// Vec2 angle_range = Vec2(0,PI/6);
+	Vec2 pos = compute_pos(urb,canvas,inter_list);
 	count_segment_out_canvas = 0;
 
 	// check if the urbanist don't meet an other segment
@@ -368,13 +373,13 @@ boolean check_meeting_segment(Segment target_segment, ArrayList<Segment> seg_lis
 
 int count_segment_out_canvas = 0;
 
-Vec2 compute_pos(Urbanist urb, Vec6 canvas, ArrayList<Intersection> inter_list, Vec2 range_angle) {
+Vec2 compute_pos(Urbanist urb, Vec6 canvas, ArrayList<Intersection> inter_list) {
 	float angle = random_next_gaussian(3);
 	float previous_direction = angle(Vec2(urb.get_pos()),Vec2(urb.get_destination()));
 	float ratio_center = abs(random_next_gaussian(2));
 	float dist = map(ratio_center,0,1,urb.get_range().x,urb.get_range().y);
 	// new angle
-	angle = map(angle,-1,1,range_angle.x,range_angle.y);
+	angle = map(angle,-1,1,urb.get_angle().x,urb.get_angle().y);
 	angle += previous_direction;
 	// other side direction
 	float goto_left = random(1);
@@ -387,7 +392,7 @@ Vec2 compute_pos(Urbanist urb, Vec6 canvas, ArrayList<Intersection> inter_list, 
 	if(count_segment_out_canvas < max_try && (!all(greaterThan(pos,Vec2(canvas_min))) || !all(lessThan(pos,Vec2(canvas_max))))) {
 		count_segment_out_canvas++;
 		// loop method until is good
-		pos = compute_pos(urb,canvas,inter_list,range_angle); 
+		pos = compute_pos(urb,canvas,inter_list); 
 	} else if( count_segment_out_canvas >= max_try) {
 		// back to starting position in case there is too much recursive call
     pos = Vec2(inter_list.get(0).get_pos());
@@ -461,12 +466,14 @@ public class Urbanist {
 	private Vec3 from;
 	private int intersection ;
 	private Vec2 range;
+	private Vec2 angle;
 	
 	public Urbanist() {
 		this.pos = Vec3();
 		this.from = Vec3();
 		this.dst = Vec3();
 		this.range = Vec2(0,height);
+		this.angle = Vec2(-PI/2,PI/2);
 	}
   
   // set
@@ -476,6 +483,10 @@ public class Urbanist {
 
 	public void set_range(float min, float max) {
 		this.range.set(min,max);
+	}
+
+	public void set_angle(float start, float end) {
+		this.angle.set(start,end);
 	}
 
 	public void set_pos(Vec pos) {
@@ -509,6 +520,10 @@ public class Urbanist {
 
 	public Vec2 get_range() {
 		return this.range;
+	}
+
+	public Vec2 get_angle() {
+		return this.angle;
 	}
 
 	public float get_max() {
