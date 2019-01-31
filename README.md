@@ -4,4 +4,5 @@
 
 #Rope
 
-The project is code with processing with Rope library dependency, [to download it](https://github.com/StanLepunK/Rope/blob/master/Rope.zip)
+The project is code with processing with Rope library dependency, [download](https://github.com/StanLepunK/Rope/blob/master/build_rope/Rope.zip)
+
