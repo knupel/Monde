@@ -15,19 +15,19 @@ urbanisme : management of town
 */
 
 
-void commune(Vec2 size_world, int surface_habitation) {
+void commune(vec2 size_world, int surface_habitation) {
   int level = 6 ; // midi size
   // int surface_hab = 40;
   urbanisme(surface_habitation,level);
 
   for (int i = 0 ; i < cadastre.size() ; i++) {
-    Vec4 cad = cadastre.get(i).copy();
+    vec4 cad = cadastre.get(i).copy();
     Habitation h = town.get(i); 
     float px = cad.x *size_world.x;
     float py = cad.y -(h.size.z/2);
     float pz = cad.z *size_world.y;
-    h.show(Vec3(px,py,pz)); 
-    // h.show(Vec3(px,py,pz),true); 
+    h.show(vec3(px,py,pz)); 
+    // h.show(vec3(px,py,pz),true); 
   }
 }
 
@@ -47,15 +47,15 @@ void urbanisme(int surface, int max_level) {
   if(town.size() != cadastre.size()) {
     town.clear();
     for(int i = 0 ; i < cadastre.size() ; i++) {
-      Vec4 pos = cadastre.get(i).copy();
-      float from_center = dist(Vec2(pos.x,pos.z),Vec2(0));
+      vec4 pos = cadastre.get(i).copy();
+      float from_center = dist(vec2(pos.x,pos.z),vec2(0));
       Habitation h = new Habitation(surface,from_center,max_level);
 
       int fill_roof = color(random(0,30),random(80,100),random(60,90));
       int fill_wall = color(random(360),random(0,10),random(50,100));
       float peak = random(1);
       peak *= peak;
-      h.set_architecture(Vec2(peak*.5));
+      h.set_architecture(vec2(peak*.5));
       h.set_aspect(fill_roof,fill_wall,fill_ground,stroke,thickness);
 
       town.add(h);
@@ -77,8 +77,8 @@ public class Habitation {
   int id;
   int level = 1;
   int surface;
-  Vec3 size;
-  Vec2 peak;
+  vec3 size;
+  vec2 peak;
 
   int fill_roof = r.BLOOD;
   int fill_wall = r.GRAY_3;
@@ -104,9 +104,9 @@ public class Habitation {
 
     // switch house orientation
     if(random(1) < .5) {
-      size = Vec3(x,z,y);
+      size = vec3(x,z,y);
     } else {
-      size = Vec3(y,z,x);
+      size = vec3(y,z,x);
     }
   }
 
@@ -118,7 +118,7 @@ public class Habitation {
     this.thickness = thickness;
   }
 
-  public void set_architecture(Vec2 peak) {
+  public void set_architecture(vec2 peak) {
     if(this.peak == null) {
       this.peak = peak.copy();
     } else {
@@ -146,7 +146,7 @@ public class Habitation {
     return this.thickness;
   }
 
-  public void show(Vec3 pos) {
+  public void show(vec3 pos) {
     // display house
     if(house == null) {
       house = new House();
@@ -182,10 +182,10 @@ public class Habitation {
 /**
 CADASTRE
 */
-ArrayList<Vec4>cadastre;
-void cadastre_generator(int num, int average_surface, Vec2 size_world) {
+ArrayList<vec4>cadastre;
+void cadastre_generator(int num, int average_surface, vec2 size_world) {
   if(cadastre == null) {
-    cadastre = new ArrayList<Vec4>();
+    cadastre = new ArrayList<vec4>();
   }
   cadastre.clear();
 
@@ -193,28 +193,28 @@ void cadastre_generator(int num, int average_surface, Vec2 size_world) {
   int altitude = 0;
   int already_occupy = 0;
   for(int i = 0 ; i < num ; i++) {
-    Vec2 pos = lot(average_surface,size_world);
+    vec2 pos = lot(average_surface,size_world);
     if(pos == null) {
       already_occupy++;
     } else {
       int id = (int)random(MAX_FLOAT); // use in futur to attribute habitation
-      cadastre.add(Vec4(pos.x,altitude,pos.y,id));
+      cadastre.add(vec4(pos.x,altitude,pos.y,id));
     }
   }
   println("plot use",num-already_occupy,"on",num);
 }
 
-Vec2 lot(int average_surface, Vec2 size_world) {
+vec2 lot(int average_surface, vec2 size_world) {
   float dist = random_next_gaussian(1,3); // make the center of town more occupy
   float angle = random(-PI,PI);
-  Vec2 pos = to_cartesian_2D(angle,dist);
+  vec2 pos = to_cartesian_2D(angle,dist);
   
   // check if the surface is already occupy
   boolean occupy = false;
-  for(Vec4 cad_pos : cadastre) {
-    Vec2 c_pos = Vec2(cad_pos.x,cad_pos.z);
-    Vec2 area = Vec2(sqrt(average_surface));
-    // Vec2 area = Vec2(average_surface).mult(2);
+  for(vec4 cad_pos : cadastre) {
+    vec2 c_pos = vec2(cad_pos.x,cad_pos.z);
+    vec2 area = vec2(sqrt(average_surface));
+    // vec2 area = vec2(average_surface).mult(2);
     area.div(size_world);
     if(compare(pos,c_pos,area)) {
       occupy = true;;
@@ -222,7 +222,7 @@ Vec2 lot(int average_surface, Vec2 size_world) {
     }
   }
   if(occupy) return null;
-  else return Vec2(pos.x,pos.y);
+  else return vec2(pos.x,pos.y);
 }
 
 

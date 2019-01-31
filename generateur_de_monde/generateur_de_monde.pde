@@ -6,13 +6,13 @@
 * http://stanlepunk.xyz/
 */
 
-Vec2 size_world;
+vec2 size_world;
 int surface_habitation = 100;
 void setup() {
   colorMode(HSB,360,100,100,100);
   fullScreen(P3D,2);
   // size(800,800,P3D);
-  size_world = Vec2(3*width,3*width);
+  size_world = vec2(3*width,3*width);
 
   cadastre_generator(10,surface_habitation,size_world);
 }

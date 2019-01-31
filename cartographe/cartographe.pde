@@ -20,8 +20,8 @@ ROPE - Romanesco processing environment –
 PImage img ;
 void setup() {
   background(0);
-  fullScreen(P2D,2);
-  // size(1300,800);
+  //fullScreen(P2D,2);
+  size(1300,800);
   init_street_map();
   img = loadImage("petit_vinci_la_dame_à_l_hermine.jpg");
   //surface.setSize(img.width,img.height);
@@ -36,7 +36,7 @@ void draw() {
   urbanist();
   if(show_info_is) {
   	show_center_world();
-  	boussole(Vec2(grid_nodes_monde.get(0).get_pos()),80);
+  	boussole(vec2(grid_nodes_monde.get(0).get_pos()),80);
     show_intersection();
   }
 }
