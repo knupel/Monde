@@ -1,7 +1,7 @@
 /**
 Costume method
 * Copyleft (c) 2014-2019
-v 1.7.1
+v 1.7.2
 * @author Stan le Punk
 * @see https://github.com/StanLepunK/Rope_method
 */
@@ -195,14 +195,18 @@ case and which_costume
 and 
 break
 */
+Costume costume_rope_sentence_manager;
 void costume(vec3 pos, vec3 size, vec rot, String sentence) {
-	if(rot.x != 0) costume_rotate_x();
-	if(rot.y != 0) costume_rotate_y();
-	if(rot.z != 0) costume_rotate_z();
+	if(costume_rope_sentence_manager == null) {
+		costume_rope_sentence_manager = new Costume();
+	}
+	if(rot.x != 0) costume_rope_sentence_manager.rotate_x_is(true);
+	if(rot.y != 0) costume_rope_sentence_manager.rotate_y_is(true);
+	if(rot.z != 0) costume_rope_sentence_manager.rotate_z_is(true);
 
 	start_matrix();
 	translate(pos);
-	rotate_behavior(rot);
+	costume_rope_sentence_manager.rotate_behavior(rot);
   text(sentence,0,0);
 	stop_matrix();
 }
@@ -210,9 +214,14 @@ void costume(vec3 pos, vec3 size, vec rot, String sentence) {
 /**
 method to pass costume to class costume
 */
+
+Costume costume_rope_buffer;
 void costume(vec3 pos, vec3 size, vec rot, int which_costume) {
-	Costume costume = new Costume(which_costume);
-	costume.draw(pos,size,rot);
+	if(costume_rope_buffer == null) {
+		costume_rope_buffer = new Costume(which_costume);
+	}
+	// Costume costume = new Costume(which_costume);
+	costume_rope_buffer.draw(pos,size,rot);
 }
 
 void costume(vec3 pos, vec3 size, vec rot, Costume costume) {
@@ -415,36 +424,7 @@ void costume_text(String s) {
 rotate behavior
 v 0.1.0
 */
-boolean costume_rot_x;
-boolean costume_rot_y;
-boolean costume_rot_z;
 
-void costume_rotate_x() {
-	costume_rot_x = true;
-}
-
-void costume_rotate_y() {
-	costume_rot_y = true;
-}
-
-void costume_rotate_z() {
-	costume_rot_z = true;
-}
-
-void rotate_behavior(vec rotate) {
-	if(costume_rot_x && rotate.x != 0) {
-		rotateX(rotate.x);
-		costume_rot_x = false;
-	}
-	if(costume_rot_y && rotate.y != 0) {
-		rotateY(rotate.y);
-		costume_rot_y = false;
-	}
-	if(costume_rot_z && rotate.z != 0) {
-		rotateZ(rotate.z);
-		costume_rot_z = false;
-	}
-}
 
 
 /**
