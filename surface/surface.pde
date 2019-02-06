@@ -27,16 +27,14 @@ void draw() {
 		offset = map(mouseX,0,width,.1,1);
 		angle = map(mouseY,0,height,0,TAU);
 	}
-	// grid.type_d(width/2,width/2,20,angle);
+
 	// grid.type_c(cols,rows,angle,offset);
-	//grid.type_d(cols,rows,angle);
-	// grid.type_d(.01,angle);
-	// grid.type_d(10,2,angle);
-	// grid.type_d(10,20,angle);
+
+	grid.type_hex(width,height,20,angle);
 	// grid.type_c(width/2,width/2,20,angle,offset);
 
 	// grid.type_b(width/2,width/2,20,offset);
-	grid.type_a(width/2,width/2,20);
+	// grid.type_a(width/2,width/2,20);
 
 
 	float size = width /(float)cols;
@@ -47,7 +45,7 @@ void draw() {
 
   // float ratio = map(mouseY,0,height,10,height);
   float canvas = height;
-  float ratio_cell = height;
+  float ratio_cell = width;
 	// show_point(ratio);
 	// show_text(ratio);
 	show_shape(canvas,ratio_cell);
@@ -87,8 +85,8 @@ void show_shape(float ratio_canvas, float ratio_cell) {
   stroke(r.BLOOD);
   noFill();
   //fill(r.BLACK);
-
-  float size = grid.get_size() *ratio_cell;
+  // println(grid.get_cell().x);
+  vec3 size = grid.get_cell().mult(ratio_cell*2); // 
  // float size = grid.get_size() *canvas *abs(sin(frameCount*.01));
   // println(size);
   // float angle = map(mouseX,0,width,0,TAU);
@@ -97,7 +95,8 @@ void show_shape(float ratio_canvas, float ratio_cell) {
 		// costume(vec2(v.copy().mult(canvas)),vec2(10),angle,TRIANGLE_ROPE);  
 		// println(v); 
 
-		costume(vec2(v.copy().mult(ratio_canvas)),vec2(size),angle,TRIANGLE_ROPE);   
+		// costume(vec2(v.copy().mult(ratio_canvas)),vec2(size),angle,TRIANGLE_ROPE);
+		costume(vec2(v.copy().mult(grid.get_canvas())),vec2(size),angle,TRIANGLE_ROPE);   
 	}
 }
 

@@ -8,7 +8,8 @@ build a normal grid from 0 to 1
 abstract class Grid {
 	protected ArrayList <vec4>grid;
 	private ivec3 canvas;
-	private float size;
+	private ivec3 cage;
+	private vec3 cell;
 
 	
 	Grid() {
@@ -25,23 +26,38 @@ abstract class Grid {
 		} else return -1;
 	}
 
-	public float  get_cell_size() {
-		return size;
+	public vec3 get_cell_master() {
+		return cell.copy();	
 	}
 
-	public void set_cell_size(float size) {
-		this.size = size;
+	ivec3 get_canvas_master() {
+		return canvas.copy();
+	}
+
+	ivec3 get_cage_master() {
+		return cage.copy();
+	}
+
+	public void set_cell(ivec3 cell, ivec3 canvas) {
+		this.cell = vec3(cell.x,cell.y,cell.z).div(vec3(canvas.x,canvas.y,canvas.z));
 	}
 
 	public void clear() {
 		grid.clear();
 	}
 
-	ivec3 get_canvas() {
-		return canvas;
-	}
 
-	public void canvas(int w, int h, int d, int size) {
+  
+	public void canvas(int w, int h, int d) {
+		if(canvas == null) {
+			canvas = ivec3(w,h,d);
+		} else {
+			canvas.set(w,h,d);
+		}
+	}
+	
+
+	public void cage(int w, int h, int d, int size) {
 		// here we calculate the real side and median not the normalize one
 		float side = size *sqrt(3);
 		float median = side *(sqrt(3) *.5);
@@ -53,10 +69,10 @@ abstract class Grid {
 		if(d > 0) {
 			depth = floor(d/size);
 		}
-		if(canvas == null) {
-			canvas = ivec3(cols,rows,depth);
+		if(cage == null) {
+			cage = ivec3(cols,rows,depth);
 		} else {
-			canvas.set(cols,rows,depth);
+			cage.set(cols,rows,depth);
 		}
 	}
 	//
@@ -79,35 +95,42 @@ public class Grid2D extends Grid {
 		super();
 	}
 
-	public float get_size() {
-		return get_cell_size()*2;
+	public vec3 get_cell() {
+		return get_cell_master().mult(2);
+	}
+  
+	public ivec3 get_canvas() {
+		return get_canvas_master();
+	}
+	
+
+	public ivec3 get_cage() {
+		return get_cage_master();
 	}
 
-
-  public void type_d(int w, int h, int size, float start_angle) {
-  	type_d(w,h,0,size,start_angle);
-
+  // type hex
+  public void type_hex(int w, int h, int cell, float start_angle) {
+  	type_hex(ivec2(w,h),ivec2(cell),start_angle);
   }
 
-	public void type_d(int w, int h, int d, int size, float start_angle) {
-		clear();
-/*
-		vec2 canvas_normal = vec2(1);
-		if(w > h) {
-			canvas_normal.y = h /(float)w;
-		} else {
-			canvas_normal.x = w /(float)h;
-		}
-		*/
-		set_cell_size((float)size/w);
+  public void type_hex(int w, int h, int cell_x, int cell_y, float start_angle) {
+  	type_hex(ivec2(w,h),ivec2(cell_x,cell_y),start_angle);
+  }
 
-	  float side = get_cell_size() *sqrt(3); // find the length of triangle side
+	public void type_hex(ivec2 canvas, ivec2 cell, float start_angle) {
+		
+		clear();
+
+		set_cell(ivec3(cell.x,cell.y,1),ivec3(canvas.x,canvas.y,1));
+
+	  float side = get_cell().x * sqrt(3); // find the length of triangle side
 	  float median = side *(sqrt(3) *.5); // find the length of the mediane equilateral triangle
-		canvas(w,h,d,size);
+		cage(canvas.x,canvas.y,1,cell.x);
+		canvas(canvas.x,canvas.y,0);
  
 	  float angle;
     vec4 pos = vec4();
-	  for(int y = 0 ; y < get_canvas().y ; y++) {
+	  for(int y = 0 ; y < get_cage().y ; y++) {
 	    float offset_y = median * y;
 	    float offset_x ;
 	    if(y%2 == 0 ) {
@@ -115,14 +138,14 @@ public class Grid2D extends Grid {
 	    } else {
 	    	offset_x = side *.5;
 	    }
-	    for(int x = 0 ; x < get_canvas().x ; x++) {
+	    for(int x = 0 ; x < get_cage().x ; x++) {
 	      if(x%2 == 0) {
 	        angle = start_angle;
 	        // correction of the triangle position to have a good line
-	        float offset_y_2 = (get_cell_size()*2) -median ; 
-	        pos.y = get_cell_size() -offset_y_2 + offset_y;
+	        float offset_y_2 = get_cell().y *2 -median; 
+	        pos.y = get_cell().y -offset_y_2 + offset_y;
 	      } else {
-	        pos.y = get_cell_size() +offset_y ;
+	        pos.y = get_cell().y +offset_y ;
 	        angle = start_angle +PI;
 	      }
 	      pos.x = x *(side *.5) +offset_x ; 
@@ -131,31 +154,43 @@ public class Grid2D extends Grid {
 	      
 	    }
 	  }
+	  
 	}
 
-public void type_c(int w, int h, int size, float start_angle, float offset) {
-  	type_c(w,h,0,size,start_angle,offset);
 
+
+
+
+
+
+
+
+
+	public void type_c(int w, int h, int size, float start_angle, float offset) {
+  	type_c(w,h,0,size,start_angle,offset);
   }
   
 	public void type_c(int w, int h, int d, int size, float start_angle, float offset) {
 		clear();
-
-		set_cell_size((float)size/w);
-
-	  float side = get_cell_size() *sqrt(3); // find the length of triangle side
-	  float median = side *(sqrt(3) *.5); // find the length of the mediane equilateral triangle
-		canvas(w,h,d,size);
     
-    float inc_x = 1. / get_canvas().x;
-		float inc_y = 1. / get_canvas().y;
+
+    set_cell(ivec3(size),ivec3(w,h,d));
+    //set_cell((float)size/w);
+
+	  float side = get_cell().x *sqrt(3); // find the length of triangle side
+	  float median = side *(sqrt(3) *.5); // find the length of the mediane equilateral triangle
+		cage(w,h,d,size);
+		canvas(w,h,d);
+    
+    float inc_x = 1. / get_cage().x;
+		float inc_y = 1. / get_cage().y;
     float offset_normal_x = inc_x *.5;
 		float offset_normal_y = inc_y *.5;
 
-    for(float y = 0 ; y < get_canvas().y ; y++) {
-			for(float x = 0 ; x < get_canvas().x ; x++) {
-				float cx = x / get_canvas().x + offset_normal_x;
-				float cy = y / get_canvas().y + offset_normal_y;
+    for(float y = 0 ; y < get_cage().y ; y++) {
+			for(float x = 0 ; x < get_cage().x ; x++) {
+				float cx = x / get_cage().x + offset_normal_x;
+				float cy = y / get_cage().y + offset_normal_y;
 				float angle = start_angle;
 				for(int i = 0 ; i < 6 ; i++) {
 					angle += PI/3;
@@ -178,24 +213,26 @@ public void type_c(int w, int h, int size, float start_angle, float offset) {
 	public void type_b(int w, int h, int d, int size, float offset) {
 		clear();
 
-		set_cell_size((float)size/w);
+		set_cell(ivec3(size),ivec3(w,h,d));
+    //set_cell((float)size/w);
 
-	  float side = get_cell_size() *sqrt(3); // find the length of triangle side
+	  float side = get_cell().x *sqrt(3); // find the length of triangle side
 	  float median = side *(sqrt(3) *.5); // find the length of the mediane equilateral triangle
-		canvas(w,h,d,size);
+		cage(w,h,d,size);
+		canvas(w,h,d);
     
-    float inc_x = 1. / get_canvas().x;
-		float inc_y = 1. / get_canvas().y;
+    float inc_x = 1. / get_cage().x;
+		float inc_y = 1. / get_cage().y;
     float offset_normal_x = inc_x *.5;
 		float offset_normal_y = inc_y *.5;
 
 		float unit_y = inc_y *offset;
 		int count = 0;
 
-    for(float y = 0 ; y < get_canvas().y ; y++) {
-			for(float x = 0 ; x < get_canvas().x ; x++) {
-				float px = x / get_canvas().x + offset_normal_x;
-				float py = y / get_canvas().y + offset_normal_y;
+    for(float y = 0 ; y < get_cage().y ; y++) {
+			for(float x = 0 ; x < get_cage().x ; x++) {
+				float px = x / get_cage().x + offset_normal_x;
+				float py = y / get_cage().y + offset_normal_y;
 				// barycenter position
 				if(count%2 == 0) {
 					py += unit_y;
@@ -217,24 +254,26 @@ public void type_c(int w, int h, int size, float start_angle, float offset) {
 	public void type_a(int w, int h, int d, int size) {
 		clear();
 
-		set_cell_size((float)size/w);
+		set_cell(ivec3(size),ivec3(w,h,d));
+    //set_cell((float)size/w);
 
-	  float side = get_cell_size() *sqrt(3); // find the length of triangle side
+	  float side = get_cell().x *sqrt(3); // find the length of triangle side
 	  float median = side *(sqrt(3) *.5); // find the length of the mediane equilateral triangle
-		canvas(w,h,d,size);
+		cage(w,h,d,size);
+		canvas(w,h,d);
     
-    float inc_x = 1. / get_canvas().x;
-		float inc_y = 1. / get_canvas().y;
+    float inc_x = 1. / get_cage().x;
+		float inc_y = 1. / get_cage().y;
     float offset_normal_x = inc_x *.5;
 		float offset_normal_y = inc_y *.5;
 
 		float unit_y = inc_y *offset;
 		int count = 0;
 
-    for(float y = 0 ; y < get_canvas().y ; y++) {
-			for(float x = 0 ; x < get_canvas().x ; x++) {
-				float px = x / get_canvas().x + offset_normal_x;
-				float py = y / get_canvas().y + offset_normal_y;
+    for(float y = 0 ; y < get_cage().y ; y++) {
+			for(float x = 0 ; x < get_cage().x ; x++) {
+				float px = x / get_cage().x + offset_normal_x;
+				float py = y / get_cage().y + offset_normal_y;
 				grid.add(vec4(px,py,0,0));
 				count++;
 			}
