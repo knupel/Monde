@@ -1,14 +1,35 @@
 /**
-ROPE SCIENCE
-v 0.6.0
-* Copyleft (c) 2014-2018 
-* Stan le Punk > http://stanlepunk.xyz/
-* @author Stan le Punk
-* @see https://github.com/StanLepunK/Rope_method
-*
-the sketch method tab is not included on this repository if you need
-* @see https://github.com/StanLepunK/Old_code/tree/master/Science_rope_2017_12_8
+* ROPE SCIENCE
+* v 0.7.4
+* Copyleft (c) 2014-2019 
+* @author @stanlepunk
+* @see https://github.com/StanLepunK/Rope_framework
+* Processing 3.5.3
 */
+
+
+
+
+/**
+* check if int number is prime number
+*/
+boolean is_prime(int n) {
+  if(n == 2) {
+    return true;
+  } else if (n%2==0) {
+    return false;
+  } else {
+    for(int i=3; i*i<=n ; i+=2) {
+      if(n%i==0) {
+        return false;
+      }
+    }
+    return true;
+  } 
+}
+
+
+
 
 /**
 Gaussian randomize
@@ -94,84 +115,11 @@ float random_next_gaussian(float range, int n) {
 
 
 /**
-WAVE
-*/
-float sin_wave(float speed, float scale) {
-  return sin(frameCount*speed)*scale;
-}
-
-vec2 sin_wave(vec2 speed, vec2 scale) {
-  float x = sin(frameCount*speed.x)*scale.x;
-  float y = sin(frameCount*speed.y)*scale.y;
-  return vec2(x,y);
-}
-
-vec3 sin_wave(vec3 speed, vec3 scale) {
-  float x = sin(frameCount*speed.x)*scale.x;
-  float y = sin(frameCount*speed.y)*scale.y;
-  float z = sin(frameCount*speed.z)*scale.z;
-  return vec3(x,y,z);
-}
-
-vec4 sin_wave(vec4 speed, vec4 scale) {
-  float x = sin(frameCount*speed.x)*scale.x;
-  float y = sin(frameCount*speed.y)*scale.y;
-  float z = sin(frameCount*speed.z)*scale.z;
-  float w = sin(frameCount*speed.w)*scale.w;
-  return vec4(x,y,z,w);
-}
-
-
-float cos_wave(float speed, float scale) {
-  return cos(frameCount*speed)*scale;
-}
-
-vec2 cos_wave(vec2 speed, vec2 scale) {
-  float x = cos(frameCount*speed.x)*scale.x;
-  float y = cos(frameCount*speed.y)*scale.y;
-  return vec2(x,y);
-}
-
-vec3 cos_wave(vec3 speed, vec3 scale) {
-  float x = cos(frameCount*speed.x)*scale.x;
-  float y = cos(frameCount*speed.y)*scale.y;
-  float z = cos(frameCount*speed.z)*scale.z;
-  return vec3(x,y,z);
-}
-
-vec4 cos_wave(vec4 speed, vec4 scale) {
-  float x = cos(frameCount*speed.x)*scale.x;
-  float y = cos(frameCount*speed.y)*scale.y;
-  float z = cos(frameCount*speed.z)*scale.z;
-  float w = cos(frameCount*speed.w)*scale.w;
-  return vec4(x,y,z,w);
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/**
 Physic Rope
 v 0.0.2
 */
 public double g_force(double dist, double m_1, double m_2) {
-  return RConstants.G *(dist*dist)/(m_1 *m_2);
+  return R_Constants.G *(dist*dist)/(m_1 *m_2);
 }
 
 
@@ -307,7 +255,11 @@ vec3 to_polar(vec3 cart) {
 }
 
 
-///////////////
+
+
+
+
+
 // Cartesian 3D
 /*
 @ return vec3
@@ -360,25 +312,26 @@ vec3 to_cartesian_3D(float longitude, float latitude, float radius) {
 
 
 
-//Step 1 : translate the mouse position x and y  on the sphere, we must do that separately
-/*
-@ return vec2 
-return linear value on the circle perimeter
-*/
-vec2 to_cartesian_2D (float posMouse, vec2 range, vec2 targetRadian, float distance) {
-  float rotationPlan = map(posMouse, range.x, range.y, targetRadian.x, targetRadian.y)  ;
-  return to_cartesian_2D (rotationPlan, distance) ;
+
+
+
+
+// To cartesian 2D
+vec2 to_cartesian_2D (float pos, vec2 range, vec2 target_rad, float distance) {
+  float rotation_plan = map(pos, range.x, range.y, target_rad.x, target_rad.y)  ;
+  return to_cartesian_2D (rotation_plan, distance) ;
 }
 
-vec2 to_cartesian_2D (float angle) {
-  float radius_normal = 1 ;
-  return to_cartesian_2D (angle, radius_normal) ;
+
+vec2 to_cartesian_2D (float angle, float radius) {
+  return to_cartesian_2D(angle).mult(radius);
 }
+
 
 // main method
-vec2 to_cartesian_2D (float angle, float radius) {
-  float x = cos(angle) *radius;
-  float y = sin(angle) *radius ;
+vec2 to_cartesian_2D (float angle) {
+  float x = cos(angle);
+  float y = sin(angle);
   return vec2(x,y) ;
 }
 
@@ -756,53 +709,6 @@ END DISC and CIRCLE
 
 
 
-/**
-TRIANGLE
-*/
-void triangle(float x_a, float y_a, float z_a, float x_b, float y_b, float z_b, float x_c, float y_c, float z_c) {
-  vec3 a = vec3(x_a, y_a, z_a) ;
-  vec3 b = vec3(x_b, y_b, z_b) ;
-  vec3 c = vec3(x_c, y_c, z_c) ;
-  triangle(a, b, c) ;
-}
-void triangle(float x_a, float y_a, float x_b, float y_b, float x_c, float y_c) {
-  vec3 a = vec3(x_a, y_a, 0) ;
-  vec3 b = vec3(x_b, y_b, 0) ;
-  vec3 c = vec3(x_c, y_c, 0) ;
-  triangle(a, b, c) ;
-}
-
-void triangle(vec2 aa, vec2 bb, vec2 cc) {
-  vec3 a = vec3(aa.x, aa.y, 0) ;
-  vec3 b = vec3(bb.x, bb.y, 0) ;
-  vec3 c = vec3(cc.x, cc.y, 0) ;
-  triangle(a,b,c) ;
-}
-
-void triangle(vec3 a, vec3 b, vec3 c) {
-  beginShape();
-  vertex(a);
-  vertex(b);
-  vertex(c);
-  endShape(CLOSE);
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1047,7 +953,6 @@ void polyhedron_draw_vertex(String name) {
     rotateY(PI/4) ;
     int n = 4 ; // quantity of face of Tetrahedron
     for(int i = 0 ; i < n ; i++) {
-      // println("je suis là face",i);
       // choice of each point
       int a = i ;
       int b = i+1 ;

@@ -1,30 +1,31 @@
 /**
 * Carte
-v 0.2.0
+v 0.3.0
 * Copyleft (c) 2019-2019
 * @author Stan le Punk
 * @see http://stanlepunk.xyz/
 * @see https://github.com/StanLepunK/Monde
-* build with Processing 3.5.2
+* build with Processing 3.5.3.269
+* Rope Library 0.7.1.25
 */
 /**
 french guide
 boussole : compass
 carte : map
 */
-ArrayList<Intersection> grid_nodes_monde;
-ArrayList<Segment> segment_monde;
+ArrayList<R_Node> grid_nodes_monde;
+ArrayList<R_Segment> segment_monde;
 Urbanist urbanist;
 float speed;
 int inter_id;
 void init_street_map() {
 	// init data if nececary
 	if( grid_nodes_monde == null) {
-		grid_nodes_monde = new ArrayList<Intersection>();
+		grid_nodes_monde = new ArrayList<R_Node>();
 	}
 
 	if(segment_monde == null) {
-		segment_monde = new ArrayList<Segment>();
+		segment_monde = new ArrayList<R_Segment>();
 	}
 
 	// reset data
@@ -42,12 +43,12 @@ void init_street_map() {
   urbanist.set_destination(destination);
   
   // angle_tracer = angle(start_pos,destination);
-  Intersection inter = new Intersection(start_pos,destination.copy()); // copy() it's nessacy to don't point on a same Object
+  R_Node inter = new R_Node(start_pos,destination.copy()); // copy() it's nessacy to don't point on a same Object
   inter.set_branch(8); // the start need a lot of branches
   inter.set_id(inter_id++);
 
   grid_nodes_monde.add(inter);
-  Segment segment = new Segment(start_pos,destination.copy());
+  R_Segment segment = new R_Segment(start_pos,destination.copy());
   segment_monde.add(segment);
   println("new street map",urbanist.get_pos());
 }
@@ -86,7 +87,7 @@ void boussole(vec2 pos, int size) {
   
   float angle = 0;
   int div = 0;
-  for(Segment s : segment_monde) {
+  for(R_Segment s : segment_monde) {
   	int mult = ceil(s.get_length());
   	div += mult;
   	angle += (s.get_angle() *mult);
@@ -119,7 +120,7 @@ void show_intersection() {
 	stroke(255);
 	noFill();
   if(grid_nodes_monde.size() > 0) {
-  	for(Intersection inter : grid_nodes_monde) {
+  	for(R_Node inter : grid_nodes_monde) {
   		textAlign(CENTER);
   		text(inter.get_id(),inter.get_pos());
   		// point(inter.get_pos());
@@ -136,7 +137,7 @@ void map() {
 		vec2 new_destination = goto_next(urbanist,canvas_birth,grid_nodes_monde,segment_monde,show_info);
 		int id_inter = rank_intersection(urbanist,urbanist.get_pos());
 	  if(id_inter >= 0) {
-	  	Intersection inter = grid_nodes_monde.get(id_inter);
+	  	R_Node inter = grid_nodes_monde.get(id_inter);
 			urbanist.set_destination(new_destination,inter);
 		} else {
 			urbanist.set_destination(new_destination);
@@ -167,7 +168,7 @@ void map() {
 	strokeWeight(1);
 
 	// show segment
-	for(Segment s : segment_monde) {
+	for(R_Segment s : segment_monde) {
 		line(s.get_start(),s.get_end());
 	}
 	/*
@@ -195,10 +196,10 @@ boolean ask_intersection() {
 }
 
 
-Intersection temp_intersection;
+R_Node temp_intersection;
 boolean ask_intersection(Urbanist urb, int max_branch) {
 	boolean add_is = false;
-	temp_intersection = new Intersection(urb.get_destination(),urb.get_from());
+	temp_intersection = new R_Node(urb.get_destination(),urb.get_from());
 	temp_intersection.set_branch(max_branch);
 	temp_intersection.set_id(inter_id++);
 	add_is = true;
@@ -215,7 +216,7 @@ boolean add_segment(Urbanist urb, boolean build_anytime, boolean show_info_is) {
 	boolean add_is = false;
 	boolean from_is = false;
   int id_from = rank_intersection(urb,urb.get_from());
-  Intersection inter;
+  R_Node inter;
 
   if(id_from >= 0) {
   	inter = grid_nodes_monde.get(id_from);
@@ -234,7 +235,7 @@ boolean add_segment(Urbanist urb, boolean build_anytime, boolean show_info_is) {
 
 
   if(build_anytime || from_is) {
-  	Segment segment = new Segment(temp_intersection.get_pos(),urb.get_from());
+  	R_Segment segment = new R_Segment(temp_intersection.get_pos(),urb.get_from());
   	if(segment.get_length() <= urb.get_max()) {
   		segment_monde.add(segment);
   		grid_nodes_monde.get(id_from).add_destination(temp_intersection.get_pos());
@@ -319,13 +320,13 @@ GOTO NEXT
 v 0.1.0
 * is a main method to give the next destination point for urbanist
 */
-vec2 goto_next(Urbanist urb, vec6 canvas, ArrayList<Intersection> inter_list, ArrayList<Segment> seg_list, boolean show_info) {
+vec2 goto_next(Urbanist urb, vec6 canvas, ArrayList<R_Node> inter_list, ArrayList<R_Segment> seg_list, boolean show_info) {
 	// vec2 angle_range = vec2(0,PI/6);
 	vec2 pos = compute_pos(urb,canvas,inter_list);
 	count_segment_out_canvas = 0;
 
 	// check if the urbanist don't meet an other segment
-	Segment urb_seg = new Segment(urb.get_pos(),pos);
+	R_Segment urb_seg = new R_Segment(urb.get_pos(),pos);
 	boolean meet_is = check_meeting_segment(urb_seg,seg_list,show_info);
   
   if(meet_is) {
@@ -348,10 +349,10 @@ vec2 goto_next(Urbanist urb, vec6 canvas, ArrayList<Intersection> inter_list, Ar
 }
 
 int count_segment_meeting = 0;
-boolean check_meeting_segment(Segment target_segment, ArrayList<Segment> seg_list, boolean show_info) {
+boolean check_meeting_segment(R_Segment target_segment, ArrayList<R_Segment> seg_list, boolean show_info) {
 	boolean is = false;
 	int max_iter_for_meeting = 100;
-	for(Segment s : seg_list) {
+	for(R_Segment s : seg_list) {
   	if(show_info) {
   		strokeWeight(1);
   		stroke(255);
@@ -373,7 +374,7 @@ boolean check_meeting_segment(Segment target_segment, ArrayList<Segment> seg_lis
 
 int count_segment_out_canvas = 0;
 
-vec2 compute_pos(Urbanist urb, vec6 canvas, ArrayList<Intersection> inter_list) {
+vec2 compute_pos(Urbanist urb, vec6 canvas, ArrayList<R_Node> inter_list) {
 	float angle = random_next_gaussian(3);
 	float previous_direction = angle(vec2(urb.get_pos()),vec2(urb.get_destination()));
 	float ratio_center = abs(random_next_gaussian(2));
@@ -384,8 +385,8 @@ vec2 compute_pos(Urbanist urb, vec6 canvas, ArrayList<Intersection> inter_list) 
 	// other side direction
 	float goto_left = random(1);
 	if(goto_left < .5) angle *= -1;
-	vec3 canvas_min = vec3(canvas.a,canvas.b,canvas.c);
-	vec3 canvas_max = vec3(canvas.d,canvas.e,canvas.f);
+	vec3 canvas_min = vec3(canvas.x(),canvas.y(),canvas.z());
+	vec3 canvas_max = vec3(canvas.w(),canvas.e(),canvas.f());
 	vec2 pos = to_cartesian_2D(angle,dist).add(vec2(urb.get_destination()));
   
   int max_try = 10; // limit for the recursive call
@@ -498,7 +499,7 @@ public class Urbanist {
 
 	}
 
-	public void set_destination(vec dst, Intersection intersection) {
+	public void set_destination(vec dst, R_Node intersection) {
 		// check if there is free slot on this intersection
 		if(intersection == null || intersection.get_branch_available() > 0) {
 			this.from.set(this.dst);
@@ -556,81 +557,6 @@ public class Urbanist {
 
 
 
-/**
-INTERSECTION
-v 0.0.3
-*/
-public class Intersection {
-	private vec3 pos;
-	private ArrayList<vec3> dest_list;
-	private int branch = 4;
-	private int id;
-
-	public Intersection(vec pos, vec from) {
-		this.id = (int)random(MAX_INT);
-		this.pos = vec3(pos);
-		dest_list = new ArrayList<vec3>();
-		dest_list.add(vec3(from));
-	}
-
-
-	public boolean add_destination(vec dst) {
-		if(dest_list.size() < branch && !all(equal(get_pos(),vec3(dst)))) {
-			boolean equal_is = false;
-			vec3 [] list = get_destination();
-			for(int i = 0 ; i < list.length ; i++) {
-				if(all(equal(list[i],vec3(dst)))) {
-					equal_is = true;
-				}
-			}
-			if(!equal_is) {
-				dest_list.add(vec3(dst));
-			}
-			return !equal_is;
-		} else {
-			return false;
-		}
-	}
-  
-  // set
-  public void set_destination(vec3 pos) {
-		if(dest_list.size() < branch) {
-			dest_list.add(pos);
-		} 
-	}
-
-	public void set_id(int id) {
-		this.id = id;
-	}
-
-	public void set_branch(int branch) {
-		if(branch > 1 && branch > dest_list.size()) {
-			this.branch = branch;
-		} 
-	}
-
-  
-  // get
-	public int get_id() {
-		return id;
-	}
-
-	public int get_branch() {
-		return branch;
-	}
-
-	public int get_branch_available() {
-		return branch - dest_list.size();
-	}
-
-	public vec3 [] get_destination() {
-		return dest_list.toArray(new vec3[dest_list.size()]);
-	}
-
-	public vec3 get_pos() {
-		return pos;
-	}
-}
 
 
 
@@ -639,97 +565,8 @@ public class Intersection {
 
 
 
-/**
-SEGMENT
-v 0.0.2
-*/
-public class Segment {
-	private vec3 start;
-	private vec3 end;
-	private int capacity;
-	private boolean direction;
-	private float angle;
-	private float length;
-	public Segment(vec start, vec end) {
-		this.start = vec3(start.x,start.y,start.z);
-		this.end = vec3(end.x,end.y,end.z);
-		this.angle = angle(vec2(this.start),vec2(this.end));
-		this.length = dist(this.start,this.end);
-		// println("class Segment: new Segment build");
-	}
-
-	public vec3 get_start() {
-		return start;
-	}
-
-	public vec3 get_end() {
-		return end;
-	}
-
-	public float get_angle() {
-		return angle;
-	}
-
-	public float get_length() {
-		return length;
-	}
-
-	public void set_capacity(int capacity) {
-		this.capacity = capacity;
-	}
-
-	public void set_direction(boolean direction) {
-		this.direction = direction;
-	}
 
 
-
-	private vec2 line_intersection(Segment one, Segment two) {
-    float x1 = one.get_start().x;
-    float y1 = one.get_start().y;
-    float x2 = one.get_end().x;
-    float y2 = one.get_end().y;
-    
-    float x3 = two.get_start().x;
-    float y3 = two.get_start().y;
-    float x4 = two.get_end().x;
-    float y4 = two.get_end().y;
-    
-    float bx = x2 - x1;
-    float by = y2 - y1;
-    float dx = x4 - x3;
-    float dy = y4 - y3;
-   
-    float b_dot_d_perp = bx * dy - by * dx;
-   
-    if(b_dot_d_perp == 0) {
-    	return null;
-    }
-   
-    float cx = x3 - x1;
-    float cy = y3 - y1;
-   
-    float t = (cx * dy - cy * dx) / b_dot_d_perp;
-    if(t < 0 || t > 1) return null;
-   
-    float u = (cx * by - cy * bx) / b_dot_d_perp;
-    if(u < 0 || u > 1) return null;
-   
-    return vec2(x1+t*bx, y1+t*by);
-  }
-  
-  public vec2 meet_at(Segment target) {
-    return line_intersection(this,target);
-  }
-
-  public boolean meet_is(Segment target) {
-  	if(meet_at(target) == null) {
-  		return false;
-  	} else {
-  		return true;
-  	}
-  }
-}
 
 
 
