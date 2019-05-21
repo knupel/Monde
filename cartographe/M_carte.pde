@@ -111,7 +111,7 @@ void boussole(vec2 pos, int size) {
 void show_center_world() {
 	strokeWeight(2);
   if(grid_nodes_monde.size() > 0) {
-  	ellipse(grid_nodes_monde.get(0).get_pos(),50,50);
+  	ellipse(grid_nodes_monde.get(0).pos(),50,50);
   }
 }
 
@@ -122,7 +122,7 @@ void show_intersection() {
   if(grid_nodes_monde.size() > 0) {
   	for(R_Node inter : grid_nodes_monde) {
   		textAlign(CENTER);
-  		text(inter.get_id(),inter.get_pos());
+  		text(inter.get_id(),inter.pos());
   		// point(inter.get_pos());
   	}
   }
@@ -153,7 +153,7 @@ void map() {
       if(cycle_add_is) {
       	add_intersection();
       } else {
-      	vec2 back_to_center_pos = vec2(grid_nodes_monde.get(0).get_pos());
+      	vec2 back_to_center_pos = vec2(grid_nodes_monde.get(0).pos());
       	urbanist.set_destination(back_to_center_pos);
 
       }
@@ -235,10 +235,10 @@ boolean add_segment(Urbanist urb, boolean build_anytime, boolean show_info_is) {
 
 
   if(build_anytime || from_is) {
-  	R_Segment segment = new R_Segment(temp_intersection.get_pos(),urb.get_from());
+  	R_Segment segment = new R_Segment(temp_intersection.pos(),urb.get_from());
   	if(segment.get_length() <= urb.get_max()) {
   		segment_monde.add(segment);
-  		grid_nodes_monde.get(id_from).add_destination(temp_intersection.get_pos());
+  		grid_nodes_monde.get(id_from).add_destination(temp_intersection.pos());
   		temp_intersection.add_destination(urb.get_from());
   		add_is = true;
   	}
@@ -251,7 +251,7 @@ boolean add_segment(Urbanist urb, boolean build_anytime, boolean show_info_is) {
 int rank_intersection(Urbanist urb, vec target) {
 	int rank = -1;
 	for(int i = 0 ; i < grid_nodes_monde.size() ; i++) {
-		vec3 p = grid_nodes_monde.get(i).get_pos();
+		vec3 p = grid_nodes_monde.get(i).pos();
 		if(compare(vec2(target),vec2(p.x,p.y),vec2(5))) {
 			rank = i;
 			break;
@@ -337,7 +337,7 @@ vec2 goto_next(Urbanist urb, vec6 canvas, ArrayList<R_Node> inter_list, ArrayLis
 	urb.set_intersection(-1);
 
 	for(int i = 0 ; i < grid_nodes_monde.size() ; i++) {
-		vec3 p = grid_nodes_monde.get(i).get_pos();
+		vec3 p = grid_nodes_monde.get(i).pos();
 		if(compare(pos,vec2(p.x,p.y),vec2(urb.get_min()))) {
 			intersection_is(true);
 			pos = vec2(p.x,p.y);
@@ -396,14 +396,14 @@ vec2 compute_pos(Urbanist urb, vec6 canvas, ArrayList<R_Node> inter_list) {
 		pos = compute_pos(urb,canvas,inter_list); 
 	} else if( count_segment_out_canvas >= max_try) {
 		// back to starting position in case there is too much recursive call
-    pos = vec2(inter_list.get(0).get_pos());
+    pos = vec2(inter_list.get(0).pos());
 	}
 
   // check for to big length for next destination
 	float length_to_go = dist(pos,vec2(urb.get_pos()));
 	if(length_to_go >= urb.get_max()) {
 		int target = (floor(random(inter_list.size())));
-		pos = vec2(inter_list.get(target).get_pos());
+		pos = vec2(inter_list.get(target).pos());
 	}
 	
 	return pos;

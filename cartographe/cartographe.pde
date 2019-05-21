@@ -36,7 +36,7 @@ void draw() {
   urbanist();
   if(show_info_is) {
   	show_center_world();
-  	boussole(vec2(grid_nodes_monde.get(0).get_pos()),80);
+  	boussole(vec2(grid_nodes_monde.get(0).pos()),80);
     show_intersection();
   }
 }
