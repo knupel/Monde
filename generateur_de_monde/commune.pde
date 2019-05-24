@@ -42,7 +42,7 @@ void urbanisme(int surface, int max_level) {
 
 
   int fill_ground = r.BLACK;
-  int stroke = r.GRAY_2;
+  int stroke = r.GRAY[4];
   float thickness = 2;
   if(town.size() != cadastre.size()) {
     town.clear();
@@ -81,7 +81,7 @@ public class Habitation {
   vec2 peak;
 
   int fill_roof = r.BLOOD;
-  int fill_wall = r.GRAY_3;
+  int fill_wall = r.GRAY[6];
   int fill_ground = r.BLACK;
   int stroke = r.BLACK;
   float thickness = 1;

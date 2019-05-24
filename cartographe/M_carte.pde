@@ -35,15 +35,15 @@ void init_street_map() {
   
   // set data
   int marge = width/10;
-	vec2 start_pos = vec2(random(marge,width -marge),random(marge,height -marge));
+	vec3 start_pos = vec3(random(marge,width -marge),random(marge,height -marge),0);
 	int range_start = 30;
-	vec2 destination = vec2(start_pos.x+random(-range_start,range_start),start_pos.y+random(-range_start,range_start));
+	vec3 destination = vec3(start_pos.x+random(-range_start,range_start),start_pos.y+random(-range_start,range_start),0);
   urbanist = new Urbanist();
   urbanist.set_pos(start_pos);
   urbanist.set_destination(destination);
   
   // angle_tracer = angle(start_pos,destination);
-  R_Node inter = new R_Node(start_pos,destination.copy()); // copy() it's nessacy to don't point on a same Object
+  R_Node inter = new R_Node(start_pos.copy(),destination.copy()); // copy() it's nessacy to don't point on a same Object
   inter.set_branch(8); // the start need a lot of branches
   inter.set_id(inter_id++);
 
@@ -199,7 +199,7 @@ boolean ask_intersection() {
 R_Node temp_intersection;
 boolean ask_intersection(Urbanist urb, int max_branch) {
 	boolean add_is = false;
-	temp_intersection = new R_Node(urb.get_destination(),urb.get_from());
+	temp_intersection = new R_Node(urb.get_destination().copy(),urb.get_from());
 	temp_intersection.set_branch(max_branch);
 	temp_intersection.set_id(inter_id++);
 	add_is = true;
