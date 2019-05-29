@@ -49,7 +49,7 @@ void urbanisme(int surface, int max_level) {
     for(int i = 0 ; i < cadastre.size() ; i++) {
       vec4 pos = cadastre.get(i).copy();
       float from_center = dist(vec2(pos.x,pos.z),vec2(0));
-      Habitation h = new Habitation(surface,from_center,max_level);
+      Habitation h = new Habitation(this,surface,from_center,max_level);
 
       int fill_roof = color(random(0,30),random(80,100),random(60,90));
       int fill_wall = color(random(360),random(0,10),random(50,100));
@@ -74,6 +74,7 @@ void urbanisme(int surface, int max_level) {
 HABITATION
 */
 public class Habitation {
+  PApplet pa;
   int id;
   int level = 1;
   int surface;
@@ -88,7 +89,8 @@ public class Habitation {
 
   float from_center;
   House house;
-  public Habitation(int surface, float from_center, int max_level) {
+  public Habitation(PApplet pa, int surface, float from_center, int max_level) {
+    this.pa = pa;
     this.from_center = from_center;
     this.surface = surface;
     float avg_side = sqrt(surface) ;
@@ -149,13 +151,13 @@ public class Habitation {
   public void show(vec3 pos) {
     // display house
     if(house == null) {
-      house = new House();
+      house = new House(pa);
       house.set_fill_roof(fill_roof);
       house.set_fill_wall(fill_wall);
       house.set_fill_ground(fill_ground);
       house.set_stroke(stroke);
       house.set_thickness(thickness);
-      house.set_size(size);
+      house.size(size);
       house.mode(BOTTOM);
       if(peak != null) house.set_peak(peak.x,peak.y);
     }

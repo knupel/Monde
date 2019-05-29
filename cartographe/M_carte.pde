@@ -1,12 +1,12 @@
 /**
 * Carte
-v 0.3.0
+v 0.3.1
 * Copyleft (c) 2019-2019
 * @author Stan le Punk
 * @see http://stanlepunk.xyz/
 * @see https://github.com/StanLepunK/Monde
 * build with Processing 3.5.3.269
-* Rope Library 0.7.1.25
+* Rope Library 0.8.1.26
 */
 /**
 french guide
@@ -100,8 +100,8 @@ void boussole(vec2 pos, int size) {
 	push();
 	translate(pos);
 	rotate(PI/4+angle);
-	line(north,south);
-	line(west,east);
+	line(vec2(north),vec2(south));
+	line(vec2(west),vec2(east));
 	pop();
 }
 
