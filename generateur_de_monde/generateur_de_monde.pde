@@ -8,19 +8,34 @@
 
 vec2 size_world;
 int surface_habitation = 100;
+int urban_mode = 1;
+// 0 is random
+// 1 is streep_map ;
+int min_lot = 10;
+int max_lot = 20;
+
 void setup() {
   colorMode(HSB,360,100,100,100);
-  fullScreen(P3D,2);
-  //size(800,800,P3D);
+  //fullScreen(P3D,2);
+  size(800,800,P3D);
   size_world = vec2(3*width,3*width);
-
-  cadastre_generator(10,surface_habitation,size_world);
+  
+  init_street_map();
+  init_cadastre();
 }
 
 float dir_x,dir_y;
 void draw() {
   background(0);
-  // background_rope(0);
+  cartographe();
+  /*
+  if(urban_mode == 1) {
+    generate_map_commune();
+  }
+  */
+
+  cadastre_update(urban_mode,min_lot,max_lot);
+
 
   pushMatrix();
   if(mousePressed) { 
@@ -34,64 +49,41 @@ void draw() {
     dir_x += .005;
   }
   rotateY(dir_x);
-  
 
   commune(size_world,surface_habitation);
+  
   popMatrix();
+
 }
 
 
 
-
+boolean show_info_is = true;
 void keyPressed() {
-  if(key == 'n') {
-    int num = (int)random(100,1500);
-    cadastre_generator(num,surface_habitation,size_world);
+  if(key == 'n') {  
+    init_street_map();
+    init_commune_street_map();
+    init_cadastre(); 
+  }
+
+  if(key == 'i') {
+    if(show_info_is) {
+      show_info_is = false;
+    } else {
+      show_info_is = true;
+    }
   }
 }
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+void cartographe() {
+  map();
+  urbanist();
+  if(show_info_is) {
+    show_center_world();
+    boussole(vec2(grid_nodes_monde.get(0).pos()),80);
+    show_intersection();
+  }
+}
