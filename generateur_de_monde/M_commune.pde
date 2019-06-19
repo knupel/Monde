@@ -21,20 +21,24 @@ void commune(vec2 size_world, int surface_habitation) {
 
   for (int i = 0 ; i < cadastre.size() ; i++) {
     vec4 cad = cadastre.get(i).copy();
-    Habitation h = town.get(i); 
+    Home h = town.get(i); 
     float px = cad.x *size_world.x;
     float py = cad.y -(h.size.z/2);
     float pz = cad.z *size_world.y;
-    h.show(vec3(px,py,pz)); 
-    // h.show(vec3(px,py,pz),true); 
+    vec3 pos = vec3(px,py,pz);
+    noStroke();
+    fill(h.get_fill());
+    costume(pos,h.get_size(),TETRAHEDRON);
+
+    // h.show(pos); 
   }
 }
 
 
-ArrayList<Habitation>town;
+ArrayList<Home>town;
 void urbanisme(int surface, int max_level) {
   if(town == null) {
-    town = new ArrayList<Habitation>();
+    town = new ArrayList<Home>();
   }
 
   // build new town if necessary
@@ -46,7 +50,7 @@ void urbanisme(int surface, int max_level) {
     for(int i = 0 ; i < cadastre.size() ; i++) {
       vec4 pos = cadastre.get(i).copy();
       float from_center = dist(vec2(pos.x,pos.z),vec2(0));
-      Habitation h = new Habitation(this,surface,from_center,max_level);
+      Home h = new Home(this,surface,from_center,max_level);
 
       int fill_roof = color(random(0,30),random(80,100),random(60,90));
       int fill_wall = color(random(360),random(0,10),random(50,100));
@@ -97,19 +101,20 @@ void init_cadastre() {
 }
 
 
-void cadastre_update(int mode, int min_habitation, int max_habitation) {
+void cadastre_update(int mode, int min_habitation, int max_habitation, int tempo) {
   int num = (int)random(min_habitation,max_habitation);
+
+  if(segment_monde.size()%tempo == 0) {
+    new_commune = true;
+  }
+
+
   if(mode == 0) {   
     if(new_commune) {
       cadastre_random_generator(num, surface_habitation, size_world);
       new_commune = false;
     }
   } else if(mode == 1) {
-    int step = 20;
-    if(segment_monde.size()%step == 0) {
-      new_commune = true;
-    }
-
     if(new_commune) {
       new_commune = false; 
       cadastre_map_generator(num, surface_habitation, size_world, segment_monde);
@@ -252,7 +257,7 @@ boolean cadastre_is(vec2 pos, int average_surface, vec2 size_world) {
 /**
 HABITATION
 */
-public class Habitation {
+public class Home {
   PApplet pa;
   int id;
   int level = 1;
@@ -268,7 +273,7 @@ public class Habitation {
 
   float from_center;
   House house;
-  public Habitation(PApplet pa, int surface, float from_center, int max_level) {
+  public Home(PApplet pa, int surface, float from_center, int max_level) {
     this.pa = pa;
     this.from_center = from_center;
     this.surface = surface;

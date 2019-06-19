@@ -351,7 +351,7 @@ public class R_Segment {
 	public vec3 get_end() {
 		return end;
 	}
-  
+
 	public float get_angle() {
 		return vec2(start).angle(vec2(end));
 	}

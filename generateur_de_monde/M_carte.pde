@@ -73,10 +73,16 @@ void urbanist() {
 	urbanist.set_range(min,max);
 	urbanist.set_angle(-PI,PI);
 	// display
+
+}
+
+
+void show_urbanist() {
 	stroke(255);
   noFill();
   strokeWeight(10);
   point(urbanist.get_pos());
+
 }
 
 void boussole(vec2 pos, int size) {
@@ -130,10 +136,10 @@ void show_intersection() {
 }
 
 
-void map() {
+void map(boolean show_info) {
 	vec2 area = vec2(10);
 	vec6 canvas_birth = vec6(0,0,-width,   width,height,width);
-	boolean show_info = true;
+	// boolean show_info = true;
 	if(compare(vec2(urbanist.get_pos()),vec2(urbanist.get_destination()),area)) {
 		vec2 new_destination = goto_next(urbanist,canvas_birth,grid_nodes_monde,segment_monde,show_info);
 		int id_inter = rank_intersection(urbanist,urbanist.get_pos());
@@ -159,29 +165,20 @@ void map() {
 
       }
     }
-    
     intersection_is(false);
 	}
+	count_segment_meeting = 0;
+}
 
-  // draw road map
+
+void show_map() {
 	stroke(r.BLOOD);
 	noFill();
 	strokeWeight(1);
 
-	// show segment
 	for(R_Segment s : segment_monde) {
 		line(s.get_start(),s.get_end());
 	}
-	/*
-	// SHOW ALL PATH
-	beginShape();
-	for(int i = 0 ; i < grid_monde.size(); i++) {
-		vertex(grid_monde.get(i).get_pos());
-	}
-	endShape();
-	*/
-	count_segment_meeting = 0;
-	
 }
 
 
@@ -227,12 +224,14 @@ boolean add_segment(Urbanist urb, boolean build_anytime, boolean show_info_is) {
   }
   
   // info
+  /*
   if(show_info_is) {
   	noStroke();
   	fill(r.WHITE);
   	ellipse(vec2(urb.get_from()),20,20);
   	ellipse(vec2(urb.get_destination()),20,20);
   }
+  */
 
 
   if(build_anytime || from_is) {
@@ -356,7 +355,7 @@ boolean check_meeting_segment(R_Segment target_segment, ArrayList<R_Segment> seg
 	for(R_Segment s : seg_list) {
   	if(show_info) {
   		strokeWeight(1);
-  		stroke(255);
+  		stroke(r.WHITE);
   		noFill();
   		vec2 meet_pos = target_segment.meet_at(s);
   		line(target_segment.get_start(),target_segment.get_end());
