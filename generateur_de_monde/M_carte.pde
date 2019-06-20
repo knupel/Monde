@@ -1,12 +1,35 @@
 /**
 * Carte
-v 0.3.3
+v 0.4.0
 * Copyleft (c) 2019-2019
 * @author Stan le Punk
 * @see http://stanlepunk.xyz/
 * @see https://github.com/StanLepunK/Monde
 * build with Processing 3.5.3.269
 * Rope Library 0.8.3.28
+*/
+/**
+* 
+*/
+PGraphics relief_map;
+void init_map_relief() {
+	relief_map = pattern_noise(width,height,.003);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+* ROAD MAP
 */
 /**
 french guide
@@ -18,7 +41,7 @@ ArrayList<R_Segment> segment_monde;
 Urbanist urbanist;
 float speed;
 int inter_id;
-void init_street_map() {
+void init_map_street() {
 	// init data if nececary
 	if( grid_nodes_monde == null) {
 		grid_nodes_monde = new ArrayList<R_Node>();
@@ -129,8 +152,10 @@ void show_intersection() {
   	for(R_Node inter : grid_nodes_monde) {
   		textAlign(CENTER);
   		
-  		point(inter.pos());
-  		text(inter.get_id(),inter.pos());
+  		point(inter.pos().xy());
+  		vec3 p = vec3(inter.pos().x(),inter.pos().y(), 10);
+  		text(inter.get_id(),p);
+
   	}
   }
 }

@@ -14,7 +14,7 @@ urbanisme : management of town
 */
 
 
-void commune(vec2 size_world, int surface_habitation) {
+void commune(vec3 world, int surface_habitation, int which_one) {
   int level = 6 ; // midi size
   // int surface_hab = 40;
   urbanisme(surface_habitation,level);
@@ -22,15 +22,41 @@ void commune(vec2 size_world, int surface_habitation) {
   for (int i = 0 ; i < cadastre.size() ; i++) {
     vec4 cad = cadastre.get(i).copy();
     Home h = town.get(i); 
-    float px = cad.x *size_world.x;
-    float py = cad.y -(h.size.z/2);
-    float pz = cad.z *size_world.y;
+    float px = cad.x *world.x();
+    float py = (cad.y *world.y()) -(h.size.z/2);
+    float pz = cad.z *world.z();
     vec3 pos = vec3(px,py,pz);
-    noStroke();
-    fill(h.get_fill());
-    costume(pos,h.get_size(),TETRAHEDRON);
+    show_home(h, pos, which_one);
+  }
+}
 
-    // h.show(pos); 
+
+void show_home(Home h, vec3 pos, int which) {
+  if(which == 0) {
+    h.show(pos);  
+  } else {
+    strokeWeight(1);
+    stroke(r.BLACK);
+    fill(h.get_fill());
+    if(which == 1) {
+      costume(pos,h.get_size(),LINE);
+    } else if(which == 2) {
+      costume(pos,h.get_size(),TETRAHEDRON);
+    } else if(which == 3) {
+      costume(pos,h.get_size(),SPHERE_LOW);
+    } else if(which == 4) {
+      costume(pos,h.get_size(),SPHERE_MEDIUM);
+    } else if(which == 5) {
+      costume(pos,h.get_size(),CROSS_BOX_2);
+    } else if(which == 6) {
+      costume(pos,h.get_size(),CROSS_BOX_3);
+    } else if(which == 7) {
+      costume(pos,h.get_size(),FLOWER);
+    } else if(which == 8) {
+      costume(pos,h.get_size(),STAR);
+    } else if(which == 9) {
+      costume(pos,h.get_size(),STAR_3D);
+    }
   }
 }
 
@@ -101,23 +127,22 @@ void init_cadastre() {
 }
 
 
-void cadastre_update(int mode, int min_habitation, int max_habitation, int tempo) {
+void cadastre_update(int mode, int min_habitation, int max_habitation, int tempo, vec3 world, PImage map, boolean use_altitude_is) {
   int num = (int)random(min_habitation,max_habitation);
 
   if(segment_monde.size()%tempo == 0) {
     new_commune = true;
   }
 
-
   if(mode == 0) {   
     if(new_commune) {
-      cadastre_random_generator(num, surface_habitation, size_world);
+      cadastre_random_generator(num, surface_habitation, world.xz(), map, use_altitude_is);
       new_commune = false;
     }
   } else if(mode == 1) {
     if(new_commune) {
       new_commune = false; 
-      cadastre_map_generator(num, surface_habitation, size_world, segment_monde);
+      cadastre_map_generator(num, surface_habitation, world.xz(), map, use_altitude_is, segment_monde);
     }
   }
 }
@@ -135,17 +160,16 @@ void cadastre_update(int mode, int min_habitation, int max_habitation, int tempo
 /**
 *  CADASTRE random system generator of cadastre, with more concentration of lots in the center town
 */
-void cadastre_random_generator(int num, int average_surface, vec2 size_world) {
+void cadastre_random_generator(int num, int average_surface, vec2 flat_world, PImage map, boolean use_altitude_is) {
   // that's can be change when the noise map will be introduce
-  int altitude = 0;
   int already_occupy = 0;
   for(int i = 0 ; i < num ; i++) {
-    vec2 pos = lot_random(average_surface,size_world);
+    vec2 pos = lot_random(average_surface,flat_world);
     if(pos == null) {
       already_occupy++;
     } else {
       int id = (int)random(MAX_FLOAT); // use in futur to attribute habitation
-      cadastre.add(vec4(pos.x,altitude,pos.y,id));
+      set_cadastre(pos,map,id,use_altitude_is);
     }
   }
   println("plot use",num-already_occupy,"on",num);
@@ -155,20 +179,49 @@ void cadastre_random_generator(int num, int average_surface, vec2 size_world) {
 
 
 
-void cadastre_map_generator(int num, int average_surface, vec2 size_world, ArrayList<R_Segment> segment) {
-  int altitude = 0;
+void cadastre_map_generator(int num, int average_surface, vec2 flat_world, PImage map, boolean use_altitude_is, ArrayList<R_Segment> segment) {
   int already_occupy = 0;
   for(int i = 0 ; i < num ; i++) {
-    vec2 pos = lot_street_map(average_surface, size_world, segment);
+    vec2 pos = lot_street_map(average_surface, flat_world, segment);
     if(pos == null) {
       already_occupy++;
     } else {
-      int id = (int)random(MAX_FLOAT); // use in futur to attribute habitation
-      cadastre.add(vec4(pos.x,altitude,pos.y,id));
+      int id = (int)random(MAX_FLOAT); // use in future to attribute habitation
+      set_cadastre(pos,map,id,use_altitude_is);
     }
   }
   println("plot use",num-already_occupy,"on",num);
 }
+
+
+
+
+
+
+
+/**
+* CADASTRE ALLOCATION by lot
+* cadastre scale value is between - 1 > 1 
+*/
+void set_cadastre(vec2 pos, PImage map, int id, boolean use_altitude_is) {
+  float altitude = 0;
+  if(map != null && use_altitude_is) {
+    vec2 temp = pos.copy();
+    temp.map(-1,1,0,1).mult(map.width,map.height);
+    if(temp.x() < 0) temp.x(0);
+    if(temp.y() < 0) temp.y(0);
+    if(temp.x() > map.width) temp.x(map.width);
+    if(temp.y() > map.height) temp.y(map.height);
+    ivec2 p = ivec2(temp);
+    int c = map.get(p.x(),p.y());
+    altitude = brightness(c);
+    altitude = map(altitude,0,g.colorModeZ,1,-1);
+  }
+  cadastre.add(vec4(pos.x,altitude,pos.y,id));
+
+}
+
+
 
 
 
@@ -177,7 +230,7 @@ void cadastre_map_generator(int num, int average_surface, vec2 size_world, Array
 /**
 * LOT
 */
-vec2 lot_street_map(int average_surface, vec2 size_world, ArrayList<R_Segment> segment) {
+vec2 lot_street_map(int average_surface, vec2 flat_world, ArrayList<R_Segment> segment) {
   int target = floor(random(segment.size()));
   vec3 a = segment.get(target).get_start();
   vec3 b = segment.get(target).get_end();
@@ -198,7 +251,7 @@ vec2 lot_street_map(int average_surface, vec2 size_world, ArrayList<R_Segment> s
   float min_norm = -0.5;
   float max_norm = 0.5;
   pos.div(width,height).map(0,1,min_norm,max_norm);
-  boolean occupy_is = cadastre_is(pos, average_surface, size_world);
+  boolean occupy_is = cadastre_is(pos, average_surface, flat_world);
 
   if(occupy_is) {
     return null;
@@ -209,14 +262,19 @@ vec2 lot_street_map(int average_surface, vec2 size_world, ArrayList<R_Segment> s
 }
 
 
-vec2 lot_random(int average_surface, vec2 size_world) {
+
+
+
+
+
+vec2 lot_random(int average_surface, vec2 flat_world) {
   float dist = random_next_gaussian(1,3); // make the center of town more occupy
   float angle = random(-PI,PI);
   vec2 pos = to_cartesian_2D(angle,dist);
   // println("pos normal",pos);
   
   // check if the surface is already occupy
-  boolean occupy_is = cadastre_is(pos, average_surface, size_world);
+  boolean occupy_is = cadastre_is(pos, average_surface, flat_world);
   if(occupy_is) {
     return null;
   } else {
@@ -228,13 +286,13 @@ vec2 lot_random(int average_surface, vec2 size_world) {
 
 
 
-boolean cadastre_is(vec2 pos, int average_surface, vec2 size_world) {
+boolean cadastre_is(vec2 pos, int average_surface, vec2 flat_world) {
   boolean occupy = false;
   for(vec4 cad_pos : cadastre) {
     vec2 c_pos = vec2(cad_pos.x,cad_pos.z);
     vec2 area = vec2(sqrt(average_surface));
     // vec2 area = vec2(average_surface).mult(2);
-    area.div(size_world);
+    area.div(flat_world);
     if(compare(pos,c_pos,area)) {
       occupy = true;;
       break;
