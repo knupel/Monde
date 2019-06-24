@@ -419,8 +419,6 @@ public class Home {
 
 
 
-
-
   float get_from_center() {
     return from_center;
   }
