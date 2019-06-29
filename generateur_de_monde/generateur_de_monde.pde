@@ -23,8 +23,8 @@ PImage img_map;
 
 void setup() {
   colorMode(HSB,360,100,100,100);
-  fullScreen(P3D,1);
-  // size(1200,800,P3D);
+  // fullScreen(P3D,1);
+  size(1200,800,P3D);
 
   // x,z is the flat map
   // y is the altitude
