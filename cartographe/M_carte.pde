@@ -1,18 +1,20 @@
 /**
 * Carte
-v 0.3.1
-* Copyleft (c) 2019-2019
+* v 0.3.2
+* Copyleft (c) 2019-2021
 * @author Stan le Punk
-* @see http://stanlepunk.xyz/
 * @see https://github.com/StanLepunK/Monde
 * build with Processing 3.5.3.269
-* Rope Library 0.8.1.26
+* Rope Library 0.9.1.36
 */
 /**
 french guide
 boussole : compass
 carte : map
 */
+import rope.mesh.R_Node;
+import rope.mesh.R_Segment;
+
 ArrayList<R_Node> grid_nodes_monde;
 ArrayList<R_Segment> segment_monde;
 Urbanist urbanist;
@@ -63,13 +65,13 @@ void init_street_map() {
 
 
 
-
+vec3 buf_follow = vec3();
 void urbanist() {
 	float speed = .8;
 	int min = 20;
 	int max = 200;
 	// update
-	urbanist.set_pos(follow(urbanist.get_destination(),speed));
+	urbanist.set_pos(follow(urbanist.get_destination(),speed,buf_follow));
 	urbanist.set_range(min,max);
 	urbanist.set_angle(-PI,PI);
 	// display

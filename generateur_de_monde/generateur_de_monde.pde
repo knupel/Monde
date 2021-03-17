@@ -78,9 +78,9 @@ String input_ref;
 void manage_gui() {
   if(which_costume < 0) which_costume = max_costume_available;
   if(which_costume > max_costume_available) which_costume = 0;
-  if(input() != null) {
-    if(extension_is(input(), "jpg", "jpeg") && input_ref != input() && !use_noise_map_is) {
-      input_ref = input();
+  if(input_path() != null) {
+    if(extension_is(input_path(), "jpg", "jpeg") && input_ref != input_path() && !use_noise_map_is) {
+      input_ref = input_path();
       img_map = loadImage(input_ref);
     } else if(use_noise_map_is) {
       input_ref = " ";

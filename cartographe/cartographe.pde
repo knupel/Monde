@@ -1,6 +1,6 @@
 /**
 ROPE - Romanesco processing environment – 
-* Copyleft (c) 2014-2019
+* Copyleft (c) 2014-2021
 * Stan le Punk
 * https://github.com/StanLepunK
 * http://stanlepunk.xyz/
@@ -60,7 +60,6 @@ void keyPressed() {
 			show_info_is = true;
 		}
 	}
-
 }
 
 

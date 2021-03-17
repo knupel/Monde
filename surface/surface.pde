@@ -92,11 +92,11 @@ void show_shape(float ratio_canvas, float ratio_cell) {
   // float angle = map(mouseX,0,width,0,TAU);
 	for(vec4 v : grid.get()) {
 		float angle = v.w;
-		// costume(vec2(v.copy().mult(canvas)),vec2(10),angle,TRIANGLE_ROPE);  
+		// costume(vec2(v.copy().mult(canvas)),vec2(10),angle,TRIANGLE);  
 		// println(v); 
 
-		// costume(vec2(v.copy().mult(ratio_canvas)),vec2(size),angle,TRIANGLE_ROPE);
-		costume(vec2(v.copy().mult(grid.get_canvas())),vec2(size),angle,TRIANGLE_ROPE);   
+		// costume(vec2(v.copy().mult(ratio_canvas)),vec2(size),angle,TRIANGLE);
+		costume(vec2(v.copy().mult(grid.get_canvas())),vec2(size),angle,TRIANGLE);   
 	}
 }
 

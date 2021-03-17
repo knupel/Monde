@@ -12,7 +12,7 @@ cadastre : land register
 lot : habitation(home) position in the cadastre
 urbanisme : management of town
 */
-
+import rope.costume.R_House;
 
 void commune(vec3 world, int surface_habitation, int which_one) {
   int level = 6 ; // midi size
@@ -330,7 +330,7 @@ public class Home {
   float thickness = 1;
 
   float from_center;
-  House house;
+  R_House house;
   public Home(PApplet pa, int surface, float from_center, int max_level) {
     this.pa = pa;
     this.from_center = from_center;
@@ -401,12 +401,12 @@ public class Home {
   public void show(vec3 pos) {
     // display house
     if(house == null) {
-      house = new House(pa);
-      house.set_fill_roof(fill_roof);
-      house.set_fill_wall(fill_wall);
-      house.set_fill_ground(fill_ground);
-      house.set_stroke(stroke);
-      house.set_thickness(thickness);
+      house = new R_House(pa);
+      house.fill_roof(fill_roof);
+      house.fill_wall(fill_wall);
+      house.fill_ground(fill_ground);
+      house.stroke(stroke);
+      house.thickness(thickness);
       house.size(size);
       house.mode(BOTTOM);
       if(peak != null) house.set_peak(peak.x,peak.y);
