@@ -1,14 +1,11 @@
 /**
 * ROPE PROCESSING METHOD
-* v 2.8.0
-* Copyleft (c) 2014-2019
-* Stan le Punk > http://stanlepunk.xyz/
+* v 2.9.0
+* Copyleft (c) 2014-2021
 * @author @stanlepunk
 * @see https://github.com/StanLepunK/Rope_framework
-* Processing 3.5.3.269
-* Rope library 0.8.5.30
+* Processing 3.5.4.270
 */
-import rope.core.R_Image;
 import rope.costume.R_Shape;
 
 /**
@@ -19,22 +16,44 @@ Processing and vec, ivec and bvec method
 the idea here is create method directly insprating from Processing to simplify the coder life
 */
 
+
+
 /**
-* colorMode(vec5 color_component)
-* @param component give in order : mode, x, y, z and alpha
+* color
+* WARNING is not possible because the color is a type defin Processing
+* so we use colour instead
 */
-/*
-void colorMode(vec5 component) {
-  int mode = (int)component.a();
-  if(mode == HSB) {
-    colorMode(HSB,component.b(),component.c(),component.d(),component.e());
-  } else if(mode == RGB) {
-    colorMode(RGB,component.b(),component.c(),component.d(),component.e());
-  } else {
-    printErr("The first component of your vec is", mode, "and don't match with any Processing colorMode, instead the current colorMode will be used");
-  }
+int colour(vec4 xyza) {
+  return color(xyza.x(),xyza.y(),xyza.z(),xyza.w());
 }
-*/
+
+int colour(vec3 xyz) {
+  return color(xyz.x(),xyz.y(),xyz.z());
+}
+
+int colour(vec2 gray) {
+  return color(gray.x(),gray.y());
+}
+
+
+int colour(float gray) {
+  return color(gray,gray,gray);
+}
+
+int colour(float gray, float alpha) {
+  return color(gray,gray,gray, alpha);
+}
+
+int colour(float x, float y, float z) {
+  return color(x,y,z);
+}
+
+int colour(float x, float y, float z, float a) {
+  return color(x,y,z,a);
+}
+
+
+
 /**
 * colorMode(int mode, vec4 color_component)
 * @param mode give environment HSB or RGB
@@ -46,7 +65,7 @@ void colorMode(int mode, vec4 component) {
   } else if(mode == RGB) {
     colorMode(RGB,component.x(),component.y(),component.z(),component.w());
   } else {
-    printErr("int mode", mode, "don't match with any Processing colorMode, instead the current colorMode will be used");
+    print_err("int mode", mode, "don't match with any Processing colorMode, instead the current colorMode will be used");
   }
 }
 /**
@@ -288,7 +307,7 @@ void set(vec2 pos, int c) {
 void set(int x, int y, int c, PGraphics other) {
   if(other != null) {
     set_buffer_shape(other);
-    buffer_rope_framework.set(x,y,c,other);
+    buffer_rope_framework.set(x,y,c);
   } else {
     set(x,y,c);
   }
@@ -718,7 +737,8 @@ void line(vec a, vec b, PGraphics other){
 void beginShape(PGraphics other) {
   if(other != null) {
     set_buffer_shape(other);
-    buffer_rope_framework.beginShape(other);
+    buffer_rope_framework.beginShape();
+    // buffer_rope_framework.beginShape(other);
   } else {
     beginShape();
   }
@@ -727,7 +747,8 @@ void beginShape(PGraphics other) {
 void beginShape(int kind, PGraphics other) {
   if(other != null) {
     set_buffer_shape(other);
-    buffer_rope_framework.beginShape(kind,other);
+    buffer_rope_framework.beginShape(kind);
+    // buffer_rope_framework.beginShape(kind,other);
   } else {
     beginShape(kind);
   }
@@ -737,7 +758,8 @@ void beginShape(int kind, PGraphics other) {
 void endShape(PGraphics other) {
   if(other != null) {
     set_buffer_shape(other);
-    buffer_rope_framework.endShape(other);
+    buffer_rope_framework.endShape();
+    // buffer_rope_framework.endShape(other);
   } else {
     endShape();
   }
@@ -746,7 +768,8 @@ void endShape(PGraphics other) {
 void endShape(int mode, PGraphics other) {
   if(other != null) {
     set_buffer_shape(other);
-    buffer_rope_framework.endShape(mode,other);
+    buffer_rope_framework.endShape(mode);
+    // buffer_rope_framework.endShape(mode,other);
   } else {
     endShape(mode);
   }
@@ -759,7 +782,8 @@ void endShape(int mode, PGraphics other) {
 void vertex(float x, float y, PGraphics other) {
   if(other != null) {
     set_buffer_shape(other);
-    buffer_rope_framework.vertex(x,y,other);
+    buffer_rope_framework.vertex(x,y);
+    // buffer_rope_framework.vertex(x,y,other);
   } else {
     vertex(x,y);
   }
@@ -771,9 +795,11 @@ void vertex(float x, float y, float z, PGraphics other) {
   if(other != null) {
     set_buffer_shape(other);
     if(renderer_P3D()) {
-      buffer_rope_framework.vertex(x,y,z,other);
+      buffer_rope_framework.vertex(x,y,z);
+      // buffer_rope_framework.vertex(x,y,z,other);
     } else {
-      buffer_rope_framework.vertex(x,y,other);
+      buffer_rope_framework.vertex(x,y);
+      // buffer_rope_framework.vertex(x,y,other);
     }   
   } else {
     vertex(x,y,z);
@@ -784,7 +810,8 @@ void vertex(float x, float y, float z, PGraphics other) {
 void vertex(float [] v, PGraphics other) {
   if(other != null) {
     set_buffer_shape(other);
-    buffer_rope_framework.vertex(v,other);
+    buffer_rope_framework.vertex(v);
+    // buffer_rope_framework.vertex(v,other);
   } else {
     vertex(v);
   }
@@ -794,9 +821,11 @@ void vertex(float [] v, PGraphics other) {
 void vertex(float x, float y, float u, float v, PGraphics other) {
   if(other != null) {
     set_buffer_shape(other);
-    buffer_rope_framework.vertex(x,y,u,v,other);
+    buffer_rope_framework.vertex(x,y,u,v);
+    // buffer_rope_framework.vertex(x,y,u,v,other);
   } else {
-    vertex(x,y,u,v,other);
+    vertex(x,y,u,v);
+    //vertex(x,y,u,v,other);
   }
 }
 
@@ -804,12 +833,15 @@ void vertex(float x, float y, float z, float u, float v, PGraphics other) {
   if(other != null) {
     set_buffer_shape(other);
     if(renderer_P3D()) {
-      buffer_rope_framework.vertex(x,y,u,v,other);
+      buffer_rope_framework.vertex(x,y,u,v);
+      // buffer_rope_framework.vertex(x,y,u,v,other);
     } else {
-      buffer_rope_framework.vertex(x,y,z,u,v,other);
+      // buffer_rope_framework.vertex(x,y,z,u,v,other);
+      buffer_rope_framework.vertex(x,y,z,u,v);
     }
   } else {
-    vertex(x,y,z,u,v,other);
+    vertex(x,y,z,u,v);
+    // vertex(x,y,z,u,v,other);
   }
 }
 
@@ -826,7 +858,8 @@ void vertex(vec coord) {
 void vertex(vec coord, PGraphics other) {
   if(other != null) {
     set_buffer_shape(other);
-    buffer_rope_framework.vertex(coord,other);
+    buffer_rope_framework.vertex(coord);
+    // buffer_rope_framework.vertex(coord,other);
   } else {
     vertex(coord);
   }
@@ -851,7 +884,8 @@ void vertex(vec3 coord, vec2 uv) {
 void vertex(vec2 coord, vec2 uv, PGraphics other) {
   if(other != null) {
     set_buffer_shape(other);
-    buffer_rope_framework.vertex(coord,uv,other);
+    buffer_rope_framework.vertex(coord,uv);
+    // buffer_rope_framework.vertex(coord,uv,other);
   } else {
     vertex(coord,uv);
   }
@@ -861,7 +895,8 @@ void vertex(vec2 coord, vec2 uv, PGraphics other) {
 void vertex(vec3 coord, vec2 uv, PGraphics other) {
   if(other != null) {
     set_buffer_shape(other);
-    buffer_rope_framework.vertex(coord,uv,other);
+    buffer_rope_framework.vertex(coord,uv);
+    // buffer_rope_framework.vertex(coord,uv,other);
   } else {
     vertex(coord,uv);
   }
@@ -875,7 +910,8 @@ void vertex(vec3 coord, vec2 uv, PGraphics other) {
 void bezierVertex(float x2, float y2, float x3, float y3,  float x4, float y4, PGraphics other) {
   if(other != null) {
     set_buffer_shape(other);
-    buffer_rope_framework.bezierVertex(x2,y2, x3,y3,  x4,y4, other);
+    buffer_rope_framework.bezierVertex(x2,y2, x3,y3,  x4,y4);
+    // buffer_rope_framework.bezierVertex(x2,y2, x3,y3,  x4,y4, other);
   } else {
     bezierVertex(x2,y2, x3,y3,  x4,y4);
   }
@@ -885,9 +921,11 @@ void bezierVertex(float x2, float y2, float z2, float x3, float y3, float z3, fl
   if(other != null) {
     set_buffer_shape(other);
     if(renderer_P3D()) {
-      buffer_rope_framework.bezierVertex(x2,y2,z2, x3,y3,z3,  x4,y4,z4, other);
+      buffer_rope_framework.bezierVertex(x2,y2,z2, x3,y3,z3,  x4,y4,z4);
+      // buffer_rope_framework.bezierVertex(x2,y2,z2, x3,y3,z3,  x4,y4,z4, other);
     } else {
-      buffer_rope_framework.bezierVertex(x2,y2, x3,y3,  x4,y4, other);
+      buffer_rope_framework.bezierVertex(x2,y2, x3,y3,  x4,y4);
+      // buffer_rope_framework.bezierVertex(x2,y2, x3,y3,  x4,y4, other);
     }
   } else {
     if(renderer_P3D()) {
@@ -912,7 +950,7 @@ void bezierVertex(vec a, vec b, vec c) {
       bezierVertex(a.x(),a.y(), b.x(),b.y(), c.x(),c.y());
     }    
   } else {
-    printErr("method bezierVertex() all arg need to be vec2 or vec3");
+    print_err("method bezierVertex() all arg need to be vec2 or vec3");
     exit();
   }
 }
@@ -920,7 +958,8 @@ void bezierVertex(vec a, vec b, vec c) {
 void bezierVertex(vec a, vec b, vec c, PGraphics other) {
   if(other != null) {
     set_buffer_shape(other);
-    buffer_rope_framework.bezierVertex(a,b,c,other);
+    buffer_rope_framework.bezierVertex(a,b,c);
+    // buffer_rope_framework.bezierVertex(a,b,c,other);
   } else {
     bezierVertex(a,b,c);
   }
@@ -944,7 +983,8 @@ void bezierVertex(vec a, vec b, vec c, PGraphics other) {
 void quadraticVertex(float cx, float cy, float x3, float y3, PGraphics other) {
   if(other != null) {
     set_buffer_shape(other);
-    buffer_rope_framework.quadraticVertex(cx,cy, x3,y3,other);
+    buffer_rope_framework.quadraticVertex(cx,cy, x3,y3);
+    // buffer_rope_framework.quadraticVertex(cx,cy, x3,y3,other);
   } else {
     quadraticVertex(cx,cy, x3,y3);
   }
@@ -954,9 +994,11 @@ void quadraticVertex(float cx, float cy, float cz, float x3, float y3, float z3,
   if(other != null) {
     set_buffer_shape(other);
     if(renderer_P3D()) {
-      buffer_rope_framework.quadraticVertex(cx,cy,cz, x3,y3,z3,other);
+      buffer_rope_framework.quadraticVertex(cx,cy,cz, x3,y3,z3);
+      // buffer_rope_framework.quadraticVertex(cx,cy,cz, x3,y3,z3,other);
     } else {
-      buffer_rope_framework.quadraticVertex(cx,cy, x3,y3,other);
+      buffer_rope_framework.quadraticVertex(cx,cy, x3,y3);
+      // buffer_rope_framework.quadraticVertex(cx,cy, x3,y3,other);
     }    
   } else {
     if(renderer_P3D()) {
@@ -978,7 +1020,7 @@ void quadraticVertex(vec a, vec b) {
       quadraticVertex(a.x(),a.y(), b.x(),b.y());
     } 
   } else {
-    printErr("method quadraticVertex() all arg need to be vec2 or vec3");
+    print_err("method quadraticVertex() all arg need to be vec2 or vec3");
     exit();
   }
 }
@@ -986,7 +1028,8 @@ void quadraticVertex(vec a, vec b) {
 void quadraticVertex(vec a, vec b, PGraphics other) {
   if(other != null) {
     set_buffer_shape(other);
-    buffer_rope_framework.quadraticVertex(a,b,other);
+    buffer_rope_framework.quadraticVertex(a,b);
+    // buffer_rope_framework.quadraticVertex(a,b,other);
   } else {
     quadraticVertex(a,b);
   }
@@ -1011,7 +1054,8 @@ void quadraticVertex(vec a, vec b, PGraphics other) {
 void curveVertex(float x, float y, PGraphics other) {
   if(other != null) {
     set_buffer_shape(other);
-    buffer_rope_framework.curveVertex(x,y,other);
+    buffer_rope_framework.curveVertex(x,y);
+    // buffer_rope_framework.curveVertex(x,y,other);
   } else {
     curveVertex(x,y);
   }
@@ -1021,9 +1065,11 @@ void curveVertex(float x, float y, float z, PGraphics other) {
   if(other != null) {
     set_buffer_shape(other);
     if(renderer_P3D()) {
-      buffer_rope_framework.curveVertex(x,y,z,other);
+      buffer_rope_framework.curveVertex(x,y,z);
+      // buffer_rope_framework.curveVertex(x,y,z,other);
     } else {
-      buffer_rope_framework.curveVertex(x,y,other);
+      buffer_rope_framework.curveVertex(x,y);
+      // buffer_rope_framework.curveVertex(x,y,other);
     }   
   } else {
     if(renderer_P3D()) {
@@ -1048,7 +1094,8 @@ void curveVertex(vec a) {
 void curveVertex(vec a, PGraphics other) {
    if(other != null) {
     set_buffer_shape(other);
-    buffer_rope_framework.curveVertex(a,other);
+    buffer_rope_framework.curveVertex(a);
+    // buffer_rope_framework.curveVertex(a,other);
   } else {
     curveVertex(a);
   }
@@ -1367,7 +1414,7 @@ void text(String s, vec pos, PGraphics other) {
     vec3 p = (vec3)pos;
     text(s, p.x(),p.y(),p.z(), other);
   } else {
-    printErrTempo(60,"method text(): String message is null or vec is not an instance of vec3 or vec2");
+    print_err_tempo(60,"method text(): String message is null or vec is not an instance of vec3 or vec2");
   }
 }
 
@@ -1614,8 +1661,7 @@ void push_3D(vec pos, vec3 dir_cart) {
     vec3 p = (vec3) pos ;
     translate(p) ;
   } else {
-    printErr("Error in void push_3D(), vec pos is not an instance of vec2 or vec3, the matrix don't translate your object") ;
-    // exit() ;
+    print_err("Error in void push_3D(), vec pos is not an instance of vec2 or vec3, the matrix don't translate your object") ;
   }
   float radius = sqrt(dir.x * dir.x + dir.y * dir.y + dir.z * dir.z);
   float longitude = acos(dir.x / sqrt(dir.x * dir.x + dir.y * dir.y)) * (dir.y < 0 ? -1 : 1);
@@ -1640,7 +1686,7 @@ void push_3D(vec pos, vec2 dir_polar) {
     translate(p);
     rotateXY(dir_polar);
   } else {
-    printErr("Error in void push_3D(), vec pos is not an instance of vec2 or vec3, the matrix cannot be init") ;
+    print_err("Error in void push_3D(), vec pos is not an instance of vec2 or vec3, the matrix cannot be init") ;
   }
 }
 
@@ -1656,7 +1702,7 @@ void push_2D(vec pos, float orientation) {
     translate(p.x, p.y);
     rotate(orientation);
   } else {
-    printErr("Error in void push_3D(), vec pos is not an instance of vec2 or vec3, the matrix cannot be init") ;
+    print_err("Error in void push_3D(), vec pos is not an instance of vec2 or vec3, the matrix cannot be init") ;
   }
 }
 
@@ -1739,7 +1785,7 @@ void pop(PGraphics other) {
 /**
 * GHOST METHODS for PROCESSING
 * 2018-2019
-* v 0.3.0
+* v 0.3.1
 */
 boolean get_layer_is_correct() {
   if(get_layer() != null && get_layer().width > 0 && get_layer().height > 0) {
@@ -1748,6 +1794,23 @@ boolean get_layer_is_correct() {
     return false;
   }
 }
+
+/**
+* color
+* WARNING is not possible because the color is a type defin Processing
+*/
+// int color(vec4 xyza) {
+//   return color(xyza.x(),xyza.y(),xyza.z(),xyza.w());
+// }
+
+// int color(vec3 xyz) {
+//   return color(xyza.x(),xyza.y(),xyza.z());
+// }
+
+// int color(vec2 gray) {
+//   return color(gray.x(),gray.y());
+// }
+
 
 // colorMode
 void colorMode(int mode) {
@@ -2239,19 +2302,6 @@ void quad(float x1, float y1, float x2, float y2, float x3, float y3, float x4, 
     g.quad(x1,y1,x2,y2,x3,y3,x4,y4);
   }
 }
-
-// triangle
-/*
-method already use somewhere else
-void triangle(float x1, float y1, float x2, float y2, float x3, float y3) {
-  if(get_layer() != null) {
-    get_layer().triangle(x1,y1,x2,y2,x3,y3);
-  } else {
-    g.triangle(x1,y1,x2,y2,x3,y3);
-  }
-}
-*/
-
 
 /**
 vertex
