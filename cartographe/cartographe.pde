@@ -19,6 +19,7 @@ ROPE - Romanesco processing environment –
 
 PImage img ;
 void setup() {
+  init_rope();
   background(0);
   //fullScreen(P2D,2);
   size(1300,800);
