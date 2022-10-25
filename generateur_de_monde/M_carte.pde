@@ -6,7 +6,6 @@ v 0.4.1
 * @see http://knupel.art/
 * @see https://github.com/StanLepunK/Monde
 * build with Processing 3.5.3.269
-* Rope Library 0.8.3.28
 */
 /**
 * 
@@ -60,7 +59,7 @@ void init_map_street() {
   // angle_tracer = angle(start_pos,destination);
   R_Node inter = new R_Node(start_pos.copy(),destination.copy()); // copy() it's nessacy to don't point on a same Object
   inter.set_branch(8); // the start need a lot of branches
-  inter.set_id(inter_id++);
+  inter.id_a(inter_id++);
 
   grid_nodes_monde.add(inter);
   R_Segment segment = new R_Segment(start_pos,destination.copy());
@@ -146,8 +145,7 @@ void show_intersection() {
   		
   		point(inter.pos().xy());
   		vec3 p = vec3(inter.pos().x(),inter.pos().y(), 10);
-  		text(inter.get_id(),p);
-
+  		text(inter.id().a(),p);
   	}
   }
 }
@@ -216,7 +214,7 @@ boolean ask_intersection(Urbanist urb, int max_branch) {
 	boolean add_is = false;
 	temp_intersection = new R_Node(urb.get_destination().copy(),urb.get_from());
 	temp_intersection.set_branch(max_branch);
-	temp_intersection.set_id(inter_id++);
+	temp_intersection.id_a(inter_id++);
 	add_is = true;
 	return add_is;
 }
@@ -241,14 +239,6 @@ boolean add_segment(Urbanist urb, boolean build_anytime, boolean show_info_is) {
   }
   
   // info
-  /*
-  if(show_info_is) {
-  	noStroke();
-  	fill(r.WHITE);
-  	ellipse(vec2(urb.get_from()),20,20);
-  	ellipse(vec2(urb.get_destination()),20,20);
-  }
-  */
 
 
   if(build_anytime || from_is) {
@@ -283,45 +273,6 @@ int num_branch_by_intersection(int min, int max) {
 	if(num == 0 || num == (min-1)) num = min; // we can choic 1 for the future to create a cul-de-sac
 	return num;
 }
-
-
-
-
-
-
-
-
-
-/*
-void img_urbanist_setting() {
-	ivec2 pos = ivec2(urbanist.get_pos());
-	float density = brightness(img.get(pos.x,pos.y));
-	// float min = map(density,0,g.colorModeZ,5,15);
-	// float max = map(density,0,g.colorModeZ,25,400);
-	float min = 100;
-	float max = 300;
-	// println(density);
-	urbanist.set_range(min,max);
-}
-
-
-void img_map_setting() {
-	ivec2 pos = ivec2(urbanist.get_pos());
-	float density = brightness(img.get(pos.x,pos.y));
-	int num = (int)map(density,0,g.colorModeZ,12,2);
-	add_intersection(urbanist,num);
-}
-*/
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -437,25 +388,6 @@ boolean intersection_is() {
 void intersection_is(boolean is) {
 	intersection_is = is;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

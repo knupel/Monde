@@ -1,11 +1,10 @@
 /**
 * Carte
-* v 0.3.2
-* Copyleft (c) 2019-2021
+* v 0.4.0
+* Copyleft (c) 2019-2022
 * @author Stan le Punk
 * @see https://github.com/StanLepunK/Monde
-* build with Processing 3.5.3.269
-* Rope Library 0.9.1.36
+* build with Processing 4
 */
 /**
 french guide
@@ -47,7 +46,7 @@ void init_street_map() {
   // angle_tracer = angle(start_pos,destination);
   R_Node inter = new R_Node(start_pos.copy(),destination.copy()); // copy() it's nessacy to don't point on a same Object
   inter.set_branch(8); // the start need a lot of branches
-  inter.set_id(inter_id++);
+  inter.id_a(inter_id++);
 
   grid_nodes_monde.add(inter);
   R_Segment segment = new R_Segment(start_pos,destination.copy());
@@ -124,7 +123,7 @@ void show_intersection() {
   if(grid_nodes_monde.size() > 0) {
   	for(R_Node inter : grid_nodes_monde) {
   		textAlign(CENTER);
-  		text(inter.get_id(),inter.pos());
+  		text(inter.id().a(),inter.pos());
   		// point(inter.get_pos());
   	}
   }
@@ -203,7 +202,7 @@ boolean ask_intersection(Urbanist urb, int max_branch) {
 	boolean add_is = false;
 	temp_intersection = new R_Node(urb.get_destination().copy(),urb.get_from());
 	temp_intersection.set_branch(max_branch);
-	temp_intersection.set_id(inter_id++);
+	temp_intersection.id_a(inter_id++);
 	add_is = true;
 	return add_is;
 }
