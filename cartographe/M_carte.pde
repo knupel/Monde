@@ -171,7 +171,7 @@ void map() {
 
 	// show segment
 	for(R_Segment s : segment_monde) {
-		line(s.get_start(),s.get_end());
+		line(s.get_start(),s.get_stop());
 	}
 	/*
 	// SHOW ALL PATH
@@ -360,7 +360,7 @@ boolean check_meeting_segment(R_Segment target_segment, ArrayList<R_Segment> seg
   		stroke(255);
   		noFill();
   		vec2 meet_pos = target_segment.meet_at(s);
-  		line(target_segment.get_start(),target_segment.get_end());
+  		line(target_segment.get_start(),target_segment.get_stop());
   		if(meet_pos != null) ellipse(meet_pos,30,30);
   	}
 

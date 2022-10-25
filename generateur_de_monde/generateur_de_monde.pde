@@ -1,6 +1,6 @@
 /**
 * Code Kitchen
-* Copyleft (c) 2019-2019
+* Copyleft (c) 2019-2022
 * Stan le Punk
 * https://github.com/StanLepunK
 * http://stanlepunk.xyz/

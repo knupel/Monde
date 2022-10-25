@@ -1,8 +1,8 @@
 /**
 * Ville : Project born in the Code Kitchen in Creative Code Paris january session.
-* Copyleft (c) 2019-2019
-* v 0.2.0
-* Stan le Punk > http://stanlepunk.xyz/
+* Copyleft (c) 2019-2022
+* v 0.2.1
+* @see http://knupel.art/
 
 * All class, method is in french... C'est la vie, excuse my french!
 ville : town
@@ -39,23 +39,23 @@ void show_home(Home h, vec3 pos, int which) {
     stroke(r.BLACK);
     fill(h.get_fill());
     if(which == 1) {
-      costume(pos,h.get_size(),LINE);
+      costume(pos,h.get_size(),r.LINE);
     } else if(which == 2) {
-      costume(pos,h.get_size(),TETRAHEDRON);
+      costume(pos,h.get_size(),r.TETRAHEDRON);
     } else if(which == 3) {
-      costume(pos,h.get_size(),SPHERE_LOW);
+      costume(pos,h.get_size(),r.SPHERE_LOW);
     } else if(which == 4) {
-      costume(pos,h.get_size(),SPHERE_MEDIUM);
+      costume(pos,h.get_size(),r.SPHERE_MEDIUM);
     } else if(which == 5) {
-      costume(pos,h.get_size(),CROSS_BOX_2);
+      costume(pos,h.get_size(),r.CROSS_BOX_2);
     } else if(which == 6) {
-      costume(pos,h.get_size(),CROSS_BOX_3);
+      costume(pos,h.get_size(),r.CROSS_BOX_3);
     } else if(which == 7) {
-      costume(pos,h.get_size(),FLOWER);
+      costume(pos,h.get_size(),r.FLOWER);
     } else if(which == 8) {
-      costume(pos,h.get_size(),STAR);
+      costume(pos,h.get_size(),r.STAR);
     } else if(which == 9) {
-      costume(pos,h.get_size(),STAR_3D);
+      costume(pos,h.get_size(),r.STAR_3D);
     }
   }
 }
@@ -233,7 +233,7 @@ void set_cadastre(vec2 pos, PImage map, int id, boolean use_altitude_is) {
 vec2 lot_street_map(int average_surface, vec2 flat_world, ArrayList<R_Segment> segment) {
   int target = floor(random(segment.size()));
   vec3 a = segment.get(target).get_start();
-  vec3 b = segment.get(target).get_end();
+  vec3 b = segment.get(target).get_stop();
   float dist = a.mag(b);
   vec2 dir = vec2(a).dir(vec2(b));
   vec2 tan = vec2(a).tan(vec2(b));

@@ -1,9 +1,9 @@
 /**
 * Carte
 v 0.4.1
-* Copyleft (c) 2019-2021
+* Copyleft (c) 2019-2022
 * @author Stan le Punk
-* @see http://stanlepunk.xyz/
+* @see http://knupel.art/
 * @see https://github.com/StanLepunK/Monde
 * build with Processing 3.5.3.269
 * Rope Library 0.8.3.28
@@ -194,7 +194,7 @@ void show_map() {
 	strokeWeight(1);
 
 	for(R_Segment s : segment_monde) {
-		line(s.get_start(),s.get_end());
+		line(s.get_start(),s.get_stop());
 	}
 }
 
@@ -375,7 +375,7 @@ boolean check_meeting_segment(R_Segment target_segment, ArrayList<R_Segment> seg
   		stroke(r.WHITE);
   		noFill();
   		vec2 meet_pos = target_segment.meet_at(s);
-  		line(target_segment.get_start(),target_segment.get_end());
+  		line(target_segment.get_start(),target_segment.get_stop());
   		if(meet_pos != null) ellipse(meet_pos,30,30);
   	}
 
@@ -407,7 +407,10 @@ vec2 compute_pos(Urbanist urb, vec6 canvas, ArrayList<R_Node> inter_list) {
 	vec2 pos = to_cartesian_2D(angle,dist).add(vec2(urb.get_destination()));
   
   int max_try = 10; // limit for the recursive call
-	if(count_segment_out_canvas < max_try && (!all(greaterThan(pos,vec2(canvas_min))) || !all(lessThan(pos,vec2(canvas_max))))) {
+  println(pos,canvas_min.xy(),canvas_max.xy());
+  println(r.greaterThan(pos,canvas_min.xy()));
+  	println(r.lessThan(pos,canvas_max.xy()));
+	if(count_segment_out_canvas < max_try && (!r.all(r.greaterThan(pos,canvas_min.xy())) || !r.all(r.lessThan(pos,canvas_max.xy())))) {
 		count_segment_out_canvas++;
 		// loop method until is good
 		pos = compute_pos(urb,canvas,inter_list); 
