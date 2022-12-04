@@ -1,9 +1,9 @@
 /**
 * Code Kitchen
 * Copyleft (c) 2019-2022
-* Stan le Punk
-* https://github.com/StanLepunK
-* http://stanlepunk.xyz/
+* Knupel
+* https://github.com/knupel
+* http://knupel.art
 */
 
 vec3 size_world;

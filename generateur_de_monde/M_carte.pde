@@ -2,7 +2,7 @@
 * Carte
 v 0.4.1
 * Copyleft (c) 2019-2022
-* @author Stan le Punk
+* @author Knupel
 * @see http://knupel.art/
 * @see https://github.com/StanLepunK/Monde
 * build with Processing 3.5.3.269

@@ -1,9 +1,9 @@
 
 /**
-GRID
-2019-2019
-v 0.1.0
-build a normal grid from 0 to 1
+* GRID
+* 2019-2019
+* v 0.1.0
+* build a normal grid from 0 to 1
 * link about grid
 * @see https://www.quantamagazine.org/the-sum-product-problem-shows-how-addition-and-multiplication-constrain-each-other-20190206/
 */

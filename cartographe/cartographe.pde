@@ -2,8 +2,8 @@
 ROPE - Romanesco processing environment – 
 * Copyleft (c) 2014-2021
 * Stan le Punk
-* https://github.com/StanLepunK
-* http://stanlepunk.xyz/
+* https://github.com/knupel
+* http://knupel.art
 */
 
 
