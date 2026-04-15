@@ -1,9 +1,9 @@
 /**
 * Carte
-* v 0.4.0
-* Copyleft (c) 2019-2022
-* @author Stan le Punk
-* @see https://github.com/StanLepunK/Monde
+* v 0.5.0
+* Copyleft (c) 2019-2026
+* @author Knupel
+* @see https://github.com/knupel/Monde
 * build with Processing 4
 */
 /**
@@ -36,9 +36,9 @@ void init_street_map() {
   
   // set data
   int marge = width/10;
-	vec3 start_pos = vec3(random(marge,width -marge),random(marge,height -marge),0);
+	vec3 start_pos = new vec3(random(marge,width -marge),random(marge,height -marge),0);
 	int range_start = 30;
-	vec3 destination = vec3(start_pos.x+random(-range_start,range_start),start_pos.y+random(-range_start,range_start),0);
+	vec3 destination = new vec3(start_pos.x+random(-range_start,range_start),start_pos.y+random(-range_start,range_start),0);
   urbanist = new Urbanist();
   urbanist.set_pos(start_pos);
   urbanist.set_destination(destination);
@@ -64,7 +64,7 @@ void init_street_map() {
 
 
 
-vec3 buf_follow = vec3();
+vec3 buf_follow = new vec3();
 void urbanist() {
 	float speed = .8;
 	int min = 20;
@@ -81,10 +81,10 @@ void urbanist() {
 }
 
 void boussole(vec2 pos, int size) {
-	ivec2 north = ivec2(0,-1).mult(size);
-	ivec2 south = ivec2(0,1).mult(size);
-	ivec2 west = ivec2(-1,0).mult(size);
-	ivec2 east = ivec2(1,0).mult(size);
+	ivec2 north = new ivec2(0,-1).mult(size);
+	ivec2 south = new ivec2(0,1).mult(size);
+	ivec2 west = new ivec2(-1,0).mult(size);
+	ivec2 east = new ivec2(1,0).mult(size);
   
   float angle = 0;
   int div = 0;
@@ -101,8 +101,8 @@ void boussole(vec2 pos, int size) {
 	push();
 	translate(pos);
 	rotate(PI/4+angle);
-	line(vec2(north),vec2(south));
-	line(vec2(west),vec2(east));
+	line(new vec2(north),new vec2(south));
+	line(new vec2(west),new vec2(east));
 	pop();
 }
 
@@ -131,10 +131,10 @@ void show_intersection() {
 
 
 void map() {
-	vec2 area = vec2(10);
-	vec6 canvas_birth = vec6(0,0,-width,   width,height,width);
+	vec2 area = new vec2(10);
+	vec6 canvas_birth = new vec6(0,0,-width,   width,height,width);
 	boolean show_info = true;
-	if(compare(vec2(urbanist.get_pos()),vec2(urbanist.get_destination()),area)) {
+	if(r.compare(new vec2(urbanist.get_pos()),new vec2(urbanist.get_destination()),area)) {
 		vec2 new_destination = goto_next(urbanist,canvas_birth,grid_nodes_monde,segment_monde,show_info);
 		int id_inter = rank_intersection(urbanist,urbanist.get_pos());
 	  if(id_inter >= 0) {
@@ -154,7 +154,7 @@ void map() {
       if(cycle_add_is) {
       	add_intersection();
       } else {
-      	vec2 back_to_center_pos = vec2(grid_nodes_monde.get(0).pos());
+      	vec2 back_to_center_pos = new vec2(grid_nodes_monde.get(0).pos());
       	urbanist.set_destination(back_to_center_pos);
 
       }
@@ -230,8 +230,8 @@ boolean add_segment(Urbanist urb, boolean build_anytime, boolean show_info_is) {
   if(show_info_is) {
   	noStroke();
   	fill(r.WHITE);
-  	ellipse(vec2(urb.get_from()),20,20);
-  	ellipse(vec2(urb.get_destination()),20,20);
+  	ellipse(new vec2(urb.get_from()),20,20);
+  	ellipse(new vec2(urb.get_destination()),20,20);
   }
 
 
@@ -253,7 +253,7 @@ int rank_intersection(Urbanist urb, vec target) {
 	int rank = -1;
 	for(int i = 0 ; i < grid_nodes_monde.size() ; i++) {
 		vec3 p = grid_nodes_monde.get(i).pos();
-		if(compare(vec2(target),vec2(p.x,p.y),vec2(5))) {
+		if(r.compare(new vec2(target),new vec2(p.x,p.y),new vec2(5))) {
 			rank = i;
 			break;
 		}
@@ -339,9 +339,9 @@ vec2 goto_next(Urbanist urb, vec6 canvas, ArrayList<R_Node> inter_list, ArrayLis
 
 	for(int i = 0 ; i < grid_nodes_monde.size() ; i++) {
 		vec3 p = grid_nodes_monde.get(i).pos();
-		if(compare(pos,vec2(p.x,p.y),vec2(urb.get_min()))) {
+		if(r.compare(pos,new vec2(p.x,p.y),new vec2(urb.get_min()))) {
 			intersection_is(true);
-			pos = vec2(p.x,p.y);
+			pos = new vec2(p.x,p.y);
 			urb.set_intersection(i);
 			break;
 		}
@@ -377,7 +377,7 @@ int count_segment_out_canvas = 0;
 
 vec2 compute_pos(Urbanist urb, vec6 canvas, ArrayList<R_Node> inter_list) {
 	float angle = random_next_gaussian(3);
-	float previous_direction = angle(vec2(urb.get_pos()),vec2(urb.get_destination()));
+	float previous_direction = angle(new vec2(urb.get_pos()),new vec2(urb.get_destination()));
 	float ratio_center = abs(random_next_gaussian(2));
 	float dist = map(ratio_center,0,1,urb.get_range().x,urb.get_range().y);
 	// new angle
@@ -386,25 +386,25 @@ vec2 compute_pos(Urbanist urb, vec6 canvas, ArrayList<R_Node> inter_list) {
 	// other side direction
 	float goto_left = random(1);
 	if(goto_left < .5) angle *= -1;
-	vec3 canvas_min = vec3(canvas.x(),canvas.y(),canvas.z());
-	vec3 canvas_max = vec3(canvas.w(),canvas.e(),canvas.f());
-	vec2 pos = to_cartesian_2D(angle,dist).add(vec2(urb.get_destination()));
+	vec3 canvas_min = new vec3(canvas.x(),canvas.y(),canvas.z());
+	vec3 canvas_max = new vec3(canvas.w(),canvas.e(),canvas.f());
+	vec2 pos = to_cartesian_2D(angle,dist).add(new vec2(urb.get_destination()));
   
   int max_try = 10; // limit for the recursive call
-	if(count_segment_out_canvas < max_try && (!all(greaterThan(pos,vec2(canvas_min))) || !all(lessThan(pos,vec2(canvas_max))))) {
+	if(count_segment_out_canvas < max_try && (!r.all(r.greaterThan(pos,new vec2(canvas_min))) || !r.all(r.lessThan(pos, new vec2(canvas_max))))) {
 		count_segment_out_canvas++;
 		// loop method until is good
 		pos = compute_pos(urb,canvas,inter_list); 
 	} else if( count_segment_out_canvas >= max_try) {
 		// back to starting position in case there is too much recursive call
-    pos = vec2(inter_list.get(0).pos());
+    pos = new vec2(inter_list.get(0).pos());
 	}
 
   // check for to big length for next destination
-	float length_to_go = dist(pos,vec2(urb.get_pos()));
+	float length_to_go = r.dist(pos,new vec2(urb.get_pos()));
 	if(length_to_go >= urb.get_max()) {
 		int target = (floor(random(inter_list.size())));
-		pos = vec2(inter_list.get(target).pos());
+		pos = new vec2(inter_list.get(target).pos());
 	}
 	
 	return pos;
@@ -471,11 +471,11 @@ public class Urbanist {
 	private vec2 angle;
 	
 	public Urbanist() {
-		this.pos = vec3();
-		this.from = vec3();
-		this.dst = vec3();
-		this.range = vec2(0,height);
-		this.angle = vec2(-PI/2,PI/2);
+		this.pos = new vec3();
+		this.from = new vec3();
+		this.dst = new vec3();
+		this.range = new vec2(0,height);
+		this.angle = new vec2(-PI/2,PI/2);
 	}
   
   // set

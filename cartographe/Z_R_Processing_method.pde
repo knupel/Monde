@@ -74,7 +74,7 @@ void colorMode(int mode, vec4 component) {
 * @param color_component give in order : x, y, z
 */
 void colorMode(int mode, vec3 component) {
-  colorMode(mode, vec4(component.x(),component.y(),component.z(),g.colorModeA));
+  colorMode(mode, new vec4(component.x(),component.y(),component.z(),g.colorModeA));
 }
 /**
 * colorMode(int mode, vec2 color_component)
@@ -82,7 +82,7 @@ void colorMode(int mode, vec3 component) {
 * @param color_component give in order the x give x,y,z and y give the alpha
 */
 void colorMode(int mode, vec2 component) {
-  colorMode(mode, vec4(component.x(),component.x(),component.x(),component.y()));
+  colorMode(mode, new vec4(component.x(),component.x(),component.x(),component.y()));
 }
 
 
@@ -95,15 +95,15 @@ void colorMode(int mode, vec2 component) {
 floor
 */
 vec2 floor(vec2 arg) {
-  return vec2(floor(arg.x()),floor(arg.y()));
+  return new vec2(floor(arg.x()),floor(arg.y()));
 }
 
 vec3 floor(vec3 arg) {
-  return vec3(floor(arg.x()),floor(arg.y()),floor(arg.z()));
+  return new vec3(floor(arg.x()),floor(arg.y()),floor(arg.z()));
 }
 
 vec4 floor(vec4 arg) {
-  return vec4(floor(arg.x()),floor(arg.y()),floor(arg.z()),floor(arg.w()));
+  return new vec4(floor(arg.x()),floor(arg.y()),floor(arg.z()),floor(arg.w()));
 }
 
 
@@ -115,15 +115,15 @@ vec4 floor(vec4 arg) {
 round
 */
 vec2 round(vec2 arg) {
-  return vec2(round(arg.x()),round(arg.y()));
+  return new vec2(round(arg.x()),round(arg.y()));
 }
 
 vec3 round(vec3 arg) {
-  return vec3(round(arg.x()),round(arg.y()),round(arg.z()));
+  return new vec3(round(arg.x()),round(arg.y()),round(arg.z()));
 }
 
 vec4 round(vec4 arg) {
-  return vec4(round(arg.x()),round(arg.y()),round(arg.z()),round(arg.w()));
+  return new vec4(round(arg.x()),round(arg.y()),round(arg.z()),round(arg.w()));
 }
 
 
@@ -134,15 +134,15 @@ vec4 round(vec4 arg) {
 ceil
 */
 vec2 ceil(vec2 arg) {
-  return vec2(ceil(arg.x()),ceil(arg.y()));
+  return new vec2(ceil(arg.x()),ceil(arg.y()));
 }
 
 vec3 ceil(vec3 arg) {
-  return vec3(ceil(arg.x()),ceil(arg.y()),ceil(arg.z()));
+  return new vec3(ceil(arg.x()),ceil(arg.y()),ceil(arg.z()));
 }
 
 vec4 ceil(vec4 arg) {
-  return vec4(ceil(arg.x()),ceil(arg.y()),ceil(arg.z()),ceil(arg.w()));
+  return new vec4(ceil(arg.x()),ceil(arg.y()),ceil(arg.z()),ceil(arg.w()));
 }
 
 
@@ -150,27 +150,27 @@ vec4 ceil(vec4 arg) {
 abs
 */
 vec2 abs(vec2 arg) {
-  return vec2(abs(arg.x()),abs(arg.y()));
+  return new vec2(abs(arg.x()),abs(arg.y()));
 }
 
 vec3 abs(vec3 arg) {
-  return vec3(abs(arg.x()),abs(arg.y()),abs(arg.z()));
+  return new vec3(abs(arg.x()),abs(arg.y()),abs(arg.z()));
 }
 
 vec4 abs(vec4 arg) {
-  return vec4(abs(arg.x()),abs(arg.y()),abs(arg.z()),abs(arg.w()));
+  return new vec4(abs(arg.x()),abs(arg.y()),abs(arg.z()),abs(arg.w()));
 }
 
 ivec2 abs(ivec2 arg) {
-  return ivec2(abs(arg.x()),abs(arg.y()));
+  return new ivec2(abs(arg.x()),abs(arg.y()));
 }
 
 ivec3 abs(ivec3 arg) {
-  return ivec3(abs(arg.x()),abs(arg.y()),abs(arg.z()));
+  return new ivec3(abs(arg.x()),abs(arg.y()),abs(arg.z()));
 }
 
 ivec4 abs(ivec4 arg) {
-  return ivec4(abs(arg.x()),abs(arg.y()),abs(arg.z()),abs(arg.w()));
+  return new ivec4(abs(arg.x()),abs(arg.y()),abs(arg.z()),abs(arg.w()));
 }
 
 
@@ -179,27 +179,27 @@ ivec4 abs(ivec4 arg) {
 max
 */
 vec2 max(vec2 a, vec2 b) {
-  return vec2(max(a.x(),b.x()),max(a.y(),b.y()));
+  return new vec2(max(a.x(),b.x()),max(a.y(),b.y()));
 }
 
 vec3 max(vec3 a, vec3 b) {
-  return vec3(max(a.x(),b.x()),max(a.y(),b.y()),max(a.z(),b.z()));
+  return new vec3(max(a.x(),b.x()),max(a.y(),b.y()),max(a.z(),b.z()));
 }
 
 vec4 max(vec4 a, vec4 b) {
-  return vec4(max(a.x(),b.x()),max(a.y(),b.y()),max(a.z(),b.z()),max(a.w(),b.w()));
+  return new vec4(max(a.x(),b.x()),max(a.y(),b.y()),max(a.z(),b.z()),max(a.w(),b.w()));
 }
 
 ivec2 max(ivec2 a, ivec2 b) {
-  return ivec2(max(a.x(),b.x()),max(a.y(),b.y()));
+  return new ivec2(max(a.x(),b.x()),max(a.y(),b.y()));
 }
 
 ivec3 max(ivec3 a, ivec3 b) {
-  return ivec3(max(a.x(),b.x()),max(a.y(),b.y()),max(a.z(),b.z()));
+  return new ivec3(max(a.x(),b.x()),max(a.y(),b.y()),max(a.z(),b.z()));
 }
 
 ivec4 max(ivec4 a, ivec4 b) {
-  return ivec4(max(a.x(),b.x()),max(a.y(),b.y()),max(a.z(),b.z()),max(a.w(),b.w()));
+  return new ivec4(max(a.x(),b.x()),max(a.y(),b.y()),max(a.z(),b.z()),max(a.w(),b.w()));
 }
 
 
@@ -208,27 +208,27 @@ ivec4 max(ivec4 a, ivec4 b) {
 min
 */
 vec2 min(vec2 a, vec2 b) {
-  return vec2(min(a.x(),b.x()),min(a.y(),b.y()));
+  return new vec2(min(a.x(),b.x()),min(a.y(),b.y()));
 }
 
 vec3 min(vec3 a, vec3 b) {
-  return vec3(min(a.x(),b.x()),min(a.y(),b.y()),min(a.z(),b.z()));
+  return new vec3(min(a.x(),b.x()),min(a.y(),b.y()),min(a.z(),b.z()));
 }
 
 vec4 min(vec4 a, vec4 b) {
-  return vec4(min(a.x(),b.x()),min(a.y(),b.y()),min(a.z(),b.z()),min(a.w(),b.w()));
+  return new vec4(min(a.x(),b.x()),min(a.y(),b.y()),min(a.z(),b.z()),min(a.w(),b.w()));
 }
 
 ivec2 min(ivec2 a, ivec2 b) {
-  return ivec2(min(a.x(),b.x()),min(a.y(),b.y()));
+  return new ivec2(min(a.x(),b.x()),min(a.y(),b.y()));
 }
 
 ivec3 min(ivec3 a, ivec3 b) {
-  return ivec3(min(a.x(),b.x()),min(a.y(),b.y()),min(a.z(),b.z()));
+  return new ivec3(min(a.x(),b.x()),min(a.y(),b.y()),min(a.z(),b.z()));
 }
 
 ivec4 min(ivec4 a, ivec4 b) {
-  return ivec4(min(a.x(),b.x()),min(a.y(),b.y()),min(a.z(),b.z()),min(a.w(),b.w()));
+  return new ivec4(min(a.x(),b.x()),min(a.y(),b.y()),min(a.z(),b.z()),min(a.w(),b.w()));
 }
 
 
@@ -465,7 +465,7 @@ void ellipse(vec p, float x, float y) {
 }
 
 void ellipse(vec p, float x, float y, PGraphics other) {
-  ellipse(p,vec2(x,y),other);
+  ellipse(p,new vec2(x,y),other);
 }
 
 void ellipse(vec p, float x) {
@@ -473,7 +473,7 @@ void ellipse(vec p, float x) {
 }
 
 void ellipse(vec p, float x, PGraphics other) {
-  ellipse(p,vec2(x),other);
+  ellipse(p,new vec2(x),other);
 }
 
 

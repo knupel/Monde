@@ -72,7 +72,7 @@ public void scroll(MouseEvent e) {
 	float scroll_x = e.getCount();
 	float scroll_y = e.getCount();
 	if(scroll_event == null) {
-		scroll_event = vec2(scroll_x,scroll_y);
+		scroll_event = new vec2(scroll_x,scroll_y);
 	} else {
 		scroll_event.set(scroll_x,scroll_y);
 	}
@@ -81,7 +81,7 @@ public void scroll(MouseEvent e) {
 
 public vec2 get_scroll() {
 	if(scroll_event == null) {
-		scroll_event = vec2();
+		scroll_event = new vec2();
 		return scroll_event;
 	} else {
 		return scroll_event;

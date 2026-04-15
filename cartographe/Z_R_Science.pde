@@ -178,11 +178,11 @@ float radius_from_circle_surface(int surface) {
 
 
 boolean inside(ivec pos, ivec size, ivec2 target_pos) {
-  return inside(vec2(pos.x,pos.y), vec2(size.x,size.y), vec2(target_pos), ELLIPSE);
+  return inside(new vec2(pos.x,pos.y), new vec2(size.x,size.y), new vec2(target_pos), ELLIPSE);
 }
 
 boolean inside(ivec pos, ivec size, ivec2 target_pos, int type) {
-  return inside(vec2(pos.x,pos.y), vec2(size.x,size.y), vec2(target_pos), type);
+  return inside(new vec2(pos.x,pos.y), new vec2(size.x,size.y), new vec2(target_pos), type);
 }
 
 boolean inside(vec pos, vec size, vec2 target_pos) {
@@ -192,7 +192,7 @@ boolean inside(vec pos, vec size, vec2 target_pos) {
 boolean inside(vec pos, vec size, vec2 target_pos, int type) {
   if(type == ELLIPSE) {
     // this part can be improve to check the 'x' and the 'y'
-    if (dist(vec2(pos.x,pos.y), target_pos) < size.x *.5) return true ; 
+    if (r.dist(new vec2(pos.x,pos.y), target_pos) < size.x *.5) return true ; 
     else return false ;
   } else {
     if(target_pos.x > pos.x && target_pos.x < pos.x +size.x && 
@@ -210,20 +210,20 @@ boolean inside(vec pos, vec size, vec2 target_pos, int type) {
 * refactoring from Quark Algorithm
 */
 boolean is_on_line(vec2 start, vec2 end, vec2 point, float range) {
-  vec2 vp = vec2();
-  vec2 line = sub(end,start);
+  vec2 vp = new vec2();
+  vec2 line = r.sub(end,start);
   float l2 = line.magSq();
   if (l2 == 0.0) {
     vp.set(start);
     return false;
   }
-  vec2 pv0_line = sub(point, start);
+  vec2 pv0_line = r.sub(point, start);
   float t = pv0_line.dot(line)/l2;
   pv0_line.normalize();
   vp.set(line);
   vp.mult(t);
   vp.add(start);
-  float d = dist(point, vp);
+  float d = r.dist(point, vp);
   if (t >= 0 && t <= 1 && d <= range) {
     return true;
   } else {
@@ -334,16 +334,17 @@ vec3 to_polar(vec3 cart) {
 */
 //If you want just the final pos
 vec3 to_cartesian_3D(vec2 pos, vec2 range, float size_field)  {
-  // vertical plan position
-  float vertical_y = to_cartesian_2D(pos.y(), vec2(0,range.y()), vec2(0,TAU), size_field).x();
-  float vertical_z = to_cartesian_2D(pos.y(), vec2(0,range.y()), vec2(0,TAU), size_field).y(); 
-  vec3 pos_vertical = new vec3(0, vertical_y, vertical_z) ;
-  // horizontal plan position
-  float horizontal_x = to_cartesian_2D(pos.x(), vec2(0,range.x()), vec2(0,TAU), size_field).x(); 
-  float horizontal_z = to_cartesian_2D(pos.x(), vec2(0,range.x()), vec2(0,TAU), size_field).y();
-  vec3 pos_horizontal = new vec3(horizontal_x, 0, horizontal_z) ;
+  return r.to_cartesian_3D(pos, range, size_field);
+  // // vertical plan position
+  // float vertical_y = to_cartesian_2D(pos.y(), new vec2(0,range.y()), new vec2(0,TAU), size_field).x();
+  // float vertical_z = to_cartesian_2D(pos.y(), new vec2(0,range.y()), new vec2(0,TAU), size_field).y(); 
+  // vec3 pos_vertical = new vec3(0, vertical_y, vertical_z) ;
+  // // horizontal plan position
+  // float horizontal_x = to_cartesian_2D(pos.x(), new vec2(0,range.x()), new vec2(0,TAU), size_field).x(); 
+  // float horizontal_z = to_cartesian_2D(pos.x(), new vec2(0,range.x()), new vec2(0,TAU), size_field).y();
+  // vec3 pos_horizontal = new vec3(horizontal_x, 0, horizontal_z) ;
   
-  return projection(middle(pos_vertical, pos_horizontal), size_field) ;
+  // return projection(middle(pos_vertical, pos_horizontal), size_field) ;
 }
 
 
@@ -395,7 +396,7 @@ vec2 to_cartesian_2D(float angle, float radius) {
 vec2 to_cartesian_2D(float angle) {
   float x = cos(angle);
   float y = sin(angle);
-  return vec2(x,y);
+  return new vec2(x,y);
 }
 
 
@@ -409,11 +410,11 @@ vec2 to_cartesian_2D(float angle) {
 */
 // Cartesian projection 2D
 vec2 projection(vec2 direction) {
-  return projection(direction, vec2(), 1.) ;
+  return projection(direction, new vec2(), 1.) ;
 }
 
 vec2 projection(vec2 direction, float radius) {
-  return projection(direction, vec2(), radius) ;
+  return projection(direction, new vec2(), radius) ;
 }
 vec2 projection(vec2 direction, vec2 origin, float radius) {
   vec2 p = direction.copy().dir(origin) ;
@@ -426,15 +427,15 @@ vec2 projection(float angle) {
   return projection(angle, 1) ;
 }
 vec2 projection(float angle, float radius) {
-  return vec2(cos(angle) *radius, sin(angle) *radius) ;
+  return new vec2(cos(angle) *radius, sin(angle) *radius) ;
 }
 // cartesian projection 3D
 vec3 projection(vec3 direction) {
-  return projection(direction, vec3(), 1.) ;
+  return projection(direction, new vec3(), 1.) ;
 }
 
 vec3 projection(vec3 direction, float radius) {
-  return projection(direction, vec3(), radius) ;
+  return projection(direction, new vec3(), radius) ;
 }
 
 vec3 projection(vec3 direction, vec3 origin, float radius) {
@@ -505,8 +506,8 @@ vec3 distribution_cartesian_fibonacci_sphere(int n, int num, float step, float r
     float x = cos(phi) *r ;
     float z = sin(phi) *r ;
     
-    return vec3(x,y,z) ;
-  } else return vec3() ;
+    return new vec3(x,y,z) ;
+  } else return new vec3() ;
 }
 
 /**
@@ -527,8 +528,8 @@ vec2 distribution_polar_fibonacci_sphere(int n, int num, float step) {
     if (longitude > PI)  longitude -= TAU;
     // Convert dome height (which is proportional to surface area) to latitude
     float latitude = asin(-1 + 2*n/(float)num);
-    return vec2(longitude, latitude) ;
-  } else return vec2() ;
+    return new vec2(longitude, latitude) ;
+  } else return new vec2() ;
 
 }
 
@@ -576,7 +577,7 @@ vec2 rotation(vec2 ref, vec2 lattice, float angle) {
   float d = lattice.dist(ref);
   float x = lattice.x +cos(a) *d;
   float y = lattice.y +sin(a) *d;
-  return vec2(x,y);
+  return new vec2(x,y);
 }
 
 /**
@@ -584,10 +585,10 @@ May be must push to deprecated
 */
 vec2 rotation_lattice(vec2 ref, vec2 lattice, float angle) {
   float a = angle( lattice, ref) +angle;
-  float d = dist( lattice, ref);
+  float d = r.dist( lattice, ref);
   float x = lattice.x +cos(a) *d;
   float y = lattice.y +sin(a) *d;
-  return vec2(x,y);
+  return new vec2(x,y);
 }
 
 
@@ -866,10 +867,10 @@ float edge_polyhedron_length;
 // BASIC
 void tetrahedron_poly(int size) {
   if(vec_polyhedron_list == null) vec_polyhedron_list = new ArrayList();
-  vec_polyhedron_list.add(vec3(1,1,1));
-  vec_polyhedron_list.add(vec3(-1,-1,1));
-  vec_polyhedron_list.add(vec3(-1,1,-1));
-  vec_polyhedron_list.add(vec3(1,-1,-1));
+  vec_polyhedron_list.add(new vec3(1,1,1));
+  vec_polyhedron_list.add(new vec3(-1,-1,1));
+  vec_polyhedron_list.add(new vec3(-1,1,-1));
+  vec_polyhedron_list.add(new vec3(1,-1,-1));
   edge_polyhedron_length = 0 ;
   factor_size_polyhedron = size /2;
 }
@@ -1098,21 +1099,21 @@ void add_permutations(float x, float y, float z) {
  
 void add_vertices(float x, float y, float z) {
   //adds the requested vert and all "mirrored" verts
-  vec_polyhedron_list.add (vec3(x,y,z));
+  vec_polyhedron_list.add (new vec3(x,y,z));
   // z
-  if (z != 0.0) vec_polyhedron_list.add (vec3(x,y,-z)); 
+  if (z != 0.0) vec_polyhedron_list.add (new vec3(x,y,-z)); 
   // y
   if (y != 0.0) {
-    vec_polyhedron_list.add (vec3(x, -y, z));
-    if (z != 0.0) vec_polyhedron_list.add(vec3(x,-y,-z));
+    vec_polyhedron_list.add (new vec3(x, -y, z));
+    if (z != 0.0) vec_polyhedron_list.add(new vec3(x,-y,-z));
   } 
   // x
   if (x != 0.0) {
-    vec_polyhedron_list.add (vec3(-x, y, z));
-    if (z != 0.0) vec_polyhedron_list.add(vec3(-x,y,-z));
+    vec_polyhedron_list.add (new vec3(-x, y, z));
+    if (z != 0.0) vec_polyhedron_list.add(new vec3(-x,y,-z));
     if (y != 0.0) {
-      vec_polyhedron_list.add(vec3(-x, -y, z));
-      if (z != 0.0) vec_polyhedron_list.add(vec3(-x,-y,-z));
+      vec_polyhedron_list.add(new vec3(-x, -y, z));
+      if (z != 0.0) vec_polyhedron_list.add(new vec3(-x,-y,-z));
     }
   }
 }

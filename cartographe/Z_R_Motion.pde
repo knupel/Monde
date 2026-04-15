@@ -196,7 +196,7 @@ class Motion {
     this.vel = 0 ;
     this.vel_ref = 0 ;
     if(dir == null) {
-      this.dir = vec3(0) ;
+      this.dir = new vec3(0) ;
     } else {
       this.dir.set(0) ;
     }
@@ -261,10 +261,10 @@ class Motion {
   v 0.0.3
   */
   public vec2 leading(vec2 leading_pos, vec2 exec_pos) {
-    vec3 current_pos_3D = vec3(leading_pos) ;
-    vec3 my_pos_3D = vec3(exec_pos) ;
+    vec3 current_pos_3D = new vec3(leading_pos) ;
+    vec3 my_pos_3D = new vec3(exec_pos) ;
     vec3 lead = leading(current_pos_3D, my_pos_3D) ;
-    return vec2(lead.x, lead.y) ;
+    return new vec2(lead.x, lead.y) ;
   }
 
 
@@ -277,15 +277,15 @@ class Motion {
 
   public vec3 leading(vec3 leading_pos, vec3 exec_pos) {
     if(leading_ref == null) {
-      leading_ref = vec3(exec_pos) ;
+      leading_ref = new vec3(exec_pos) ;
     }
-    vec3 new_pos = vec3(exec_pos) ;
+    vec3 new_pos = new vec3(exec_pos) ;
 
     vec3 velocity_xyz = apply_leading(leading_pos) ;
-    if(velocity_xyz.equals(vec3(0))) {
+    if(velocity_xyz.equals(new vec3(0))) {
       // follow the lead when this one move
       apply_acc = true ;
-      new_pos.sub(sub(leading_ref, leading_pos)) ;
+      new_pos.sub(r.sub(leading_ref, leading_pos)) ;
     } else {
       new_pos.add(velocity_xyz) ;
     }
@@ -297,20 +297,20 @@ class Motion {
   private vec3 apply_leading(vec3 leading_pos) {
     // init var if var is null
     if (dir == null) {
-      dir = vec3() ;
+      dir = new vec3() ;
     }
     if (for_vel == null) {
-      for_vel = vec3() ;
+      for_vel = new vec3() ;
     }
     if (for_dir == null) {
-      for_dir = vec3() ;
+      for_dir = new vec3() ;
     }
     if (leading_pos == null) {
-      leading_pos = vec3() ;
+      leading_pos = new vec3() ;
     }
 
 
-    vec3 vel_vec3 = vec3() ;
+    vec3 vel_vec3 = new vec3() ;
     leading_pos.set(leading_pos) ;
 
     if(for_vel.equals(leading_pos)) {
@@ -337,10 +337,10 @@ class Motion {
       }
 
       // update position
-      vel_vec3 = mult(dir, vel) ;
+      vel_vec3 = r.mult(dir, vel) ;
     } else {
-      vel = dist(leading_pos, for_vel) ;
-      dir = sub(leading_pos, for_dir) ;
+      vel = r.dist(leading_pos, for_vel) ;
+      dir = r.sub(leading_pos, for_dir) ;
       dir.normalize() ;
     }
     for_vel.set(leading_pos) ;
@@ -394,7 +394,7 @@ class Path extends Motion {
   Path() {
     super() ;
     path = new ArrayList<vec3>() ;
-    pos = vec3(MAX_INT) ;
+    pos = new vec3(MAX_INT) ;
   }
    // set
    void set_velocity(float velocity) {
@@ -411,20 +411,20 @@ class Path extends Motion {
   public void previous() {
     vec3 origin, target ;
     if (path.size() > 1 ) {
-      vec3 key_a = vec3() ;
-      vec3 key_b = vec3() ;
+      vec3 key_a = new vec3() ;
+      vec3 key_b = new vec3() ;
       int origin_rank = path.size() - n -1 ;
       int target_rank = path.size() - m -1 ;
       key_a = (vec3) path.get(origin_rank) ;
       key_b = (vec3) path.get(target_rank) ;
 
-      origin = vec3(key_a) ;
-      target = vec3(key_b) ;
+      origin = new vec3(key_a) ;
+      target = new vec3(key_b) ;
       go(origin, target) ;
 
     } else if (path.size() == 1) {
       vec3 key_a = (vec3) path.get(0) ;
-      origin = vec3(key_a) ;
+      origin = new vec3(key_a) ;
       pos.set(origin) ;
     } else {
       pos.set(-100) ;
@@ -440,18 +440,18 @@ class Path extends Motion {
   public void next() {
     vec3 origin, target ;
     if (path.size() > 1 ) {
-      vec3 key_a = vec3() ;
-      vec3 key_b = vec3() ;
+      vec3 key_a = new vec3() ;
+      vec3 key_b = new vec3() ;
       key_a = (vec3) path.get(n) ;
       key_b = (vec3) path.get(m) ;
 
-      origin = vec3(key_a) ;
-      target = vec3(key_b) ;
+      origin = new vec3(key_a) ;
+      target = new vec3(key_b) ;
       go(origin, target) ;
 
     } else if (path.size() == 1) {
       vec3 key_a = (vec3) path.get(n) ;
-      origin = vec3(key_a) ;
+      origin = new vec3(key_a) ;
       pos.set(origin) ;
     } else {
       pos.set(-100) ;
@@ -463,7 +463,7 @@ class Path extends Motion {
 
   // private method of class
   private void go(vec3 origin, vec3 target) {
-    if(pos.equals(vec3(MAX_INT))) {
+    if(pos.equals(new vec3(MAX_INT))) {
       pos.set(origin) ;
     }
     // distance between the keypoint a & b and the position of the translation shape
@@ -472,11 +472,11 @@ class Path extends Motion {
     //update the position
     if (dist_from_start < dist_a_b) {
       // calcul speed ratio
-      vec3 speed_ratio = sub(origin,target) ;
+      vec3 speed_ratio = r.sub(origin,target) ;
 
       // final calcul ratio
       if(ratio == null) {
-        ratio = vec3() ;
+        ratio = new vec3() ;
       }
       ratio.x = speed_ratio.x / speed_ratio.y ;
       ratio.y = speed_ratio.y / speed_ratio.x ;
@@ -572,13 +572,13 @@ class Path extends Motion {
 
   // add point to the list to make the path
   void add(vec coord) {
-    path.add(vec3(coord.x,coord.y,coord.z)) ;
+    path.add(new vec3(coord.x,coord.y,coord.z)) ;
   }
   void add(int x, int y, int z) {
-    path.add(vec3(x,y,z)) ;
+    path.add(new vec3(x,y,z)) ;
   }
 
   void add(int x, int y) {
-    path.add(vec3(x,y,0)) ;
+    path.add(new vec3(x,y,0)) ;
   }
 }

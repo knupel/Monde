@@ -1,7 +1,7 @@
 /**
-ROPE - Romanesco processing environment – 
-* Copyleft (c) 2014-2021
-* Stan le Punk
+* Projet MONDE
+* Chapitre : Le Cartographe
+* Knupel
 * https://github.com/knupel
 * http://knupel.art
 */
@@ -37,7 +37,7 @@ void draw() {
   urbanist();
   if(show_info_is) {
   	show_center_world();
-  	boussole(vec2(grid_nodes_monde.get(0).pos()),80);
+  	boussole(new vec2(grid_nodes_monde.get(0).pos()),80);
     show_intersection();
   }
 }
