@@ -77,7 +77,7 @@ void urbanist() {
 	stroke(255);
   noFill();
   strokeWeight(10);
-  point(urbanist.get_pos());
+  rg.point(urbanist.get_pos());
 }
 
 void boussole(vec2 pos, int size) {
@@ -99,10 +99,10 @@ void boussole(vec2 pos, int size) {
   stroke(r.WHITE);
   strokeWeight(1);
 	push();
-	translate(pos);
+	rg.translate(pos);
 	rotate(PI/4+angle);
-	line(new vec2(north),new vec2(south));
-	line(new vec2(west),new vec2(east));
+	rg.line(new vec2(north),new vec2(south));
+	rg.line(new vec2(west),new vec2(east));
 	pop();
 }
 
@@ -112,7 +112,7 @@ void boussole(vec2 pos, int size) {
 void show_center_world() {
 	strokeWeight(2);
   if(grid_nodes_monde.size() > 0) {
-  	ellipse(grid_nodes_monde.get(0).pos(),50,50);
+  	rg.ellipse(grid_nodes_monde.get(0).pos(),50,50);
   }
 }
 
@@ -123,7 +123,7 @@ void show_intersection() {
   if(grid_nodes_monde.size() > 0) {
   	for(R_Node inter : grid_nodes_monde) {
   		textAlign(CENTER);
-  		text(inter.id().a(),inter.pos());
+  		rg.text(inter.id().a(),inter.pos());
   		// point(inter.get_pos());
   	}
   }
@@ -170,7 +170,7 @@ void map() {
 
 	// show segment
 	for(R_Segment s : segment_monde) {
-		line(s.get_start(),s.get_stop());
+		rg.line(s.get_start(),s.get_stop());
 	}
 	/*
 	// SHOW ALL PATH
@@ -230,8 +230,8 @@ boolean add_segment(Urbanist urb, boolean build_anytime, boolean show_info_is) {
   if(show_info_is) {
   	noStroke();
   	fill(r.WHITE);
-  	ellipse(new vec2(urb.get_from()),20,20);
-  	ellipse(new vec2(urb.get_destination()),20,20);
+  	rg.ellipse(new vec2(urb.get_from()),20,20);
+  	rg.ellipse(new vec2(urb.get_destination()),20,20);
   }
 
 
@@ -263,7 +263,7 @@ int rank_intersection(Urbanist urb, vec target) {
 
 
 int num_branch_by_intersection(int min, int max) {
-	int num = (ceil(map(random_next_gaussian(1),-1,1,0,max)));
+	int num = (ceil(map(r.random_next_gaussian(1),-1,1,0,max)));
 	if(num == 0 || num == (min-1)) num = min; // we can choic 1 for the future to create a cul-de-sac
 	return num;
 }
@@ -359,8 +359,8 @@ boolean check_meeting_segment(R_Segment target_segment, ArrayList<R_Segment> seg
   		stroke(255);
   		noFill();
   		vec2 meet_pos = target_segment.meet_at(s);
-  		line(target_segment.get_start(),target_segment.get_stop());
-  		if(meet_pos != null) ellipse(meet_pos,30,30);
+  		rg.line(target_segment.get_start(),target_segment.get_stop());
+  		if(meet_pos != null) rg.ellipse(meet_pos,30,30);
   	}
 
   	if(target_segment.meet_is(s) && count_segment_meeting < max_iter_for_meeting) {
@@ -376,9 +376,10 @@ boolean check_meeting_segment(R_Segment target_segment, ArrayList<R_Segment> seg
 int count_segment_out_canvas = 0;
 
 vec2 compute_pos(Urbanist urb, vec6 canvas, ArrayList<R_Node> inter_list) {
-	float angle = random_next_gaussian(3);
-	float previous_direction = angle(new vec2(urb.get_pos()),new vec2(urb.get_destination()));
-	float ratio_center = abs(random_next_gaussian(2));
+	float angle = r.random_next_gaussian(3);
+	float previous_direction = new vec2(urb.get_pos()).angle(new vec2(urb.get_destination()));
+	// float previous_direction = angle(new vec2(urb.get_pos()),new vec2(urb.get_destination()));
+	float ratio_center = abs(r.random_next_gaussian(2));
 	float dist = map(ratio_center,0,1,urb.get_range().x,urb.get_range().y);
 	// new angle
 	angle = map(angle,-1,1,urb.get_angle().x,urb.get_angle().y);
@@ -388,7 +389,7 @@ vec2 compute_pos(Urbanist urb, vec6 canvas, ArrayList<R_Node> inter_list) {
 	if(goto_left < .5) angle *= -1;
 	vec3 canvas_min = new vec3(canvas.x(),canvas.y(),canvas.z());
 	vec3 canvas_max = new vec3(canvas.w(),canvas.e(),canvas.f());
-	vec2 pos = to_cartesian_2D(angle,dist).add(new vec2(urb.get_destination()));
+	vec2 pos = r.to_cartesian_2D(angle,dist).add(new vec2(urb.get_destination()));
   
   int max_try = 10; // limit for the recursive call
 	if(count_segment_out_canvas < max_try && (!r.all(r.greaterThan(pos,new vec2(canvas_min))) || !r.all(r.lessThan(pos, new vec2(canvas_max))))) {

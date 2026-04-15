@@ -5,7 +5,12 @@
 * https://github.com/knupel
 * http://knupel.art
 */
+import rope.core.*;
+import rope.vector.*;
+import rope.image.R_Pattern;
 
+Rope r = new Rope();
+R_Graphic rg = new R_Graphic(this);
 
 
 
@@ -18,8 +23,9 @@
 
 
 PImage img ;
+
 void setup() {
-  init_rope();
+  println(r.VERSION);
   background(0);
   //fullScreen(P2D,2);
   size(1300,800);
