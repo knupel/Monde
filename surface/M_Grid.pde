@@ -41,7 +41,7 @@ abstract class Grid {
 	}
 
 	public void set_cell(ivec3 cell, ivec3 canvas) {
-		this.cell = vec3(cell.x,cell.y,cell.z).div(vec3(canvas.x,canvas.y,canvas.z));
+		this.cell = new vec3(cell.x,cell.y,cell.z).div(new vec3(canvas.x,canvas.y,canvas.z));
 	}
 
 	public void clear() {
@@ -52,7 +52,7 @@ abstract class Grid {
   
 	public void canvas(int w, int h, int d) {
 		if(canvas == null) {
-			canvas = ivec3(w,h,d);
+			canvas = new ivec3(w,h,d);
 		} else {
 			canvas.set(w,h,d);
 		}
@@ -72,7 +72,7 @@ abstract class Grid {
 			depth = floor(d/size);
 		}
 		if(cage == null) {
-			cage = ivec3(cols,rows,depth);
+			cage = new ivec3(cols,rows,depth);
 		} else {
 			cage.set(cols,rows,depth);
 		}
@@ -112,18 +112,18 @@ public class Grid2D extends Grid {
 
   // type hex
   public void type_hex(int w, int h, int cell, float start_angle) {
-  	type_hex(ivec2(w,h),ivec2(cell),start_angle);
+  	type_hex(new ivec2(w,h), new ivec2(cell),start_angle);
   }
 
   public void type_hex(int w, int h, int cell_x, int cell_y, float start_angle) {
-  	type_hex(ivec2(w,h),ivec2(cell_x,cell_y),start_angle);
+  	type_hex(new ivec2(w,h), new ivec2(cell_x,cell_y),start_angle);
   }
 
 	public void type_hex(ivec2 canvas, ivec2 cell, float start_angle) {
 		
 		clear();
 
-		set_cell(ivec3(cell.x,cell.y,1),ivec3(canvas.x,canvas.y,1));
+		set_cell(new ivec3(cell.x,cell.y,1), new ivec3(canvas.x,canvas.y,1));
 
 	  float side = get_cell().x * sqrt(3); // find the length of triangle side
 	  float median = side *(sqrt(3) *.5); // find the length of the mediane equilateral triangle
@@ -131,7 +131,7 @@ public class Grid2D extends Grid {
 		canvas(canvas.x,canvas.y,0);
  
 	  float angle;
-    vec4 pos = vec4();
+    vec4 pos = new vec4();
 	  for(int y = 0 ; y < get_cage().y ; y++) {
 	    float offset_y = median * y;
 	    float offset_x ;
@@ -152,7 +152,7 @@ public class Grid2D extends Grid {
 	      }
 	      pos.x = x *(side *.5) +offset_x ; 
 	      
-	      grid.add(vec4(pos.x,pos.y,0,angle));
+	      grid.add(new vec4(pos.x,pos.y,0,angle));
 	      
 	    }
 	  }
@@ -176,7 +176,7 @@ public class Grid2D extends Grid {
 		clear();
     
 
-    set_cell(ivec3(size),ivec3(w,h,d));
+    set_cell(new ivec3(size), new ivec3(w,h,d));
     //set_cell((float)size/w);
 
 	  float side = get_cell().x *sqrt(3); // find the length of triangle side
@@ -202,7 +202,7 @@ public class Grid2D extends Grid {
 					if(i%2 == 0) {
 						pw = PI;
 					}
-					grid.add(vec4(cx+px,cy+py,0,pw));
+					grid.add(new vec4(cx+px,cy+py,0,pw));
 				}	
 			}
 		}
@@ -215,7 +215,7 @@ public class Grid2D extends Grid {
 	public void type_b(int w, int h, int d, int size, float offset) {
 		clear();
 
-		set_cell(ivec3(size),ivec3(w,h,d));
+		set_cell(new ivec3(size),new ivec3(w,h,d));
     //set_cell((float)size/w);
 
 	  float side = get_cell().x *sqrt(3); // find the length of triangle side
@@ -243,7 +243,7 @@ public class Grid2D extends Grid {
 				}
 	      
 	      // direction
-				grid.add(vec4(px,py,0,0));
+				grid.add(new vec4(px,py,0,0));
 				count++;
 			}
 		}
@@ -256,7 +256,7 @@ public class Grid2D extends Grid {
 	public void type_a(int w, int h, int d, int size) {
 		clear();
 
-		set_cell(ivec3(size),ivec3(w,h,d));
+		set_cell(new ivec3(size),new ivec3(w,h,d));
     //set_cell((float)size/w);
 
 	  float side = get_cell().x *sqrt(3); // find the length of triangle side
@@ -276,7 +276,7 @@ public class Grid2D extends Grid {
 			for(float x = 0 ; x < get_cage().x ; x++) {
 				float px = x / get_cage().x + offset_normal_x;
 				float py = y / get_cage().y + offset_normal_y;
-				grid.add(vec4(px,py,0,0));
+				grid.add(new vec4(px,py,0,0));
 				count++;
 			}
 		}

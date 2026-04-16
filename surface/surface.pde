@@ -66,7 +66,7 @@ void show_text(int canvas) {
 	fill(r.BLACK);
   int count =0;
 	for(vec4 v : grid.get()) {
-		text(count++,vec2(v).mult(canvas));  
+		text(count++,new vec2(v).mult(canvas));  
 	}
 }
 
@@ -76,7 +76,7 @@ void show_point(int canvas) {
   stroke(r.BLOOD);
   noFill();
 	for(vec4 v : grid.get()) {
-		point(vec2(v.copy().mult(canvas)));   
+		point(new vec2(v.copy().mult(canvas)));   
 	}
 }
 
@@ -96,7 +96,8 @@ void show_shape(float ratio_canvas, float ratio_cell) {
 		// println(v); 
 
 		// costume(vec2(v.copy().mult(ratio_canvas)),vec2(size),angle,TRIANGLE);
-		costume(vec2(v.copy().mult(grid.get_canvas())),vec2(size),angle,TRIANGLE);   
+		vec4 buf = new vec4(v.copy().mult(grid.get_canvas()));
+		costume(new vec2(buf.x(), buf.y()), new vec2(size.x(), size.y()),angle,TRIANGLE);   
 	}
 }
 
@@ -124,7 +125,7 @@ void sol() {
 public class Sol {
 	ivec3 coord;
 	Sol (int x, int y, int z) {
-		this.coord = ivec3(x,y,z);
+		this.coord = new ivec3(x,y,z);
 	}
 
 	void set_altitude(int z) {
@@ -136,7 +137,7 @@ public class Sol {
 	}
 
 	vec2 get_pos() {
-		return vec2(coord.x,coord.y);
+		return new vec2(coord.x,coord.y);
 	}
 
 	int get_alt() {
