@@ -10,7 +10,7 @@ import rope.vector.*;
 import rope.image.R_Pattern;
 
 Rope r = new Rope();
-R_Graphic rg = new R_Graphic(this);
+R_Graphic rg;
 
 
 
@@ -25,10 +25,11 @@ R_Graphic rg = new R_Graphic(this);
 PImage img ;
 
 void setup() {
+  rg = new R_Graphic(this);
   println(r.VERSION);
   background(0);
-  //fullScreen(P2D,2);
-  size(1300,800);
+  fullScreen(P2D,2);
+  // size(1300,800, P2D);
   init_street_map();
   img = loadImage("petit_vinci_la_dame_à_l_hermine.jpg");
   //surface.setSize(img.width,img.height);
@@ -36,8 +37,6 @@ void setup() {
 
 
 void draw() {
-
-  
   background(0);
   map();
   urbanist();
