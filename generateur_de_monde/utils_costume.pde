@@ -19,29 +19,29 @@ import rope.mesh.R_Line2D;
 Costume selection in shape catalogue
 */
 void costume(float x, float y, float sx, float sy, Object data) {
-	costume(vec2(x,y),vec2(sx,sy),data,null);
+	costume(new vec2(x,y), new vec2(sx,sy),data,null);
 }
 
 void costume(float x, float y, float sx, float sy, Object data, PGraphics pg) {
-	costume(vec2(x,y),vec2(sx,sy),data,pg);
+	costume(new vec2(x,y), new vec2(sx,sy),data,pg);
 }
 
 //
 void costume(float x, float y, float z, float sx, float sy, Object data) {
-	costume(vec3(x,y,z),vec2(sx,sy),data,null);
+	costume(new vec3(x,y,z),new vec2(sx,sy),data,null);
 }
 
 void costume(float x, float y, float z, float sx, float sy, Object data, PGraphics pg) {
-	costume(vec3(x,y,z),vec2(sx,sy),data,pg);
+	costume(new vec3(x,y,z), new vec2(sx,sy),data,pg);
 }
 
 // 
 void costume(float x, float y, float z, float sx, float sy, float sz, Object data) {
-	costume(vec3(x,y,z),vec3(sx,sy,sz),data,null);
+	costume(new vec3(x,y,z), new vec3(sx,sy,sz),data,null);
 }
 
 void costume(float x, float y, float z, float sx, float sy, float sz, Object data, PGraphics pg) {
-	costume(vec3(x,y,z),vec3(sx,sy,sz),data,pg);
+	costume(new vec3(x,y,z), new vec3(sx,sy,sz),data,pg);
 }
 
 //
@@ -52,8 +52,8 @@ void costume(vec pos, int size_int, Object data) {
 void costume(vec pos, int size_int, Object data, PGraphics pg) {
 	int which_costume = 0;
 	String sentence = null;
-	vec3 rotation = vec3();
-	vec3 size = vec3(size_int);
+	vec3 rotation = new vec3();
+	vec3 size = new vec3(size_int);
 	if(data instanceof R_Costume) {
 		costume_impl(pos,size,rotation,(R_Costume)data,pg);
 	} else if(data instanceof Integer) {
@@ -74,7 +74,7 @@ void costume(vec pos, vec size, Object data) {
 void costume(vec pos, vec size, Object data, PGraphics pg) {
 	int which_costume = 0;
 	String sentence = null;
-	vec3 rotation = vec3();
+	vec3 rotation = new vec3();
 	if(data instanceof R_Costume) {
 		//println("void costume(vec pos, vec size, Object data, PGraphics pg)", ((R_Costume)data).get_type());
 		costume_impl(pos,size,rotation,(R_Costume)data,pg);
@@ -98,7 +98,7 @@ void costume(vec pos, vec size, Float rot, Object data) {
 void costume(vec pos, vec size, Float rot, Object data, PGraphics pg) {
 	int which_costume = 0;
 	String sentence = null;
-	vec3 rotation = vec3(0,0,rot);
+	vec3 rotation = new vec3(0,0,rot);
 	if(data instanceof R_Costume) {
 		costume_impl(pos,size,rotation,(R_Costume)data,pg);
 	} else if(data instanceof Integer) {
@@ -145,8 +145,8 @@ managing costume rope method
 */
 void costume_management(vec pos, vec size, vec rotation, int which_costume, String sentence, PGraphics pg) {
 				
-	vec3 pos_final = vec3(0) ;
-	vec3 size_final = vec3(1) ;
+	vec3 pos_final = new vec3(0) ;
+	vec3 size_final = new vec3(1) ;
 	if((pos instanceof vec2 || pos instanceof vec3) 
 			&& (size instanceof vec2 || size instanceof vec3)
 			&& (rotation instanceof vec2 || rotation instanceof vec3)) {
@@ -173,7 +173,7 @@ void costume_management(vec pos, vec size, vec rotation, int which_costume, Stri
 			costume_impl(pos_final,size_final,rotation,sentence,pg);
 		}		
 	} else {
-		print_err_tempo(180,"vec pos or vec size if not an instanceof vec2 or vec3, it's not possible to process costume_rope()");
+		r.print_err_tempo(180,"vec pos or vec size if not an instanceof vec2 or vec3, it's not possible to process costume_rope()");
 	}
 }
 
@@ -198,18 +198,18 @@ void costume_impl(vec3 pos, vec3 size, vec rot, String sentence, PGraphics pg) {
 	if(pg == null) {
 		println("je suis là");
 		push();
-		translate(pos);
+		rg.translate(pos);
 		costume_rotate(rot);
 		textSize(size.x());
 		text(sentence,0,0);
 		pop();
 	} else {
-		push(pg);
-		translate(pos,pg);
+		pg.push();
+		pg.translate(pos.x(), pos.y(), pos.z());
 		costume_rotate(rot,pg);
 		textSize(size.x());
-		text(sentence,0,0,pg);
-		pop(pg);
+		pg.text(sentence,0,0);
+		pg.pop();
 	}
 }
 
@@ -234,7 +234,7 @@ void costume_impl(vec pos, vec size, vec rot, R_Costume costume, PGraphics pg) {
 	if(pg != null) {
 		costume.pass_graphic(pg);
 	}
-	costume.show(vec3(pos),vec3(size),rot);
+	costume.show(new vec3(pos), new vec3(size),rot);
 }
 
 
@@ -291,28 +291,28 @@ void costume_rotate(vec rotate) {
 void costume_rotate(vec rotate, PGraphics other) {
 	if(r.get_renderer(g) == P3D) {
 		if(costume_rot_x && rotate.x() != 0) {
-			rotateX(rotate.x(),other);
+			other.rotateX(rotate.x());
 			costume_rot_x = false;
 		}
 		if(costume_rot_y && rotate.y() != 0) {
-			rotateY(rotate.y(),other);
+			other.rotateY(rotate.y());
 			costume_rot_y = false;
 		}
 		if(costume_rot_z && rotate.z() != 0) {
-			rotateZ(rotate.z(),other);
+			other.rotateZ(rotate.z());
 			costume_rot_z = false;
 		}
 	} else {
 		if(rotate.x() == 0 && rotate.y() == 0 && rotate.z() != 0 && costume_rot_x) {
-			rotate(rotate.z(),other);
+			other.rotate(rotate.z());
 			costume_rot_x = false;
 		} 
 		if(costume_rot_x && rotate.x() != 0) {
-			rotateX(rotate.x(),other);
+			other.rotateX(rotate.x());
 			costume_rot_x = false;
 		}
 		if(costume_rot_y && rotate.y() != 0) {
-			rotateY(rotate.y(),other);
+			other.rotateY(rotate.y());
 			costume_rot_y = false;
 		}
 	}
@@ -608,8 +608,8 @@ void line2D(float x1, float y1, float x2, float y2, boolean aa_is, boolean updat
 	if(!aa_is) {
 		draw_line_no_aa(x1, y1, x2, y2, update_pix_is, pg);
 	} else { 	
-		vec2 src = vec2(x1,y1);
-		vec2 dst = vec2(x2,y2);
+		vec2 src = new vec2(x1,y1);
+		vec2 dst = new vec2(x2,y2);
 		float angle = src.angle(dst);
 		float range = 0.005;
 		
@@ -692,22 +692,24 @@ R_Line2D line2D_echo_loop(R_Line2D line, R_Line2D [] walls, ArrayList<R_Line2D> 
 				}
 			}
 
-			vec2 displacement = projection(angle_offset,offset);
+			vec2 displacement = rg.projection(angle_offset,offset);
 			rest.offset(displacement);
 			
 			// classic go and return
 			if(go_return_is) {
-				rest.angle(rest.angle() +PI);
+				rest.rotation(rest.angle() +PI);
+				// rest.angle(rest.angle() +PI);
 			// go on a same way
 			} else {
 				float angle = rest.angle() -PI;
 
-				vec2 temp = projection(angle, width+height).add(rest.a());
+				vec2 temp = rg.projection(angle, width+height).add(rest.a());
 				R_Line2D max_line = new R_Line2D(this,rest.b(),temp);
 				for(R_Line2D limit_opp : walls) {
-					vec2 opp_node = limit_opp.intersection(max_line,vec2(node).add(displacement));
+					vec2 opp_node = limit_opp.intersection(max_line,new vec2(node).add(displacement));
 					if(opp_node != null) {
-						rest.angle(rest.angle());
+						rest.rotation(rest.angle());
+						// rest.angle(rest.angle());
 						vec2 swap = opp_node.sub(node).sub(displacement);
 						rest.offset(swap);
 						break;
@@ -728,7 +730,8 @@ R_Line2D line2D_echo_loop(R_Line2D line, R_Line2D [] walls, ArrayList<R_Line2D> 
 	}
 	//angle echo effect
 	if(angle_echo != 0) {
-		rest.angle(rest.angle()+angle_echo);
+		rest.rotation(rest.angle()+angle_echo);
+		// rest.angle(rest.angle()+angle_echo);
 	}
 	return rest;
 }
@@ -791,8 +794,8 @@ double rfpart(double x) {
 void draw_line_aa_wu(double x_0, double y_0, double x_1, double y_1, boolean update_pixel, PGraphics pg) {
 	if(update_pixel) pg.loadPixels();
 	// check angle before the steeping
-	vec2 src = vec2((float)x_0,(float)y_0);
-	vec2 dst = vec2((float)x_1,(float)y_1);
+	vec2 src = new vec2((float)x_0,(float)y_0);
+	vec2 dst = new vec2((float)x_1,(float)y_1);
 	float angle = src.angle(dst);
 
 	boolean steep = Math.abs(y_1 - y_0) > Math.abs(x_1 - x_0);
@@ -822,7 +825,7 @@ void draw_line_aa_wu(double x_0, double y_0, double x_1, double y_1, boolean upd
 	// MISC
 	// here method use to set the design who the Xaolin Wu line, is not the algorithm himself
 	// colour part
-	float radius = dist(vec2((float)x_0,(float)y_0),vec2((float)x_1,(float)y_1));
+	float radius = r.dist(new vec2((float)x_0,(float)y_0), new vec2((float)x_1,(float)y_1));
 	float step_palette = radius;
 	int [] col = {pg.strokeColor};
 	int colour = col[0];
@@ -937,10 +940,10 @@ float index_wu(double intery, double start, double stop, float radius, float ang
 * NO AA
 */
 void draw_line_no_aa(float x0, float y0, float x1, float y1, boolean update_pixel, PGraphics pg) {
-	vec2 src = vec2(x0,y0);
-	vec2 dst = vec2(x1,y1);
+	vec2 src = new vec2(x0,y0);
+	vec2 dst = new vec2(x1,y1);
 	float dir = src.angle(dst);
-	float radius = dist(src,dst);
+	float radius = r.dist(src,dst);
 	
 	// manage colour list
 	float step_palette = radius;
@@ -971,8 +974,8 @@ void draw_line_no_aa(float x0, float y0, float x1, float y1, boolean update_pixe
 		float x = cos(dir);
 		float y = sin(dir);
 		float from_center = i;
-		vec2 path = vec2(x,y).mult(from_center).add(src);
-		path.constrain(vec2(0),vec2(width,height));
+		vec2 path = new vec2(x,y).mult(from_center).add(src);
+		path.constrain(new vec2(0), new vec2(width,height));
 		int px = (int)path.x();
 		int py = (int)path.y();
 
@@ -1017,4 +1020,52 @@ void alpha_line2D(float entry, float exit) {
 
 
 
+
+
+
+
+
+
+
+
+/**
+* tempo
+* v 0.0.1
+* 2019-2019
+* create tempo partition
+*/
+float [] tempo = {1};
+void tempo(float... tempo) {
+	this.tempo = tempo;
+}
+
+float sum_tempo() {
+	float sum = 0;
+	for(int i = 0 ; i < tempo().length ; i++) {
+		sum += tempo()[i];
+	}
+	return sum;
+}
+
+float get_tempo(float time) {
+	return tempo()[get_tempo_pos(time)];
+}
+
+int get_tempo_pos(float time) {
+	float rank = time%sum_tempo();
+	float progress = 0;
+	int pos = 0;
+	for(int i = 0 ; i < tempo().length ; i++) {
+		progress += tempo()[i];
+		if(rank < progress) {
+			pos = i;
+			break;
+		}  
+	} 
+	return pos;
+}
+
+float [] tempo() {
+	return tempo;
+}
 

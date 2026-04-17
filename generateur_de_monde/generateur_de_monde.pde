@@ -6,6 +6,14 @@
 * http://knupel.art
 */
 
+import rope.vector.*;
+import rope.core.Rope;
+import rope.core.R_Graphic;
+
+
+R_Graphic rg;
+Rope r = new Rope();
+
 vec3 size_world;
 int surface_habitation = 100;
 int urban_mode = 0;
@@ -22,13 +30,14 @@ int max_costume_available = 9;
 PImage img_map;
 
 void setup() {
+  rg = new R_Graphic(this);
   colorMode(HSB,360,100,100,100);
   // fullScreen(P3D,1);
   size(1200,800,P3D);
 
   // x,z is the flat map
   // y is the altitude
-  size_world = vec3(3*width,width,3*width);
+  size_world = new vec3(3*width,width,3*width);
   
   init_map_relief();
   init_map_street();
@@ -79,7 +88,7 @@ void manage_gui() {
   if(which_costume < 0) which_costume = max_costume_available;
   if(which_costume > max_costume_available) which_costume = 0;
   if(input_path() != null) {
-    if(extension_is(input_path(), "jpg", "jpeg") && input_ref != input_path() && !use_noise_map_is) {
+    if(r.extension_is(input_path(), "jpg", "jpeg") && input_ref != input_path() && !use_noise_map_is) {
       input_ref = input_path();
       img_map = loadImage(input_ref);
     } else if(use_noise_map_is) {
@@ -167,7 +176,7 @@ void cartographe() {
     show_urbanist();
     show_map();
     show_center_world();
-    boussole(vec2(grid_nodes_monde.get(0).pos()),80);
+    boussole(new vec2(grid_nodes_monde.get(0).pos()),80);
     show_intersection();
   }
 }

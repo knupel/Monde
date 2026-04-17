@@ -25,7 +25,7 @@ void commune(vec3 world, int surface_habitation, int which_one) {
     float px = cad.x *world.x();
     float py = (cad.y *world.y()) -(h.size.z/2);
     float pz = cad.z *world.z();
-    vec3 pos = vec3(px,py,pz);
+    vec3 pos = new vec3(px,py,pz);
     show_home(h, pos, which_one);
   }
 }
@@ -36,7 +36,7 @@ void show_home(Home h, vec3 pos, int which) {
     h.show(pos);  
   } else {
     strokeWeight(1);
-    stroke(r.BLACK);
+    rg.stroke(r.BLACK);
     fill(h.get_fill());
     if(which == 1) {
       costume(pos,h.get_size(),r.LINE);
@@ -75,14 +75,14 @@ void urbanisme(int surface, int max_level) {
     town.clear();
     for(int i = 0 ; i < cadastre.size() ; i++) {
       vec4 pos = cadastre.get(i).copy();
-      float from_center = dist(vec2(pos.x,pos.z),vec2(0));
+      float from_center = r.dist(new vec2(pos.x,pos.z),new vec2(0));
       Home h = new Home(this,surface,from_center,max_level);
 
       int fill_roof = color(random(0,30),random(80,100),random(60,90));
       int fill_wall = color(random(360),random(0,10),random(50,100));
       float peak = random(1);
       peak *= peak;
-      h.set_architecture(vec2(peak*.5));
+      h.set_architecture(new vec2(peak*.5));
       h.set_aspect(fill_roof,fill_wall,fill_ground,stroke,thickness);
 
       town.add(h);
@@ -212,12 +212,12 @@ void set_cadastre(vec2 pos, PImage map, int id, boolean use_altitude_is) {
     if(temp.y() < 0) temp.y(0);
     if(temp.x() > map.width) temp.x(map.width);
     if(temp.y() > map.height) temp.y(map.height);
-    ivec2 p = ivec2(temp);
+    ivec2 p = new ivec2((int)temp.x(), (int)temp.y());
     int c = map.get(p.x(),p.y());
     altitude = brightness(c);
     altitude = map(altitude,0,g.colorModeZ,1,-1);
   }
-  cadastre.add(vec4(pos.x,altitude,pos.y,id));
+  cadastre.add(new vec4(pos.x,altitude,pos.y,id));
 
 }
 
@@ -235,12 +235,12 @@ vec2 lot_street_map(int average_surface, vec2 flat_world, ArrayList<R_Segment> s
   vec3 a = segment.get(target).get_start();
   vec3 b = segment.get(target).get_stop();
   float dist = a.mag(b);
-  vec2 dir = vec2(a).dir(vec2(b));
-  vec2 tan = vec2(a).tan(vec2(b));
+  vec2 dir = new vec2(a).dir(new vec2(b));
+  vec2 tan = new vec2(a).tan(new vec2(b));
   float new_dist = random(0,dist);
   float side = random(1);
 
-  vec2 where = vec2();
+  vec2 where = new vec2();
   if(side < .5) {
     where = tan.mult(average_surface);
   } else {
@@ -268,9 +268,9 @@ vec2 lot_street_map(int average_surface, vec2 flat_world, ArrayList<R_Segment> s
 
 
 vec2 lot_random(int average_surface, vec2 flat_world) {
-  float dist = random_next_gaussian(1,3); // make the center of town more occupy
+  float dist = r.random_next_gaussian(1,3); // make the center of town more occupy
   float angle = random(-PI,PI);
-  vec2 pos = to_cartesian_2D(angle,dist);
+  vec2 pos = r.to_cartesian_2D(angle,dist);
   // println("pos normal",pos);
   
   // check if the surface is already occupy
@@ -289,11 +289,11 @@ vec2 lot_random(int average_surface, vec2 flat_world) {
 boolean cadastre_is(vec2 pos, int average_surface, vec2 flat_world) {
   boolean occupy = false;
   for(vec4 cad_pos : cadastre) {
-    vec2 c_pos = vec2(cad_pos.x,cad_pos.z);
-    vec2 area = vec2(sqrt(average_surface));
+    vec2 c_pos = new vec2(cad_pos.x(),cad_pos.z());
+    vec2 area = new vec2(sqrt(average_surface));
     // vec2 area = vec2(average_surface).mult(2);
     area.div(flat_world);
-    if(compare(pos,c_pos,area)) {
+    if(r.compare(pos,c_pos,area)) {
       occupy = true;;
       break;
     }
@@ -348,9 +348,9 @@ public class Home {
 
     // switch house orientation
     if(random(1) < .5) {
-      size = vec3(x,z,y);
+      size = new vec3(x,z,y);
     } else {
-      size = vec3(y,z,x);
+      size = new vec3(y,z,x);
     }
   }
 
@@ -412,7 +412,7 @@ public class Home {
       if(peak != null) house.set_peak(peak.x,peak.y);
     }
     pushMatrix();
-    translate(pos);
+    rg.translate(pos);
     house.show();
     popMatrix();
   }

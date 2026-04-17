@@ -1184,7 +1184,7 @@ class Info_Object extends Info_method {
     } else if(which == 6) {
       return g ;
     } else {
-      print_err(error_target) ;
+      r.print_err(error_target) ;
       return null ;
     }
   }
@@ -1210,7 +1210,7 @@ class Info_Object extends Info_method {
     } else if(which == 6) {
       return g ;
     } else {
-      print_err(error_target) ;
+      r.print_err(error_target) ;
       return null ;
     }
   }
@@ -1235,8 +1235,8 @@ class Info_Object extends Info_method {
     } else if(num_value == 7) {
       return "[ " + name + ": " + a + ", " + b + ", " + c + ", " + d + ", " + e + ", " + f + ", " + g + " ]";
     } else {
-      print_err(num_value) ;
-      print_err(error_value_message) ;
+      r.print_err(num_value) ;
+      r.print_err(error_value_message) ;
       return "hmmm hmmm there is problem with your stuff mate";
     }
   }
