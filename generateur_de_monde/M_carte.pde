@@ -357,10 +357,10 @@ vec2 compute_pos(Urbanist urb, vec6 canvas, ArrayList<R_Node> inter_list) {
 	vec3 canvas_max = new vec3(canvas.w(),canvas.e(),canvas.f());
 	vec2 pos = r.to_cartesian_2D(angle,dist).add(new vec2(urb.get_destination()));
   
-  int max_try = 10; // limit for the recursive call
-  println(pos,canvas_min.xy(),canvas_max.xy());
-  println(r.greaterThan(pos,canvas_min.xy()));
-  	println(r.lessThan(pos,canvas_max.xy()));
+	int max_try = 10; // limit for the recursive call
+	// println(pos,canvas_min.xy(),canvas_max.xy());
+	// println(r.greaterThan(pos,canvas_min.xy()));
+  	// println(r.lessThan(pos,canvas_max.xy()));
 	if(count_segment_out_canvas < max_try && (!r.all(r.greaterThan(pos,canvas_min.xy())) || !r.all(r.lessThan(pos,canvas_max.xy())))) {
 		count_segment_out_canvas++;
 		// loop method until is good

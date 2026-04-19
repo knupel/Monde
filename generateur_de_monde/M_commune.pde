@@ -1,7 +1,7 @@
 /**
 * Ville : Project born in the Code Kitchen in Creative Code Paris january session.
-* Copyleft (c) 2019-2022
-* v 0.2.1
+* Copyleft (c) 2019-2026
+* v 0.3.0
 * @see http://knupel.art/
 
 * All class, method is in french... C'est la vie, excuse my french!
@@ -21,7 +21,9 @@ void commune(vec3 world, int surface_habitation, int which_one) {
 
   for (int i = 0 ; i < cadastre.size() ; i++) {
     vec4 cad = cadastre.get(i).copy();
-    Home h = town.get(i); 
+    Home h = town.get(i);
+    h.fill_is(show_fill_is);
+    h.stroke_is(show_stroke_is);
     float px = cad.x *world.x();
     float py = (cad.y *world.y()) -(h.size.z/2);
     float pz = cad.z *world.z();
@@ -396,6 +398,18 @@ public class Home {
 
   vec3 get_size() {
     return size;
+  }
+
+  void fill_is(boolean is) {
+    if(house != null) {
+      house.fill_is(is);
+    }
+  }
+
+    void stroke_is(boolean is) {
+    if(house != null) {
+      house.stroke_is(is);
+    }
   }
 
   public void show(vec3 pos) {

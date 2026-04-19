@@ -1,6 +1,9 @@
 /**
-* Code Kitchen
-* Copyleft (c) 2019-2022
+*********************
+* Générateur de monde
+* version 2.0.0
+*********************
+* Copyleft (c) 2019-2026
 * Knupel
 * https://github.com/knupel
 * http://knupel.art
@@ -54,23 +57,22 @@ void draw() {
     background(r.NUIT);
   }
 
-  // println(brightness(get(mouseX,mouseY)));
 
   cartographe();
   cadastre_update(urban_mode,min_lot,max_lot,tempo_build,size_world,img_map,use_relief_is);
 
   pushMatrix();
-  if(mousePressed) { 
-    dir_y = map(mouseY,0,height,PI/5,-PI/5);
-  }
-  rotateX(dir_y);
-  translate(width/2,height/2);
-  if(mousePressed) {
-    dir_x = map(mouseX,0,width,-PI,PI);
-  } else {
-    dir_x += .005;
-  }
-  rotateY(dir_x);
+  // if(mousePressed) { 
+  //   dir_y = map(mouseY,0,height,PI/5,-PI/5);
+  // }
+  // rotateX(dir_y);
+  // translate(width/2,height/2);
+  // if(mousePressed) {
+  //   dir_x = map(mouseX,0,width,-PI,PI);
+  // } else {
+  //   dir_x += .005;
+  // }
+  // rotateY(dir_x);
 
   if(show_commune_is) {
     commune(size_world,surface_habitation,which_costume);
@@ -112,6 +114,8 @@ void reset() {
 
 boolean show_info_is = false;
 boolean show_commune_is = true;
+boolean show_fill_is = true;
+boolean show_stroke_is = true;
 boolean show_background_image_relief_is = false;
 boolean use_noise_map_is = true;
 boolean use_relief_is = false;
@@ -141,6 +145,18 @@ void keyPressed() {
   if(key == 's') {
     show_commune_is = !show_commune_is;
   }
+
+  if(key == 'd') {
+    show_fill_is = !show_fill_is;
+  }
+
+  if(key == 'f') {
+    show_stroke_is = !show_stroke_is;
+  }
+
+
+
+
 
   if(key == '0') {
     urban_mode = 0;

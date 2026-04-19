@@ -196,7 +196,6 @@ void costume_impl(vec3 pos, vec3 size, vec rot, String sentence, PGraphics pg) {
 	if(rot.y != 0) costume_rotate_y();
 	if(rot.z != 0) costume_rotate_z();
 	if(pg == null) {
-		println("je suis là");
 		push();
 		rg.translate(pos);
 		costume_rotate(rot);
