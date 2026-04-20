@@ -49,6 +49,8 @@ void setup() {
 
 float dir_x,dir_y;
 void draw() {
+  String title = "Générateur de Monde | FPS : " + (int)frameRate + " | Maisons : " + cadastre.size();
+  surface.setTitle(title);
   manage_gui();
 
   if(show_background_image_relief_is) {
@@ -62,17 +64,17 @@ void draw() {
   cadastre_update(urban_mode,min_lot,max_lot,tempo_build,size_world,img_map,use_relief_is);
 
   pushMatrix();
-  // if(mousePressed) { 
-  //   dir_y = map(mouseY,0,height,PI/5,-PI/5);
-  // }
-  // rotateX(dir_y);
-  // translate(width/2,height/2);
-  // if(mousePressed) {
-  //   dir_x = map(mouseX,0,width,-PI,PI);
-  // } else {
-  //   dir_x += .005;
-  // }
-  // rotateY(dir_x);
+  if(mousePressed) { 
+    dir_y = map(mouseY,0,height,PI/5,-PI/5);
+  }
+  rotateX(dir_y);
+  translate(width/2,height/2);
+  if(mousePressed) {
+    dir_x = map(mouseX,0,width,-PI,PI);
+  } else {
+    dir_x += .005;
+  }
+  rotateY(dir_x);
 
   if(show_commune_is) {
     commune(size_world,surface_habitation,which_costume);
@@ -100,7 +102,6 @@ void manage_gui() {
   } else {
     img_map = relief_map;
   }
-  
 }
 
 void reset() {

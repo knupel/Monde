@@ -174,7 +174,7 @@ void cadastre_random_generator(int num, int average_surface, vec2 flat_world, PI
       set_cadastre(pos,map,id,use_altitude_is);
     }
   }
-  println("plot use",num-already_occupy,"on",num);
+  // println("plot use",num-already_occupy,"on",num);
 }
 
 
