@@ -10,13 +10,13 @@ ArrayList<R_Line2D> links = new ArrayList();
 int cols = 0;
 int rows = 0;
 
-int diam = 100;
+int diam = 20;
 
 void setup() {
   rg = new R_Graphic(this);
   // fullScreen(P3D);
   println("width ", width, "| height ", height);
-  size(800,600,P3D);
+  size(1200,700,P3D);
 
   ivec2 step = new ivec2(diam);
   cols = width/step.x() + 1; // un peu bizarre, mais ça permets de faire les bordures
@@ -40,7 +40,14 @@ void setup() {
     pos_x++;
   }
 
-  create_link_no_cross(ground, links);
+
+}
+
+void keyPressed() {
+  // create_link(ground, links);
+  int num_lines = 30;
+  int max_length_of_line = 100;
+  create_link_no_cross(num_lines, max_length_of_line, ground, links);
 }
 
 void draw () {
@@ -59,7 +66,7 @@ void draw () {
     R_Line2D line = links.get(i);
     line.stroke_is(true);
     line.stroke(r.NANKIN);
-    line.thickness(4);
+    line.thickness(1);
     line.show();
   }
 }
@@ -79,13 +86,11 @@ void create_link(Ground grid[], ArrayList<R_Line2D> list) {
     println("line", line);
     list.add(line);
   }
-
 }
 
-void create_link_no_cross(Ground grid[], ArrayList<R_Line2D> list) {
+void create_link_no_cross(int num_of_lines, int dist_max, Ground grid[], ArrayList<R_Line2D> list) {
   list.clear();
-  int num_of_lines = 10;
-  int maxAttempts = num_of_lines * 40;
+  int maxAttempts = num_of_lines * 40; // marge un peu grande, mais peu importe
   int attempts = 0;
   ArrayList<float[]> segments = new ArrayList<float[]>();
 
@@ -99,6 +104,7 @@ void create_link_no_cross(Ground grid[], ArrayList<R_Line2D> list) {
     float ay = grid[a].pos().y();
     float bx = grid[b].pos().x();
     float by = grid[b].pos().y();
+    if(grid[a].pos().dist(grid[b].pos()) > dist_max) continue;
 
     boolean crosses = false;
     for(int i = 0; i < segments.size(); i++) {

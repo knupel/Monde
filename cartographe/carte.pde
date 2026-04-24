@@ -1,6 +1,6 @@
 /**
 * Carte
-* v 0.5.0
+* v 0.7.0
 * Copyleft (c) 2019-2026
 * @author Knupel
 * @see https://github.com/knupel/Monde
@@ -12,10 +12,10 @@ boussole : compass
 carte : map
 */
 import rope.mesh.R_Node;
-import rope.mesh.R_Segment;
+import rope.mesh.R_Line2D;
 
 ArrayList<R_Node> grid_nodes_monde;
-ArrayList<R_Segment> segment_monde;
+ArrayList<R_Line2D> segment_monde;
 Urbanist urbanist;
 float speed;
 int inter_id;
@@ -26,7 +26,7 @@ void init_street_map() {
 	}
 
 	if(segment_monde == null) {
-		segment_monde = new ArrayList<R_Segment>();
+		segment_monde = new ArrayList<R_Line2D>();
 	}
 
 	// reset data
@@ -34,24 +34,24 @@ void init_street_map() {
 	segment_monde.clear();
 	inter_id = 0;
   
-  // set data
-  int marge = width/10;
+	// set data
+	int marge = width/10;
 	vec3 start_pos = new vec3(random(marge,width -marge),random(marge,height -marge),0);
 	int range_start = 30;
 	vec3 destination = new vec3(start_pos.x+random(-range_start,range_start),start_pos.y+random(-range_start,range_start),0);
-  urbanist = new Urbanist();
-  urbanist.set_pos(start_pos);
-  urbanist.set_destination(destination);
+	urbanist = new Urbanist();
+	urbanist.set_pos(start_pos);
+	urbanist.set_destination(destination);
   
-  // angle_tracer = angle(start_pos,destination);
-  R_Node inter = new R_Node(start_pos.copy(),destination.copy()); // copy() it's nessacy to don't point on a same Object
-  inter.set_branch(8); // the start need a lot of branches
-  inter.id_a(inter_id++);
+	// angle_tracer = angle(start_pos,destination);
+	R_Node inter = new R_Node(start_pos.copy(),destination.copy()); // copy() it's nessacy to don't point on a same Object
+	inter.set_branch(8); // the start need a lot of branches
+	inter.id_a(inter_id++);
 
-  grid_nodes_monde.add(inter);
-  R_Segment segment = new R_Segment(start_pos,destination.copy());
-  segment_monde.add(segment);
-  println("new street map",urbanist.get_pos());
+	grid_nodes_monde.add(inter);
+	R_Line2D segment = new R_Line2D(this, start_pos,destination.copy());
+	segment_monde.add(segment);
+	println("new street map",urbanist.get_pos());
 }
 
 
@@ -73,11 +73,8 @@ void urbanist() {
 	urbanist.set_pos(follow(urbanist.get_destination(),speed,buf_follow));
 	urbanist.set_range(min,max);
 	urbanist.set_angle(-PI,PI);
-	// display
-	stroke(255);
-  noFill();
-  strokeWeight(10);
-  rg.point(urbanist.get_pos());
+	// show
+	show_urbaniste(urbanist.get_pos());
 }
 
 void boussole(vec2 pos, int size) {
@@ -85,19 +82,19 @@ void boussole(vec2 pos, int size) {
 	ivec2 south = new ivec2(0,1).mult(size);
 	ivec2 west = new ivec2(-1,0).mult(size);
 	ivec2 east = new ivec2(1,0).mult(size);
-  
-  float angle = 0;
-  int div = 0;
-  for(R_Segment s : segment_monde) {
-  	int mult = ceil(s.get_length());
-  	div += mult;
-  	angle += (s.get_angle() *mult);
-  }
-  angle /= div;
+	
+	float angle = 0;
+	int div = 0;
+	for(R_Line2D s : segment_monde) {
+		int mult = ceil(s.dist());
+		div += mult;
+		angle += (s.angle() *mult);
+	}
+	angle /= div;
 
-  noFill();
-  stroke(r.WHITE);
-  strokeWeight(1);
+	noFill();
+	stroke(r.WHITE);
+	strokeWeight(1);
 	push();
 	rg.translate(pos);
 	rotate(PI/4+angle);
@@ -110,23 +107,27 @@ void boussole(vec2 pos, int size) {
 
 
 void show_center_world() {
-	strokeWeight(2);
-  if(grid_nodes_monde.size() > 0) {
-  	rg.ellipse(grid_nodes_monde.get(0).pos(),50,50);
-  }
+	rg.fill_is(true);
+	rg.stroke_is(false);
+	// rg.thickness(2);
+	// rg.stroke(r.YELLOW);
+	rg.fill(r.BLOOD);
+	rg.stroke(r.BLOOD);
+	if(grid_nodes_monde.size() > 0) {
+		rg.ellipse(grid_nodes_monde.get(0).pos(),50,50);
+	}
 }
 
 void show_intersection() {
-	strokeWeight(4);
-	stroke(255);
-	noFill();
-  if(grid_nodes_monde.size() > 0) {
-  	for(R_Node inter : grid_nodes_monde) {
-  		textAlign(CENTER);
-  		rg.text(inter.id().a(),inter.pos());
-  		// point(inter.get_pos());
-  	}
-  }
+	rg.fill_is(true);
+	rg.fill(r.WHITE);
+	if(grid_nodes_monde.size() > 0) {
+		for(R_Node inter : grid_nodes_monde) {
+			textAlign(CENTER);
+			rg.text(inter.id().a(),inter.pos());
+			// point(inter.get_pos());
+		}
+	}
 }
 
 
@@ -136,41 +137,43 @@ void map() {
 	boolean show_info = true;
 	if(r.compare(new vec2(urbanist.get_pos()),new vec2(urbanist.get_destination()),area)) {
 		vec2 new_destination = goto_next(urbanist,canvas_birth,grid_nodes_monde,segment_monde,show_info);
+		// show_urbaniste(new_destination);
+
 		int id_inter = rank_intersection(urbanist,urbanist.get_pos());
-	  if(id_inter >= 0) {
-	  	R_Node inter = grid_nodes_monde.get(id_inter);
+		if(id_inter >= 0) {
+			R_Node inter = grid_nodes_monde.get(id_inter);
 			urbanist.set_destination(new_destination,inter);
 		} else {
 			urbanist.set_destination(new_destination);
 		}
-    
+
     
     if(!intersection_is()) {
     	boolean cycle_add_is = false;
-      cycle_add_is = ask_intersection();
-      // check to build segment
-      boolean build_anytime_is = false;
-      cycle_add_is = add_segment(urbanist,build_anytime_is,show_info);
-      if(cycle_add_is) {
-      	add_intersection();
-      } else {
-      	vec2 back_to_center_pos = new vec2(grid_nodes_monde.get(0).pos());
-      	urbanist.set_destination(back_to_center_pos);
+		cycle_add_is = ask_intersection();
+		// check to build segment
+		boolean build_anytime_is = false;
+		cycle_add_is = add_segment(urbanist,build_anytime_is,show_info);
+		if(cycle_add_is) {
+			add_intersection();
+		} else {
+			vec2 back_to_center_pos = new vec2(grid_nodes_monde.get(0).pos());
+			urbanist.set_destination(back_to_center_pos);
 
-      }
+		}
     }
-    
     intersection_is(false);
 	}
 
-  // draw road map
-	stroke(r.BLOOD);
-	noFill();
-	strokeWeight(1);
+	// draw road map
+  	rg.stroke_is(true);
+	rg.stroke(r.BLOOD);
+	rg.fill_is(false);
+	rg.thickness(2);
 
 	// show segment
-	for(R_Segment s : segment_monde) {
-		rg.line(s.get_start(),s.get_stop());
+	for(R_Line2D s : segment_monde) {
+		rg.line(s.a(),s.b());
 	}
 	/*
 	// SHOW ALL PATH
@@ -216,35 +219,35 @@ void add_intersection() {
 boolean add_segment(Urbanist urb, boolean build_anytime, boolean show_info_is) {
 	boolean add_is = false;
 	boolean from_is = false;
-  int id_from = rank_intersection(urb,urb.get_from());
-  R_Node inter;
+	int id_from = rank_intersection(urb,urb.get_from());
+	R_Node inter;
 
-  if(id_from >= 0) {
-  	inter = grid_nodes_monde.get(id_from);
-	  if(inter.get_branch_available() > 0) {
-	  	from_is = true;
-	  }
-  }
-  
-  // info
-  if(show_info_is) {
-  	noStroke();
-  	fill(r.WHITE);
-  	rg.ellipse(new vec2(urb.get_from()),20,20);
-  	rg.ellipse(new vec2(urb.get_destination()),20,20);
-  }
+	if(id_from >= 0) {
+		inter = grid_nodes_monde.get(id_from);
+		if(inter.get_branch_available() > 0) {
+			from_is = true;
+		}
+	}
+	
+	// info
+	if(show_info_is) {
+		noStroke();
+		fill(r.WHITE);
+		rg.ellipse(new vec2(urb.get_from()),20,20);
+		rg.ellipse(new vec2(urb.get_destination()),20,20);
+	}
 
 
-  if(build_anytime || from_is) {
-  	R_Segment segment = new R_Segment(temp_intersection.pos(),urb.get_from());
-  	if(segment.get_length() <= urb.get_max()) {
-  		segment_monde.add(segment);
-  		grid_nodes_monde.get(id_from).add_destination(temp_intersection.pos());
-  		temp_intersection.add_destination(urb.get_from());
-  		add_is = true;
-  	}
-  }
-  return add_is;
+	if(build_anytime || from_is) {
+		R_Line2D segment = new R_Line2D(this,temp_intersection.pos(),urb.get_from());
+		if(segment.dist() <= urb.get_max()) {
+			segment_monde.add(segment);
+			grid_nodes_monde.get(id_from).add_destination(temp_intersection.pos());
+			temp_intersection.add_destination(urb.get_from());
+			add_is = true;
+		}
+	}
+	return add_is;
 }
 
 
@@ -276,39 +279,6 @@ int num_branch_by_intersection(int min, int max) {
 
 
 
-/*
-void img_urbanist_setting() {
-	ivec2 pos = ivec2(urbanist.get_pos());
-	float density = brightness(img.get(pos.x,pos.y));
-	// float min = map(density,0,g.colorModeZ,5,15);
-	// float max = map(density,0,g.colorModeZ,25,400);
-	float min = 100;
-	float max = 300;
-	// println(density);
-	urbanist.set_range(min,max);
-}
-
-
-void img_map_setting() {
-	ivec2 pos = ivec2(urbanist.get_pos());
-	float density = brightness(img.get(pos.x,pos.y));
-	int num = (int)map(density,0,g.colorModeZ,12,2);
-	add_intersection(urbanist,num);
-}
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -318,22 +288,13 @@ void img_map_setting() {
 
 /**
 GOTO NEXT 
-v 0.1.0
+v 0.1.1
 * is a main method to give the next destination point for urbanist
 */
-vec2 goto_next(Urbanist urb, vec6 canvas, ArrayList<R_Node> inter_list, ArrayList<R_Segment> seg_list, boolean show_info) {
-	// vec2 angle_range = vec2(0,PI/6);
+vec2 goto_next(Urbanist urb, vec6 canvas, ArrayList<R_Node> inter_list, ArrayList<R_Line2D> seg_list, boolean show_info) {
 	vec2 pos = compute_pos(urb,canvas,inter_list);
 	count_segment_out_canvas = 0;
-
-	// check if the urbanist don't meet an other segment
-	R_Segment urb_seg = new R_Segment(urb.get_pos(),pos);
-	boolean meet_is = check_meeting_segment(urb_seg,seg_list,show_info);
   
-  if(meet_is) {
-  	//println(count_segment_meeting);
-  	// pos = goto_next(urb,canvas,seg_list,show_info);
-  }
 	// check if the new target is close to carrefour, if it is the plotter must go on it
 	urb.set_intersection(-1);
 
@@ -350,20 +311,20 @@ vec2 goto_next(Urbanist urb, vec6 canvas, ArrayList<R_Node> inter_list, ArrayLis
 }
 
 int count_segment_meeting = 0;
-boolean check_meeting_segment(R_Segment target_segment, ArrayList<R_Segment> seg_list, boolean show_info) {
+boolean check_meeting_segment(R_Line2D target_segment, ArrayList<R_Line2D> seg_list, boolean show_info) {
 	boolean is = false;
 	int max_iter_for_meeting = 100;
-	for(R_Segment s : seg_list) {
+	for(R_Line2D s : seg_list) {
   	if(show_info) {
   		strokeWeight(1);
   		stroke(255);
   		noFill();
-  		vec2 meet_pos = target_segment.meet_at(s);
-  		rg.line(target_segment.get_start(),target_segment.get_stop());
+  		vec2 meet_pos = target_segment.intersection(s);
+  		rg.line(target_segment.a(),target_segment.b());
   		if(meet_pos != null) rg.ellipse(meet_pos,30,30);
   	}
 
-  	if(target_segment.meet_is(s) && count_segment_meeting < max_iter_for_meeting) {
+  	if(target_segment.intersection_is(s) && count_segment_meeting < max_iter_for_meeting) {
   		count_segment_meeting ++;
   		is = true;
   		break;
@@ -396,7 +357,7 @@ vec2 compute_pos(Urbanist urb, vec6 canvas, ArrayList<R_Node> inter_list) {
 		count_segment_out_canvas++;
 		// loop method until is good
 		pos = compute_pos(urb,canvas,inter_list); 
-	} else if( count_segment_out_canvas >= max_try) {
+	} else if(count_segment_out_canvas >= max_try) {
 		// back to starting position in case there is too much recursive call
     pos = new vec2(inter_list.get(0).pos());
 	}
@@ -459,96 +420,6 @@ void intersection_is(boolean is) {
 
 
 
-/**
-URBANIST
-v 0.0.4
-*/
-public class Urbanist {
-	private vec3 pos;
-	private vec3 dst;
-	private vec3 from;
-	private int intersection ;
-	private vec2 range;
-	private vec2 angle;
-	
-	public Urbanist() {
-		this.pos = new vec3();
-		this.from = new vec3();
-		this.dst = new vec3();
-		this.range = new vec2(0,height);
-		this.angle = new vec2(-PI/2,PI/2);
-	}
-  
-  // set
-	public void set_intersection(int intersection) {
-		this.intersection = intersection;
-	}
-
-	public void set_range(float min, float max) {
-		this.range.set(min,max);
-	}
-
-	public void set_angle(float start, float end) {
-		this.angle.set(start,end);
-	}
-
-	public void set_pos(vec pos) {
-		this.pos.set(pos);
-	}
-
-	public void set_destination(vec dst) {
-		set_destination(dst,null);
-
-	}
-
-	public void set_destination(vec dst, R_Node intersection) {
-		// check if there is free slot on this intersection
-		if(intersection == null || intersection.get_branch_available() > 0) {
-			this.from.set(this.dst);
-			this.dst.set(dst);
-		} else {
-			this.from.set(this.dst);
-			// select destination in the pnal of destination of this intersection
-			int which = floor(random(intersection.get_branch()));
-			this.dst.set(intersection.get_destination()[which]);
-		}
-
-	}
-  
-  // get
-  public int get_intersection() {
-		return intersection;
-	}
-
-
-	public vec2 get_range() {
-		return this.range;
-	}
-
-	public vec2 get_angle() {
-		return this.angle;
-	}
-
-	public float get_max() {
-		return this.range.y;
-	}
-
-		public float get_min() {
-		return this.range.x;
-	}
-
-	public vec3 get_pos() {
-		return this.pos;
-	}
-
-	public vec3 get_from() {
-		return this.from;
-	}
-
-	public vec3 get_destination() {
-		return dst;
-	}
-}
 
 
 

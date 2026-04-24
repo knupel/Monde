@@ -1,6 +1,6 @@
 /**
-* URBANIST
-* v 0.0.4
+URBANIST
+v 0.0.5
 */
 public class Urbanist {
 	private vec3 pos;
@@ -18,7 +18,7 @@ public class Urbanist {
 		this.angle = new vec2(-PI/2,PI/2);
 	}
   
-  	// set
+  // set
 	public void set_intersection(int intersection) {
 		this.intersection = intersection;
 	}
@@ -49,17 +49,14 @@ public class Urbanist {
 			this.from.set(this.dst);
 			// select destination in the pnal of destination of this intersection
 			int which = floor(random(intersection.get_branch()));
-			if(which < 0) {
-				println("void set_destination() which",which);
-				which = 0;
-			}
+			if(which < 0) which = 0;
 			this.dst.set(intersection.get_destination()[which]);
 		}
 
 	}
   
-	// get
-	public int get_intersection() {
+  // get
+  public int get_intersection() {
 		return intersection;
 	}
 
@@ -76,7 +73,7 @@ public class Urbanist {
 		return this.range.y;
 	}
 
-	public float get_min() {
+		public float get_min() {
 		return this.range.x;
 	}
 

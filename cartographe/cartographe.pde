@@ -1,7 +1,9 @@
 /**
 * Projet MONDE
 * Chapitre : Le Cartographe
-* Knupel
+* 2019-2026
+* v 2.0.0
+* @author Knupel
 * https://github.com/knupel
 * http://knupel.art
 */
@@ -10,8 +12,8 @@ import rope.vector.*;
 import rope.image.R_Pattern;
 
 Rope r = new Rope();
-R_Graphic rg;
 
+R_Graphic rg;
 
 
 /**
@@ -22,22 +24,20 @@ R_Graphic rg;
 */
 
 
-PImage img ;
-
 void setup() {
   rg = new R_Graphic(this);
   println(r.VERSION);
   background(0);
-  fullScreen(P2D,2);
+  fullScreen(P2D,1);
+  set_ground(10);
   // size(1300,800, P2D);
   init_street_map();
-  img = loadImage("petit_vinci_la_dame_à_l_hermine.jpg");
-  //surface.setSize(img.width,img.height);
 }
 
 
 void draw() {
   background(0);
+  show_ground();
   map();
   urbanist();
   if(show_info_is) {
@@ -45,6 +45,7 @@ void draw() {
   	boussole(new vec2(grid_nodes_monde.get(0).pos()),80);
     show_intersection();
   }
+
 }
 
 

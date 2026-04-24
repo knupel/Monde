@@ -1,10 +1,11 @@
 /**
 * Ground 
 * 2026-2026
-* v 0.0.1
+* v 0.0.2
 */
 class Ground {
   private vec3 pos = new vec3();
+  private int radius = 0;
   private int water = 0;
   private int ground = 0;
   private int elements = 0;
@@ -20,6 +21,10 @@ class Ground {
 
   void set_ground(int ground) {
     this.ground = ground;
+  }
+
+  void set_radius(int radius) {
+    this.radius = radius;
   }
 
   void set_elements(int elements) {
@@ -40,5 +45,9 @@ class Ground {
 
   int get_water() {
     return this.water;
+  }
+
+  int get_radius() {
+    return this.radius;
   }
 }
