@@ -17,35 +17,12 @@ ArrayList<R_Node> grid_nodes_monde;
 ArrayList<R_Line2D> segment_monde;
 
 
-// intersection
-int intersection_id;
-
-int get_id_intersection() {
-	return intersection_id;
-}
-
-int add_id_intersection() {
-	return intersection_id++;
-}
-
-void set_id_intersection(int id) {
-	intersection_id = id;
-}
-
-
-
-
 
 // Map
 void init_map() {
 	// init data if nececary
-	if(grid_nodes_monde == null) {
-		grid_nodes_monde = new ArrayList<R_Node>();
-	}
-
-	if(segment_monde == null) {
-		segment_monde = new ArrayList<R_Line2D>();
-	}
+	if(grid_nodes_monde == null) grid_nodes_monde = new ArrayList<R_Node>();
+	if(segment_monde == null) segment_monde = new ArrayList<R_Line2D>();
 
 	// reset data
 	grid_nodes_monde.clear();
@@ -77,7 +54,7 @@ void init_map() {
 
 
 
-void map() {
+void build_map() {
 	vec2 area = new vec2(10);
 	int min_by_intersection = 2;
 	int max_by_intersection = 5;
@@ -87,8 +64,7 @@ void map() {
 	boolean show_info = true;
 	if(r.compare(new vec2(urbanist.get_pos()), new vec2(urbanist.get_destination()), area)) {
 		vec3 new_destination = goto_next(urbanist, canvas_birth, grid_nodes_monde, segment_monde, show_info);
-
-		int id_inter = rank_intersection(urbanist, urbanist.get_pos());
+		int id_inter = rank_intersection(urbanist.get_pos());
 		if(id_inter >= 0) {
 			R_Node inter = grid_nodes_monde.get(id_inter);
 			urbanist.set_destination(new_destination,inter);
@@ -101,41 +77,92 @@ void map() {
 		cycle_add_is = ask_intersection(min_by_intersection, max_by_intersection);
 		// check to build segment
 		boolean build_anytime_is = false;
-		cycle_add_is = add_segment(urbanist, build_anytime_is, show_info);
+		cycle_add_is = add_segment(urbanist, build_anytime_is);
 		if(cycle_add_is) {
-			add_intersection();
+			add_intersection(temp_intersection);
 		} else {
 			vec2 back_to_center_pos = new vec2(grid_nodes_monde.get(0).pos());
 			urbanist.set_destination(back_to_center_pos);
-
 		}
     }
     intersection_is(false);
 	}
+	count_segment_meeting = 0;
+}
 
+void close_dead_end(int range_to_link) {
+	// the path must be close, it's patch with only one entry or dead end
+	// select path with only one entry and make a list
+	ArrayList <R_Node> list_dead_end = new ArrayList();
+	ArrayList <R_Node> list_crossroad_free = new ArrayList();
+	int rank = 0; // set rank to refind the node in thee next step
+	for(R_Node node : grid_nodes_monde){
+		int entry = node.get_branch() - node.get_branch_available();
+		if(entry == 1) {
+			list_dead_end.add(node.copy().id_a(rank)); // use copy to avoid the pointer problem affectation
+		}
+		if(entry > 1) {
+			list_crossroad_free.add(node.copy().id_a(rank)); // use copy to avoid the pointer problem affectation
+		}
+		rank++;
+	}
+	println("intersection : ", grid_nodes_monde.size());
+	println("dead end : ", list_dead_end.size());
+	println("crossroad free : ", list_crossroad_free.size());
+	// close ead end if it's in the range
+	int num_possible_links = 0;
+	for(R_Node dead : list_dead_end) {
+		for(R_Node cross : list_crossroad_free) {
+			float dist = dead.pos().dist(cross.pos());
+			if(dist <= range_to_link && dist > 0) {
+				num_possible_links++;
+				// add segment
+				R_Line2D segment = new R_Line2D(this,dead.pos(),cross.pos());
+				segment_monde.add(segment);
+				// update node
+				grid_nodes_monde.get(dead.id().a()).add_destination(cross.pos());
+				grid_nodes_monde.get(cross.id().a()).add_destination(dead.pos());
+				break; // to don't more links than dead end
+			}
+		}
+	}
+	println("dead end link to network : ", num_possible_links);
+}
+
+void show_map() {
 	// draw road map
   	rg.stroke_is(true);
 	rg.stroke(r.BLOOD);
 	rg.fill_is(false);
 	rg.thickness(2);
-
 	// show segment
 	for(R_Line2D s : segment_monde) {
 		rg.line(s.a(),s.b());
 	}
-	/*
-	// SHOW ALL PATH
-	beginShape();
-	for(int i = 0 ; i < grid_monde.size(); i++) {
-		vertex(grid_monde.get(i).get_pos());
-	}
-	endShape();
-	*/
-	count_segment_meeting = 0;
-	
+}	
+
+
+
+
+
+
+/**
+intersection
+*/
+
+int intersection_id;
+
+int get_id_intersection() {
+	return intersection_id;
 }
 
+int add_id_intersection() {
+	return intersection_id++;
+}
 
+void set_id_intersection(int id) {
+	intersection_id = id;
+}
 
 /**
 add intersection
@@ -149,6 +176,7 @@ boolean ask_intersection(int min_branch, int max_branch) {
 R_Node temp_intersection;
 boolean ask_intersection(Urbanist urb, int max_branch) {
 	boolean add_is = false;
+
 	temp_intersection = new R_Node(urb.get_destination().copy(),urb.get_from());
 	temp_intersection.set_branch(max_branch);
 	temp_intersection.id_a(add_id_intersection());
@@ -156,8 +184,8 @@ boolean ask_intersection(Urbanist urb, int max_branch) {
 	return add_is;
 }
 
-void add_intersection() {
-	grid_nodes_monde.add(temp_intersection);
+void add_intersection(R_Node node) {
+	grid_nodes_monde.add(node);
 }
 
 int num_branch_by_intersection(int min, int max) {
@@ -173,10 +201,10 @@ int num_branch_by_intersection(int min, int max) {
 
 
 // segment
-boolean add_segment(Urbanist urb, boolean build_anytime, boolean show_info_is) {
+boolean add_segment(Urbanist urb, boolean build_anytime) {
 	boolean add_is = false;
 	boolean from_is = false;
-	int id_from = rank_intersection(urb,urb.get_from());
+	int id_from = rank_intersection(urb.get_from());
 	R_Node inter;
 
 	if(id_from >= 0) {
@@ -185,15 +213,6 @@ boolean add_segment(Urbanist urb, boolean build_anytime, boolean show_info_is) {
 			from_is = true;
 		}
 	}
-	
-	// info
-	// if(show_info_is) {
-	// 	noStroke();
-	// 	fill(r.WHITE);
-	// 	rg.ellipse(new vec2(urb.get_from()),20,20);
-	// 	rg.ellipse(new vec2(urb.get_destination()),20,20);
-	// }
-
 
 	if(build_anytime || from_is) {
 		R_Line2D segment = new R_Line2D(this,temp_intersection.pos(),urb.get_from());
@@ -209,11 +228,12 @@ boolean add_segment(Urbanist urb, boolean build_anytime, boolean show_info_is) {
 
 
 
-int rank_intersection(Urbanist urb, vec target) {
+int rank_intersection(vec target) {
 	int rank = -1;
+	int area = 5; // detection area
 	for(int i = 0 ; i < grid_nodes_monde.size() ; i++) {
 		vec3 p = grid_nodes_monde.get(i).pos();
-		if(r.compare(new vec2(target),new vec2(p.x,p.y),new vec2(5))) {
+		if(r.compare(target.xy(),p.xy(),new vec2(area))) {
 			rank = i;
 			break;
 		}

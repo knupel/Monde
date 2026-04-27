@@ -32,20 +32,25 @@ void setup() {
   set_ground(10);
   // size(1300,800, P2D);
   init_map();
+  set_urbanist(10, height/10);
 }
 
 
 void draw() {
+  // build
+  build_map();
+  urbanist_walk(0.5);
+
+  // show
   background(0);
   show_ground();
-  map();
-  urbanist();
+  show_map();
+  show_urbanist(urbanist.get_pos());
   if(show_info_is) {
   	show_center_town(20, r.BLOOD);
   	boussole(new vec2(grid_nodes_monde.get(0).pos()),80);
     show_intersection();
   }
-
 }
 
 
@@ -54,6 +59,7 @@ void draw() {
 void keyPressed() {
 	if(key == 'n') {
 		init_map();
+    set_urbanist(10, height/10);
 	}
 
   if(key == ' '){
@@ -66,7 +72,13 @@ void keyPressed() {
 		} else {
 			show_info_is = true;
 		}
+    
 	}
+
+
+  if(key == 'p') {
+    close_dead_end(15);
+  }
 }
 
 
