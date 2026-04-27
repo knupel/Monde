@@ -4,15 +4,13 @@ v 0.2.0
 * It's a main method to give the next destination point for urbanist
 */
 vec3 goto_next(Urbanist urb, vec6 canvas, ArrayList<R_Node> inter_list, ArrayList<R_Line2D> seg_list, boolean show_info) {
-	// vec2 compute_plan_pos = compute_pos_2D(urb, canvas, inter_list, seg_list);
+	// find the next good destination
 	vec2 compute_plan_pos = compute_pos_2D(urb, canvas, inter_list, seg_list);
 	count_segment_out_canvas = 0;
 	count_segment_no_cross = 0;
-
 	// checking the plan 2D
 	// if the new target is close to carrefour, if it is the plotter must go on it
 	urb.set_intersection(-1);
-
 	for(int i = 0 ; i < grid_nodes_monde.size() ; i++) {
 		vec3 p = grid_nodes_monde.get(i).pos();
 		if(r.compare(compute_plan_pos,new vec2(p.x(),p.y()),new vec2(urb.get_min()))) {
@@ -55,20 +53,12 @@ boolean check_meeting_segment(R_Line2D target_segment, ArrayList<R_Line2D> seg_l
 }
 
 
-int count_segment_out_canvas = 0;
+// angle
 int count_segment_no_cross = 0;
-
 vec2 compute_pos_2D(Urbanist urb, vec6 canvas, ArrayList<R_Node> inter_list, ArrayList<R_Line2D> seg_list) {
-	float angle = r.random_next_gaussian(3);
-	float previous_direction = new vec2(urb.get_pos()).angle(new vec2(urb.get_destination()));
+	float angle = next_angle_direction(urb);
 	float ratio_center = abs(r.random_next_gaussian(2));
 	float dist = map(ratio_center,0,1,urb.get_range().x,urb.get_range().y);
-	// new angle
-	angle = map(angle,-1,1,urb.get_angle().x,urb.get_angle().y);
-	angle += previous_direction;
-	// other side direction
-	float goto_left = random(1);
-	if(goto_left < .5) angle *= -1;
 
 	vec2 buf_pos = r.to_cartesian_2D(angle,dist).add(new vec2(urb.get_destination()));
 	// the function below create recursivity
@@ -85,6 +75,20 @@ vec2 compute_pos_2D(Urbanist urb, vec6 canvas, ArrayList<R_Node> inter_list, Arr
 	return buf_pos;
 }
 
+float next_angle_direction(Urbanist urb) {
+	float angle = r.random_next_gaussian(3);
+	float previous_direction = new vec2(urb.get_pos()).angle(new vec2(urb.get_destination()));
+	// new angle
+	angle = map(angle,-1,1,urb.get_angle().x(),urb.get_angle().y());
+	angle += previous_direction;
+	// other side direction
+	float goto_left = random(1);
+	if(goto_left < .5) angle *= -1;
+	return angle;
+}
+
+// out canvas
+int count_segment_out_canvas = 0;
 vec2 compute_pos_2D_out_canvas(Urbanist urb, vec6 canvas, ArrayList<R_Node> inter_list, ArrayList<R_Line2D> seg_list, vec2 pos) {
 	vec3 canvas_min = new vec3(canvas.x(),canvas.y(),canvas.z());
 	vec3 canvas_max = new vec3(canvas.w(),canvas.e(),canvas.f());
