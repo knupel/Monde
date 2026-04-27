@@ -31,7 +31,7 @@ void setup() {
   fullScreen(P2D,1);
   set_ground(10);
   // size(1300,800, P2D);
-  init_street_map();
+  init_map();
 }
 
 
@@ -41,7 +41,7 @@ void draw() {
   map();
   urbanist();
   if(show_info_is) {
-  	show_center_world();
+  	show_center_town(20, r.BLOOD);
   	boussole(new vec2(grid_nodes_monde.get(0).pos()),80);
     show_intersection();
   }
@@ -50,10 +50,10 @@ void draw() {
 
 
 
-boolean show_info_is = true;
+
 void keyPressed() {
 	if(key == 'n') {
-		init_street_map();
+		init_map();
 	}
 
   if(key == ' '){

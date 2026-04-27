@@ -2,6 +2,9 @@
 * ground 
 * 2026-2026
 * v 0.0.1
+* @author Knupel
+* https://github.com/knupel
+* http://knupel.art
 */
 
 int cols = 0;
@@ -36,13 +39,18 @@ void set_ground(int radius) {
 }
 
 
+Ground [] get_ground() {
+    return ground;
+}
+
+
 void show_ground() {
-      rg.fill_is(true);
-  rg.stroke_is(true);
-  rg.stroke(r.BLOOD);
-  rg.fill(r.BLOOD);
-  rg.thickness(ground[0].get_radius()/4);
-  for(int i = 0 ; i < ground.length ; i++) {
-    rg.point(ground[i].pos());
-  }
+    rg.fill_is(true);
+    rg.stroke_is(true);
+    rg.stroke(r.BLOOD);
+    rg.fill(r.BLOOD);
+    rg.thickness(ground[0].get_radius()/4);
+    for(int i = 0 ; i < ground.length ; i++) {
+        rg.point(ground[i].pos());
+    }
 }
