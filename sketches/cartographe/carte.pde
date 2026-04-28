@@ -216,7 +216,7 @@ boolean add_segment(Urbanist urb, boolean build_anytime) {
 
 	if(build_anytime || from_is) {
 		R_Line2D segment = new R_Line2D(this,temp_intersection.pos(),urb.get_from());
-		if(segment.dist() <= urb.get_max()) {
+		if(segment.dist() <= urb.get_dist_max()) {
 			segment_monde.add(segment);
 			grid_nodes_monde.get(id_from).add_destination(temp_intersection.pos());
 			temp_intersection.add_destination(urb.get_from());

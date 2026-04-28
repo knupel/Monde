@@ -32,7 +32,7 @@ void setup() {
   set_ground(10);
   // size(1300,800, P2D);
   init_map();
-  set_urbanist(10, height/10);
+  set_urbanist();
 }
 
 
@@ -59,7 +59,7 @@ void draw() {
 void keyPressed() {
 	if(key == 'n') {
 		init_map();
-    set_urbanist(10, height/10);
+    set_urbanist();
 	}
 
   if(key == ' '){

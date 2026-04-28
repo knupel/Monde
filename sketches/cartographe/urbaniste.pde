@@ -8,9 +8,15 @@
 Urbanist urbanist;
 
 
-void set_urbanist(float min_range, float max_range) {
-	urbanist.set_range(min_range, max_range);
-	urbanist.set_angle(-PI,PI);
+void set_urbanist() {
+	float min_range = height/80;
+	float max_range = width/10;
+	urbanist.set_dist_range(min_range, max_range);
+	// this proportion is use to choice the direction of the next step of the urbanist
+	int [] angle_proportion = {32,64,128,64,32,16,8,4,2};
+	urbanist.set_angle_proportion(angle_proportion);
+	int [] dist_proportion = {0,0,1,1,100,10,5,10,200,10,5,10,100,1,0,0};
+	urbanist.set_dist_proportion(dist_proportion);
 }
 
 vec3 buf_follow = new vec3();

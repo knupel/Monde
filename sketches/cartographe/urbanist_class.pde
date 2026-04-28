@@ -1,34 +1,47 @@
 /**
-URBANIST
-v 0.0.5
+* Class Urbanist
+* 2026-2026
+* v 0.1.0
 */
 public class Urbanist {
 	private vec3 pos;
 	private vec3 dst;
 	private vec3 from;
 	private int intersection ;
-	private vec2 range;
+	private vec2 dist_range;
+	private int [] dist_proportion;
 	private vec2 angle;
+	private int [] angle_proportion;
 	
 	public Urbanist() {
 		this.pos = new vec3();
 		this.from = new vec3();
 		this.dst = new vec3();
-		this.range = new vec2(0,height);
-		this.angle = new vec2(-PI/2,PI/2);
+		this.dist_range = new vec2(0,height);
+		this.dist_proportion = new int[] {64,32,16,8,4,2,1};
+		this.angle = new vec2(-PI,PI);
+		this.angle_proportion = new int[] {1,2,3,4,5,6,7,6,5,4,3,2,1};
 	}
   
-  // set
+  	// set
 	public void set_intersection(int intersection) {
 		this.intersection = intersection;
 	}
 
-	public void set_range(float min, float max) {
-		this.range.set(min,max);
+	public void set_dist_range(float min, float max) {
+		this.dist_range.set(min,max);
+	}
+
+	public void set_dist_proportion(int [] arr) {
+		this.dist_proportion = arr;
 	}
 
 	public void set_angle(float start, float end) {
 		this.angle.set(start,end);
+	}
+
+	public void set_angle_proportion(int [] arr) {
+		this.angle_proportion = arr;
 	}
 
 	public void set_pos(vec pos) {
@@ -37,7 +50,19 @@ public class Urbanist {
 
 	public void set_destination(vec dst) {
 		set_destination(dst,null);
+	}
 
+
+	public float next_distance() {
+		float range = abs(this.get_dist_max())-abs(this.get_dist_min());
+		float dist = r.random_ratio(range, this.dist_proportion);
+		return dist -abs(this.get_dist_min());
+	}
+
+	public float next_direction() {
+		float range = abs(this.get_angle().x())+abs(this.get_angle().y());
+		float angle = r.random_ratio(range, this.angle_proportion);
+		return angle;
 	}
 
 	public void set_destination(vec dst, R_Node intersection) {
@@ -52,7 +77,6 @@ public class Urbanist {
 			if(which < 0) which = 0;
 			this.dst.set(intersection.get_destination()[which]);
 		}
-
 	}
   
   // get
@@ -61,21 +85,23 @@ public class Urbanist {
 	}
 
 
-	public vec2 get_range() {
-		return this.range;
+	public vec2 get_dist_range() {
+		return this.dist_range;
 	}
 
 	public vec2 get_angle() {
 		return this.angle;
 	}
 
-	public float get_max() {
-		return this.range.y;
+	public float get_dist_max() {
+		return this.dist_range.y();
 	}
 
-		public float get_min() {
-		return this.range.x;
+	public float get_dist_min() {
+		return this.dist_range.x();
 	}
+
+	
 
 	public vec3 get_pos() {
 		return this.pos;

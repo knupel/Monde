@@ -13,7 +13,7 @@ vec3 goto_next(Urbanist urb, vec6 canvas, ArrayList<R_Node> inter_list, ArrayLis
 	urb.set_intersection(-1);
 	for(int i = 0 ; i < grid_nodes_monde.size() ; i++) {
 		vec3 p = grid_nodes_monde.get(i).pos();
-		if(r.compare(compute_plan_pos,new vec2(p.x(),p.y()),new vec2(urb.get_min()))) {
+		if(r.compare(compute_plan_pos,new vec2(p.x(),p.y()),new vec2(urb.get_dist_min()))) {
 			intersection_is(true);
 			compute_plan_pos = new vec2(p.x(),p.y());
 			urb.set_intersection(i);
@@ -53,12 +53,15 @@ boolean check_meeting_segment(R_Line2D target_segment, ArrayList<R_Line2D> seg_l
 }
 
 
-// angle
+// add next step for the urbanist direction, plus distance
 int count_segment_no_cross = 0;
 vec2 compute_pos_2D(Urbanist urb, vec6 canvas, ArrayList<R_Node> inter_list, ArrayList<R_Line2D> seg_list) {
+	// set direction
 	float angle = next_angle_direction(urb);
-	float ratio_center = abs(r.random_next_gaussian(2));
-	float dist = map(ratio_center,0,1,urb.get_range().x,urb.get_range().y);
+	// set distance
+	// float ratio_center = abs(r.random_next_gaussian(3));
+	// float dist = map(ratio_center,0,1,urb.get_range().x,urb.get_range().y);
+	float dist = urb.next_distance();
 
 	vec2 buf_pos = r.to_cartesian_2D(angle,dist).add(new vec2(urb.get_destination()));
 	// the function below create recursivity
@@ -68,22 +71,31 @@ vec2 compute_pos_2D(Urbanist urb, vec6 canvas, ArrayList<R_Node> inter_list, Arr
 
   	// check for to big length for next destination
 	float length_to_go = r.dist(buf_pos, new vec2(urb.get_pos()));
-	if(length_to_go >= urb.get_max()) {
+	if(length_to_go >= urb.get_dist_max()) {
 		int target = floor(random(inter_list.size()));
 		buf_pos = new vec2(inter_list.get(target).pos());
 	}
 	return buf_pos;
 }
 
+// float next_angle_direction(Urbanist urb) {
+// 	float angle = r.random_next_gaussian(3);
+// 	float previous_direction = new vec2(urb.get_pos()).angle(new vec2(urb.get_destination()));
+// 	// new angle
+// 	angle = map(angle,-1,1,urb.get_angle().x(),urb.get_angle().y());
+// 	angle += previous_direction;
+// 	// other side direction
+// 	float goto_left = random(1);
+// 	if(goto_left < .5) angle *= -1;
+// 	println("angle", angle);
+// 	return angle;
+// }
+
+
 float next_angle_direction(Urbanist urb) {
-	float angle = r.random_next_gaussian(3);
 	float previous_direction = new vec2(urb.get_pos()).angle(new vec2(urb.get_destination()));
-	// new angle
-	angle = map(angle,-1,1,urb.get_angle().x(),urb.get_angle().y());
-	angle += previous_direction;
-	// other side direction
-	float goto_left = random(1);
-	if(goto_left < .5) angle *= -1;
+	float angle = urb.next_direction();
+	// angle += previous_direction;
 	return angle;
 }
 
