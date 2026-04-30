@@ -10,21 +10,17 @@ vec3 goto_next(Urbanist urb, vec6 canvas, ArrayList<R_Node> inter_list, ArrayLis
 	count_segment_no_cross = 0;
 	// checking the plan 2D
 	// if the new target is close to carrefour, if it is the plotter must go on it
-	urb.set_intersection(-1);
 	for(int i = 0 ; i < grid_nodes_monde.size() ; i++) {
 		vec3 p = grid_nodes_monde.get(i).pos();
 		if(r.compare(compute_plan_pos,new vec2(p.x(),p.y()),new vec2(urb.get_dist_min()))) {
 			intersection_is(true);
 			compute_plan_pos = new vec2(p.x(),p.y());
-			urb.set_intersection(i);
 			break;
 		}
 	}
 
 	// checking the altitude 
     // make that in future version
-
-
 	vec3 pos = new vec3(compute_plan_pos.xy());
 	return pos;
 }
@@ -59,8 +55,6 @@ vec2 compute_pos_2D(Urbanist urb, vec6 canvas, ArrayList<R_Node> inter_list, Arr
 	// set direction
 	float angle = next_angle_direction(urb);
 	// set distance
-	// float ratio_center = abs(r.random_next_gaussian(3));
-	// float dist = map(ratio_center,0,1,urb.get_range().x,urb.get_range().y);
 	float dist = urb.next_distance();
 
 	vec2 buf_pos = r.to_cartesian_2D(angle,dist).add(new vec2(urb.get_destination()));
@@ -78,24 +72,13 @@ vec2 compute_pos_2D(Urbanist urb, vec6 canvas, ArrayList<R_Node> inter_list, Arr
 	return buf_pos;
 }
 
-// float next_angle_direction(Urbanist urb) {
-// 	float angle = r.random_next_gaussian(3);
-// 	float previous_direction = new vec2(urb.get_pos()).angle(new vec2(urb.get_destination()));
-// 	// new angle
-// 	angle = map(angle,-1,1,urb.get_angle().x(),urb.get_angle().y());
-// 	angle += previous_direction;
-// 	// other side direction
-// 	float goto_left = random(1);
-// 	if(goto_left < .5) angle *= -1;
-// 	println("angle", angle);
-// 	return angle;
-// }
-
-
 float next_angle_direction(Urbanist urb) {
 	float previous_direction = new vec2(urb.get_pos()).angle(new vec2(urb.get_destination()));
 	float angle = urb.next_direction();
-	// angle += previous_direction;
+	// println("angle", angle);
+		if(keyPressed) {
+	}
+	angle += previous_direction;
 	return angle;
 }
 

@@ -7,16 +7,24 @@ public class Urbanist {
 	private vec3 pos;
 	private vec3 dst;
 	private vec3 from;
-	private int intersection ;
+	// distance
 	private vec2 dist_range;
 	private int [] dist_proportion;
+	// angle / direction
 	private vec2 angle;
 	private int [] angle_proportion;
+	// intersection
+	private ivec2 intersection;
+	private int [] intersection_proportion;
+	private float speed;
 	
 	public Urbanist() {
 		this.pos = new vec3();
 		this.from = new vec3();
 		this.dst = new vec3();
+		this.intersection = new ivec2(2,7);
+		this.intersection_proportion = new int[] {64,32,16,8,4,2,1};
+		this.speed = 0.5;
 		this.dist_range = new vec2(0,height);
 		this.dist_proportion = new int[] {64,32,16,8,4,2,1};
 		this.angle = new vec2(-PI,PI);
@@ -24,10 +32,6 @@ public class Urbanist {
 	}
   
   	// set
-	public void set_intersection(int intersection) {
-		this.intersection = intersection;
-	}
-
 	public void set_dist_range(float min, float max) {
 		this.dist_range.set(min,max);
 	}
@@ -50,6 +54,10 @@ public class Urbanist {
 
 	public void set_destination(vec dst) {
 		set_destination(dst,null);
+	}
+
+	public void set_speed(float speed) {
+		this.speed = speed;
 	}
 
 
@@ -79,9 +87,13 @@ public class Urbanist {
 		}
 	}
   
-  // get
-  public int get_intersection() {
-		return intersection;
+  	// get
+	// public int get_intersection() {
+	// 	return intersection;
+	// }
+
+	public float get_speed() {
+		return this.speed;
 	}
 
 
@@ -102,7 +114,6 @@ public class Urbanist {
 	}
 
 	
-
 	public vec3 get_pos() {
 		return this.pos;
 	}

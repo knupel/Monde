@@ -39,7 +39,7 @@ void setup() {
 void draw() {
   // build
   build_map();
-  urbanist_walk(0.5);
+  run_urbanist();
 
   // show
   background(0);

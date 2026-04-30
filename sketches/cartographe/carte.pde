@@ -190,7 +190,7 @@ void add_intersection(R_Node node) {
 
 int num_branch_by_intersection(int min, int max) {
 	int num = (ceil(map(r.random_next_gaussian(1),-1,1,0,max)));
-	if(num == 0 || num == (min-1)) num = min; // we can choic 1 for the future to create a cul-de-sac
+	if(num == 0 || num == (min-1)) num = min; // we can choice 1 for the future to create a cul-de-sac
 	return num;
 }
 

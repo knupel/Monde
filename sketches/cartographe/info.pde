@@ -59,7 +59,10 @@ void show_intersection() {
 	if(grid_nodes_monde.size() > 0) {
 		for(R_Node inter : grid_nodes_monde) {
 			textAlign(CENTER);
-			rg.text(inter.id().a(),inter.pos());
+			// String txt = inter.get_branch() + " / " + inter.id().a();
+			// rg.text(txt,inter.pos());
+			rg.text(inter.get_branch(),inter.pos());
+			// rg.text(inter.id().a(),inter.pos());
 			// point(inter.get_pos());
 		}
 	}
