@@ -9,15 +9,23 @@ Urbanist urbanist;
 
 
 void set_urbanist() {
-	float min_range = height/80;
+
+		// direction
+	// this proportion is use to choice the direction of the next step of the urbanist
+	// int [] angle_proportion = {0,0,0,0,50,0,0,0,200,0,0,0,50,0,0,0}; // this setting cause a U-turn situation
+	int [] angle_proportion = {100,0,0,0,50,0,0,0,0,0,0,0,50,0,0,100};
+
+	urbanist.set_angle_proportion(angle_proportion);
+	// distance
+	float min_range = height/100;
 	float max_range = width/10;
 	urbanist.set_dist_range(min_range, max_range);
-	// this proportion is use to choice the direction of the next step of the urbanist
-	int [] angle_proportion = {0,0,1,1,100,10,5,10,200,10,5,10,100,1,0,0};
-	urbanist.set_angle_proportion(angle_proportion);
 	int [] dist_proportion = {32,64,128,64,32,16,8,4,2};
 	urbanist.set_dist_proportion(dist_proportion);
-	urbanist.set_speed(0.05);
+	// intersection
+	int [] inter_proportion = {32,64,64,32,4,2}; 
+	urbanist.set_intersection_ways(inter_proportion);
+	urbanist.set_speed(0.2);
 }
 
 vec3 buf_follow = new vec3();

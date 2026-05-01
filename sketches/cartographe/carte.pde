@@ -74,7 +74,7 @@ void build_map() {
 
     if(!intersection_is()) {
     	boolean cycle_add_is = false;
-		cycle_add_is = ask_intersection(min_by_intersection, max_by_intersection);
+		cycle_add_is = ask_intersection(urbanist);
 		// check to build segment
 		boolean build_anytime_is = false;
 		cycle_add_is = add_segment(urbanist, build_anytime_is);
@@ -167,18 +167,13 @@ void set_id_intersection(int id) {
 /**
 add intersection
 */
-boolean ask_intersection(int min_branch, int max_branch) {
-	int num = num_branch_by_intersection(min_branch,max_branch);
-	return ask_intersection(urbanist,num);
-}
-
-
 R_Node temp_intersection;
-boolean ask_intersection(Urbanist urb, int max_branch) {
-	boolean add_is = false;
+boolean ask_intersection(Urbanist urb) {
 
+	boolean add_is = false;
 	temp_intersection = new R_Node(urb.get_destination().copy(),urb.get_from());
-	temp_intersection.set_branch(max_branch);
+	int num_branch = urb.how_many_ways();
+	temp_intersection.set_branch(num_branch);
 	temp_intersection.id_a(add_id_intersection());
 	add_is = true;
 	return add_is;
@@ -188,11 +183,6 @@ void add_intersection(R_Node node) {
 	grid_nodes_monde.add(node);
 }
 
-int num_branch_by_intersection(int min, int max) {
-	int num = (ceil(map(r.random_next_gaussian(1),-1,1,0,max)));
-	if(num == 0 || num == (min-1)) num = min; // we can choice 1 for the future to create a cul-de-sac
-	return num;
-}
 
 
 
