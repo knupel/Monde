@@ -6,14 +6,14 @@ import rope.mesh.R_Line2D;
 Rope r = new Rope();
 R_Graphic rg;
 Ground ground[];
-ArrayList<R_Line2D> links = new ArrayList();
 int cols = 0;
 int rows = 0;
 
-int diam = 20;
+int diam = 10;
 
 void setup() {
   rg = new R_Graphic(this);
+  colorMode(HSB,360,100,100);
   // fullScreen(P3D);
   println("width ", width, "| height ", height);
   size(1200,700,P3D);
@@ -39,122 +39,55 @@ void setup() {
     ground[i].set_elements(elements);
     pos_x++;
   }
-
-
+  // réglage tectonique
+  tectonique(ground);
 }
 
-void keyPressed() {
-  // create_link(ground, links);
-  int num_lines = 30;
-  int max_length_of_line = 100;
-  create_link_no_cross(num_lines, max_length_of_line, ground, links);
-}
 
 void draw () {
   background(0);
   rg.fill_is(true);
   rg.stroke_is(true);
-  rg.stroke(r.BLOOD);
-  rg.fill(r.BLOOD);
-  rg.thickness(diam/4);
+  vec3 hsb = new vec3(hue(r.BLOOD), saturation(r.BLOOD), brightness(r.BLOOD));
+  // println(hsb);
+
+  rg.thickness(diam/2);
   for(int i = 0 ; i < ground.length ; i++) {
+    int c = color(hsb.hue(), hsb.sat(), hsb.bri() * ground[i].pos().z());
+    rg.stroke(c);
+    rg.fill(c);
     rg.point(ground[i].pos());
   }
- 
-  // println("links", links.size());
-  for(int i = 0 ; i < links.size() ; i++) {
-    R_Line2D line = links.get(i);
-    line.stroke_is(true);
-    line.stroke(r.NANKIN);
-    line.thickness(1);
-    line.show();
-  }
 }
 
 
-void create_link(Ground grid[], ArrayList<R_Line2D> list) {
-  list.clear();
-  int num_of_lines = 10;
-  for(int i = 0 ; i < num_of_lines ; i++) {
-    int a = floor(random(grid.length));
-    int b = floor(random(grid.length)); // il y a une probabilité que a == b
-    float ax = grid[a].pos().x();
-    float ay = grid[a].pos().y();
-    float bx = grid[b].pos().x();
-    float by = grid[b].pos().y();
-    R_Line2D line = new R_Line2D(this, ax, ay, bx, by);
-    println("line", line);
-    list.add(line);
+/**
+* Create a normal altitude from 0 to 1
+ */
+void tectonique(Ground ground[]) {
+  int points_high = 30;
+  int points_low = 30;
+
+  // medium points : : altitude = 0.5
+  for(Ground elem : ground) {
+    elem.pos.z(0.5);
   }
-}
-
-void create_link_no_cross(int num_of_lines, int dist_max, Ground grid[], ArrayList<R_Line2D> list) {
-  list.clear();
-  int maxAttempts = num_of_lines * 40; // marge un peu grande, mais peu importe
-  int attempts = 0;
-  ArrayList<float[]> segments = new ArrayList<float[]>();
-
-  while(list.size() < num_of_lines && attempts < maxAttempts) {
-    attempts++;
-    int a = floor(random(grid.length));
-    int b = floor(random(grid.length));
-    if (a == b) continue;
-
-    float ax = grid[a].pos().x();
-    float ay = grid[a].pos().y();
-    float bx = grid[b].pos().x();
-    float by = grid[b].pos().y();
-    if(grid[a].pos().dist(grid[b].pos()) > dist_max) continue;
-
-    boolean crosses = false;
-    for(int i = 0; i < segments.size(); i++) {
-      float[] s = segments.get(i);
-      if (segmentsIntersect(ax, ay, bx, by, s[0], s[1], s[2], s[3])) {
-        crosses = true;
-        break;
-      }
-    }
-    if (crosses) continue;
-
-    R_Line2D line = new R_Line2D(this, ax, ay, bx, by);
-    list.add(line);
-    segments.add(new float[] { ax, ay, bx, by });
+  // hight points : altitude = 1
+  for(int i = 0 ; i < points_high ; i++) {
+    int which = floor(random(ground.length));
+    ground[which].pos.z(1);
+  }
+  // low points : altitude = 0
+  for(int i = 0 ; i < points_low ; i++) {
+    int which = floor(random(ground.length));
+    ground[which].pos.z(0);
   }
 
-  println("create_link_no_cross: created", list.size(), "lines after", attempts, "attempts");
+  // create link altitude between the high and low points
+
 }
 
-boolean segmentsIntersect(float x1, float y1, float x2, float y2,
-                          float x3, float y3, float x4, float y4) {
-  if ((x1 == x3 && y1 == y3) || (x1 == x4 && y1 == y4) ||
-      (x2 == x3 && y2 == y3) || (x2 == x4 && y2 == y4)) {
-    return false;
-  }
 
-  int o1 = orientation(x1, y1, x2, y2, x3, y3);
-  int o2 = orientation(x1, y1, x2, y2, x4, y4);
-  int o3 = orientation(x3, y3, x4, y4, x1, y1);
-  int o4 = orientation(x3, y3, x4, y4, x2, y2);
-
-  if (o1 != o2 && o3 != o4) return true;
-  if (o1 == 0 && onSegment(x1, y1, x3, y3, x2, y2)) return true;
-  if (o2 == 0 && onSegment(x1, y1, x4, y4, x2, y2)) return true;
-  if (o3 == 0 && onSegment(x3, y3, x1, y1, x4, y4)) return true;
-  if (o4 == 0 && onSegment(x3, y3, x2, y2, x4, y4)) return true;
-
-  return false;
-}
-
-int orientation(float ax, float ay, float bx, float by, float cx, float cy) {
-  float value = (bx - ax) * (cy - ay) - (by - ay) * (cx - ax);
-  if (abs(value) < 0.00001) return 0;
-  return (value > 0) ? 1 : 2;
-}
-
-boolean onSegment(float ax, float ay, float bx, float by, float cx, float cy) {
-  return min(ax, bx) <= cx && cx <= max(ax, bx) &&
-         min(ay, by) <= cy && cy <= max(ay, by);
-}
 
 
 
