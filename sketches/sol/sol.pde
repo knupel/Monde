@@ -9,7 +9,7 @@ Ground ground[];
 int cols = 0;
 int rows = 0;
 
-int diam = 10;
+int diam = 5;
 
 void setup() {
   rg = new R_Graphic(this);
@@ -49,7 +49,6 @@ void draw () {
   rg.fill_is(true);
   rg.stroke_is(true);
   vec3 hsb = new vec3(hue(r.BLOOD), saturation(r.BLOOD), brightness(r.BLOOD));
-  // println(hsb);
 
   rg.thickness(diam/2);
   for(int i = 0 ; i < ground.length ; i++) {
@@ -84,7 +83,60 @@ void tectonique(Ground ground[]) {
   }
 
   // create link altitude between the high and low points
+  smooth_altitudes(ground, 40, 0.8);
+}
 
+void smooth_altitudes(Ground ground[], int passes, float convergence) {
+  int row_width = cols + 1;
+  float[] values = new float[ground.length];
+  boolean[] locked = new boolean[ground.length];
+
+  for(int i = 0; i < ground.length; i++) {
+    values[i] = ground[i].pos().z();
+    locked[i] = values[i] == 1 || values[i] == 0;
+  }
+
+  for(int pass = 0; pass < passes; pass++) {
+    float[] next = new float[ground.length];
+
+    for(int i = 0; i < ground.length; i++) {
+      if(locked[i]) {
+        next[i] = values[i];
+        continue;
+      }
+
+      int x = i % row_width;
+      int y = i / row_width;
+      float sum = 0;
+      int count = 0;
+
+      if(x > 0) {
+        sum += values[i - 1];
+        count++;
+      }
+      if(x < row_width - 1) {
+        sum += values[i + 1];
+        count++;
+      }
+      if(y > 0) {
+        sum += values[i - row_width];
+        count++;
+      }
+      if(y < rows - 1) {
+        sum += values[i + row_width];
+        count++;
+      }
+
+      float neighbor_avg = sum / max(count, 1);
+      next[i] = lerp(values[i], neighbor_avg, convergence);
+    }
+
+    values = next;
+  }
+
+  for(int i = 0; i < ground.length; i++) {
+    ground[i].pos.z(values[i]);
+  }
 }
 
 
