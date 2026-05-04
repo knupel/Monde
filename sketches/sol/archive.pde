@@ -1,96 +1,56 @@
-void old_1_create_ridge_and_talweg_network(Ground ground[], ArrayList<R_Line2D> ridges, ArrayList<R_Line2D> talwegs, int min_lines, int max_lines, int min_length, int max_length) {
-  ArrayList<Integer> high_indices = new ArrayList<Integer>();
-  ArrayList<Integer> low_indices = new ArrayList<Integer>();
+/**
+* 4e Essai avec un agent
+*/
+void essai_4_create_ridge(ArrayList<vec3> tops, ArrayList<R_Line2D> ridges) {
+  if (tops.size() < 2) return; // Need at least 2 points
 
-  for(int i = 0; i < ground.length; i++) {
-    float z = ground[i].pos().z();
-    if(z == 1) {
-      high_indices.add(i);
-    } else if(z == 0) {
-      low_indices.add(i);
+  // Create all possible edges
+  ArrayList<Edge> edges = new ArrayList<>();
+  for (int i = 0; i < tops.size(); i++) {
+    for (int j = i + 1; j < tops.size(); j++) {
+      vec3 a = tops.get(i);
+      vec3 b = tops.get(j);
+      float dist = a.dist(b);
+      edges.add(new Edge(i, j, dist));
     }
   }
 
-  int ridge_count = floor(random(min_lines, max_lines + 1));
-  int talweg_count = floor(random(min_lines, max_lines + 1));
+  // Sort edges by distance
+  edges.sort((e1, e2) -> Float.compare(e1.d, e2.d));
 
-  for(int i = 0; i < ridge_count; i++) {
-    if(high_indices.size() == 0) break;
-    int start_index = high_indices.get(floor(random(high_indices.size())));
-    old_1_create_line(ground, ridges, start_index, 1, floor(random(min_length, max_length + 1)));
+  // Process edges
+  println("tops size", tops.size());
+  println("edge size", edges.size());
+  for (Edge e : edges) {
+      // Check if adding this edge would cross existing ridges
+      R_Line2D candidate = new R_Line2D(this, tops.get(e.i), tops.get(e.j));
+      boolean crosses = false;
+      for (R_Line2D existing : ridges) {
+        if (candidate.intersection_is(existing)) {
+          crosses = true;
+          break;
+        }
+      }
+      if (!crosses) {
+        ridges.add(candidate);
+
+      }
+
   }
-
-  for(int i = 0; i < talweg_count; i++) {
-    if(low_indices.size() == 0) break;
-    int start_index = low_indices.get(floor(random(low_indices.size())));
-    old_1_create_line(ground, talwegs, start_index, 0, floor(random(min_length, max_length + 1)));
-  }
-}
-
-void old_1_create_line(Ground ground[], ArrayList<R_Line2D> lines, int start_index, float target_value, int length) {
-  // lines.clear();
-  int current_index = start_index;
-  int previous_index = -1;
-
-  for(int step = 0; step < length; step++) {
-    ground[current_index].pos.z(target_value);
-    int next_index = old_1_choose_next_line_index(ground, current_index, previous_index, target_value);
-    if(next_index == -1) {
-      break;
+  for (Edge e : edges) {
+    // Check if adding this edge would cross existing ridges
+    R_Line2D candidate = new R_Line2D(this, tops.get(e.i), tops.get(e.j));
+    boolean crosses = false;
+    for (R_Line2D existing : ridges) {
+      if (candidate.intersection_is(existing)) {
+        crosses = true;
+        break;
+      }
     }
-    if(previous_index >= 0 && current_index >= 0) {
-      vec3 a = ground[previous_index].pos().copy();
-      vec3 b = ground[current_index].pos().copy();
-      // println(a,b);
-      R_Line2D line = new R_Line2D(this, a, b);
-      lines.add(line);
-    }
-    previous_index = current_index;
-    current_index = next_index;
-  }
-}
-
-int old_1_choose_next_line_index(Ground ground[], int current_index, int previous_index, float target_value) {
-  int[] neighbors = old_1_get_neighbor_indices(current_index);
-  ArrayList<Integer> candidates = new ArrayList<Integer>();
-
-  for(int i = 0; i < neighbors.length; i++) {
-    int neighbor = neighbors[i];
-    if(neighbor == -1 || neighbor == previous_index) continue;
-    candidates.add(neighbor);
-  }
-
-  if(candidates.size() == 0) {
-    return -1;
-  }
-
-  ArrayList<Integer> unused = new ArrayList<Integer>();
-  for(int i = 0; i < candidates.size(); i++) {
-    int index = candidates.get(i);
-    if(ground[index].pos().z() != target_value) {
-      unused.add(index);
+    if (!crosses) {
+      ridges.add(candidate);
     }
   }
-
-  if(unused.size() > 0) {
-    candidates = unused;
-  }
-
-  return candidates.get(floor(random(candidates.size())));
-}
-
-int[] old_1_get_neighbor_indices(int index) {
-  int row_width = cols + 1;
-  int x = index % row_width;
-  int y = index / row_width;
-  int[] neighbors = new int[4];
-
-  neighbors[0] = (x > 0) ? index - 1 : -1;
-  neighbors[1] = (x < row_width - 1) ? index + 1 : -1;
-  neighbors[2] = (y > 0) ? index - row_width : -1;
-  neighbors[3] = (y < rows - 1) ? index + row_width : -1;
-
-  return neighbors;
 }
 
 
@@ -100,13 +60,71 @@ int[] old_1_get_neighbor_indices(int index) {
 
 
 
+/**
+* 3eme essai avec un agent
+ */
 
-// deuxième solution qui ne fonctionne pas
+ void essai_3_create_ridge(ArrayList<vec3> tops, ArrayList<R_Line2D> ridges) {
+  if (tops.size() < 2) return; // Need at least 2 points
 
+  // Create all possible edges
+  ArrayList<Edge> edges = new ArrayList<>();
+  for (int i = 0; i < tops.size(); i++) {
+    for (int j = i + 1; j < tops.size(); j++) {
+      vec3 a = tops.get(i);
+      vec3 b = tops.get(j);
+      float d = dist(a.x(), a.y(), b.x(), b.y());
+      edges.add(new Edge(i, j, d));
+    }
+  }
+
+  // Sort edges by distance
+  edges.sort((e1, e2) -> Float.compare(e1.d, e2.d));
+
+  // Union-Find
+  UnionFind uf = new UnionFind(tops.size());
+
+  // Process edges
+  for (Edge e : edges) {
+    if (uf.find(e.i) != uf.find(e.j)) {
+      // Check if adding this edge would cross existing ridges
+      R_Line2D candidate = new R_Line2D(this, tops.get(e.i), tops.get(e.j));
+      boolean crosses = false;
+      for (R_Line2D existing : ridges) {
+        if (candidate.intersection_is(existing)) {
+          crosses = true;
+          break;
+        }
+      }
+      if (!crosses) {
+        ridges.add(candidate);
+        uf.union(e.i, e.j);
+      }
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ Essai 2 avec un agent
+  */
 /**
 * Création de lignes de crête reliant les sommets par paires
  */
-void old_2_create_ridge_network(Ground[] ground, ArrayList<vec3> tops, ArrayList<R_Line2D> ridges, int min_lines, int max_lines, int min_length, int max_length) {
+void essai_2_create_ridge_network(Ground[] ground, ArrayList<vec3> tops, ArrayList<R_Line2D> ridges, int min_lines, int max_lines, int min_length, int max_length) {
   if(tops.size() < 2) return;
   
   // Convertir tops en indices
@@ -148,7 +166,7 @@ void old_2_create_ridge_network(Ground[] ground, ArrayList<vec3> tops, ArrayList
     }
     
     // Trouver chemin via BFS
-    ArrayList<Integer> path = old_2_bfs_path(ground, start_index, end_index, used_segments);
+    ArrayList<Integer> path = essai_2_bfs_path(ground, start_index, end_index, used_segments);
     
     if(path != null && path.size() > 0) {
       current_end = path.get(path.size() - 1); // Sauvegarder l'end pour chaînage futur
@@ -176,7 +194,7 @@ void old_2_create_ridge_network(Ground[] ground, ArrayList<vec3> tops, ArrayList
   }
 }
 
-ArrayList<Integer> old_2_bfs_path(Ground[] ground, int start, int end, ArrayList<Integer> used_segments) {
+ArrayList<Integer> essai_2_bfs_path(Ground[] ground, int start, int end, ArrayList<Integer> used_segments) {
   ArrayList<Integer> path = new ArrayList<>();
   ArrayList<Integer> queue = new ArrayList<>();
   ArrayList<Integer> visited = new ArrayList<>();
@@ -202,7 +220,7 @@ ArrayList<Integer> old_2_bfs_path(Ground[] ground, int start, int end, ArrayList
       return path;
     }
     
-    int[] neighbors = old_2_get_neighbor_indices(current);
+    int[] neighbors = essai_2_get_neighbor_indices(current);
     for(int n : neighbors) {
       if(n == -1) continue;
       
@@ -226,7 +244,7 @@ ArrayList<Integer> old_2_bfs_path(Ground[] ground, int start, int end, ArrayList
   return path;
 }
 
-int[] old_2_get_neighbor_indices(int index) {
+int[] essai_2_get_neighbor_indices(int index) {
   int row_width = cols + 1;
   int x = index % row_width;
   int y = index / row_width;
@@ -246,74 +264,123 @@ int[] old_2_get_neighbor_indices(int index) {
 
 
 
+
+
+
+
+
 /**
-* 3eme essai
- */
+* 1er essai avec un agent
+*/
+void essai_1_create_ridge_and_talweg_network(Ground ground[], ArrayList<R_Line2D> ridges, ArrayList<R_Line2D> talwegs, int min_lines, int max_lines, int min_length, int max_length) {
+  ArrayList<Integer> high_indices = new ArrayList<Integer>();
+  ArrayList<Integer> low_indices = new ArrayList<Integer>();
 
- void old_3_create_ridge(ArrayList<vec3> tops, ArrayList<R_Line2D> ridges) {
-  if (tops.size() < 2) return; // Need at least 2 points
-
-  // Create all possible edges
-  ArrayList<Edge> edges = new ArrayList<>();
-  for (int i = 0; i < tops.size(); i++) {
-    for (int j = i + 1; j < tops.size(); j++) {
-      vec3 a = tops.get(i);
-      vec3 b = tops.get(j);
-      float d = dist(a.x(), a.y(), b.x(), b.y());
-      edges.add(new Edge(i, j, d));
+  for(int i = 0; i < ground.length; i++) {
+    float z = ground[i].pos().z();
+    if(z == 1) {
+      high_indices.add(i);
+    } else if(z == 0) {
+      low_indices.add(i);
     }
   }
 
-  // Sort edges by distance
-  edges.sort((e1, e2) -> Float.compare(e1.d, e2.d));
+  int ridge_count = floor(random(min_lines, max_lines + 1));
+  int talweg_count = floor(random(min_lines, max_lines + 1));
 
-  // Union-Find
-  UnionFind uf = new UnionFind(tops.size());
+  for(int i = 0; i < ridge_count; i++) {
+    if(high_indices.size() == 0) break;
+    int start_index = high_indices.get(floor(random(high_indices.size())));
+    essai_1_create_line(ground, ridges, start_index, 1, floor(random(min_length, max_length + 1)));
+  }
 
-  // Process edges
-  for (Edge e : edges) {
-    if (uf.find(e.i) != uf.find(e.j)) {
-      // Check if adding this edge would cross existing ridges
-      R_Line2D candidate = new R_Line2D(this, tops.get(e.i), tops.get(e.j));
-      boolean crosses = false;
-      for (R_Line2D existing : ridges) {
-        if (candidate.intersection_is(existing)) {
-          crosses = true;
-          break;
-        }
-      }
-      if (!crosses) {
-        ridges.add(candidate);
-        uf.union(e.i, e.j);
-      }
-    }
+  for(int i = 0; i < talweg_count; i++) {
+    if(low_indices.size() == 0) break;
+    int start_index = low_indices.get(floor(random(low_indices.size())));
+    essai_1_create_line(ground, talwegs, start_index, 0, floor(random(min_length, max_length + 1)));
   }
 }
 
-// class Edge {
-//   int i, j;
-//   float d;
-//   Edge(int i, int j, float d) {
-//     this.i = i;
-//     this.j = j;
-//     this.d = d;
-//   }
-// }
+void essai_1_create_line(Ground ground[], ArrayList<R_Line2D> lines, int start_index, float target_value, int length) {
+  // lines.clear();
+  int current_index = start_index;
+  int previous_index = -1;
 
-// class UnionFind {
-//   int[] parent;
-//   UnionFind(int n) {
-//     parent = new int[n];
-//     for (int i = 0; i < n; i++) parent[i] = i;
-//   }
-//   int find(int x) {
-//     if (parent[x] != x) parent[x] = find(parent[x]);
-//     return parent[x];
-//   }
-//   void union(int x, int y) {
-//     int px = find(x), py = find(y);
-//     if (px != py) parent[px] = py;
-//   }
-// }
+  for(int step = 0; step < length; step++) {
+    ground[current_index].pos.z(target_value);
+    int next_index = essai_1_choose_next_line_index(ground, current_index, previous_index, target_value);
+    if(next_index == -1) {
+      break;
+    }
+    if(previous_index >= 0 && current_index >= 0) {
+      vec3 a = ground[previous_index].pos().copy();
+      vec3 b = ground[current_index].pos().copy();
+      // println(a,b);
+      R_Line2D line = new R_Line2D(this, a, b);
+      lines.add(line);
+    }
+    previous_index = current_index;
+    current_index = next_index;
+  }
+}
+
+int essai_1_choose_next_line_index(Ground ground[], int current_index, int previous_index, float target_value) {
+  int[] neighbors = essai_1_get_neighbor_indices(current_index);
+  ArrayList<Integer> candidates = new ArrayList<Integer>();
+
+  for(int i = 0; i < neighbors.length; i++) {
+    int neighbor = neighbors[i];
+    if(neighbor == -1 || neighbor == previous_index) continue;
+    candidates.add(neighbor);
+  }
+
+  if(candidates.size() == 0) {
+    return -1;
+  }
+
+  ArrayList<Integer> unused = new ArrayList<Integer>();
+  for(int i = 0; i < candidates.size(); i++) {
+    int index = candidates.get(i);
+    if(ground[index].pos().z() != target_value) {
+      unused.add(index);
+    }
+  }
+
+  if(unused.size() > 0) {
+    candidates = unused;
+  }
+
+  return candidates.get(floor(random(candidates.size())));
+}
+
+int[] essai_1_get_neighbor_indices(int index) {
+  int row_width = cols + 1;
+  int x = index % row_width;
+  int y = index / row_width;
+  int[] neighbors = new int[4];
+
+  neighbors[0] = (x > 0) ? index - 1 : -1;
+  neighbors[1] = (x < row_width - 1) ? index + 1 : -1;
+  neighbors[2] = (y > 0) ? index - row_width : -1;
+  neighbors[3] = (y < rows - 1) ? index + row_width : -1;
+
+  return neighbors;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

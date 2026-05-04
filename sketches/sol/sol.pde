@@ -75,11 +75,19 @@ void draw () {
   rg.stroke(r.BLOOD);
 
   // ligne de crète
+  int rank = 0;
   for(R_Line2D line : ridges) {
+    // if(rank == 0) println("ridge rank", rank, line);
+    // rank++;
     line.show();
   }
-  for(vec3 pos : tops) {
+  rank = 0;
+  for(vec3 pos : tops) { 
     rg.ellipse(pos,20);
+    rg.textAlign(CENTER);
+    // if(rank == 0) println("tops rank", rank, pos);
+    // if(rank == 1) println("tops rank", rank, pos);
+    rg.text(rank++, pos.x(), pos.y());
   }
 
   // talwegs
@@ -100,7 +108,7 @@ void keyPressed() {
 * Create a normal altitude from 0 to 1
  */
 void tectonique(Ground ground[], ArrayList<vec3> tops, ArrayList<vec3> bottoms, ArrayList<R_Line2D> ridges, ArrayList<R_Line2D> talwegs) {
-  int points_high = 100;
+  int points_high = 20;
   int points_low = 30;
   ridges.clear();
   talwegs.clear();
@@ -111,114 +119,69 @@ void tectonique(Ground ground[], ArrayList<vec3> tops, ArrayList<vec3> bottoms, 
   for(Ground elem : ground) {
     elem.pos.z(0.5);
   }
-  // hight points : altitude = 1
-  for(int i = 0 ; i < points_high ; i++) {
-    int which = floor(random(ground.length));
-    ground[which].pos.z(1);
-    tops.add(ground[which].pos().copy());
-  }
+
+
   // low points : altitude = 0
-  for(int i = 0 ; i < points_low ; i++) {
-    int which = floor(random(ground.length));
-    ground[which].pos.z(0);
-    bottoms.add(ground[which].pos().copy());
-  }
+  // for(int i = 0 ; i < points_low ; i++) {
+  //   int which = floor(random(ground.length));
+  //   ground[which].pos.z(0);
+  //   bottoms.add(ground[which].pos().copy());
+  // }
 
   // créer des lignes de crêtes pour les points hauts et des lignes de talwegs pour les points bas
-  create_ridge_network(ground, tops, ridges);
+  create_ridge_network(ground, tops, ridges, points_high);
 
   // lissage final autour du réseau
   smooth_altitudes(ground, 100, 0.9);
 }
 
-void create_ridge_network(Ground[] ground, ArrayList<vec3> tops, ArrayList<R_Line2D> ridges) {
-  create_ridge(tops, ridges);
+void create_ridge_network(Ground[] ground, ArrayList<vec3> tops, ArrayList<R_Line2D> ridges, int points_high) {
+  create_ridge(tops, ridges, points_high);
 }
 
 
-void create_ridge(ArrayList<vec3> tops, ArrayList<R_Line2D> ridges) {
-  if (tops.size() < 2) return; // Need at least 2 points
-
-  // Create all possible edges
-  ArrayList<Edge> edges = new ArrayList<>();
-  for (int i = 0; i < tops.size(); i++) {
-    for (int j = i + 1; j < tops.size(); j++) {
-      vec3 a = tops.get(i);
-      vec3 b = tops.get(j);
-      float dist = a.dist(b);
-      edges.add(new Edge(i, j, dist));
-    }
-  }
-
-  // Sort edges by distance
-  edges.sort((e1, e2) -> Float.compare(e1.d, e2.d));
-
-  // Union-Find
-  // UnionFind uf = new UnionFind(tops.size());
-
-  // Process edges
-  println("tops size", tops.size());
-  println("edge size", edges.size());
-  for (Edge e : edges) {
-      // Check if adding this edge would cross existing ridges
-      R_Line2D candidate = new R_Line2D(this, tops.get(e.i), tops.get(e.j));
-      boolean crosses = false;
-      for (R_Line2D existing : ridges) {
-        if (candidate.intersection_is(existing)) {
-          crosses = true;
+void create_ridge(ArrayList<vec3> tops, ArrayList<R_Line2D> ridges, int points_high) {
+  tops.clear();
+  ridges.clear();
+  int max_to_next_point = (int)(r.min(height, width) * 0.4);
+  vec3 seed = new vec3(random(width), random(height), 1);
+  // need to make .copy() along the algorithm to avoid the pointer effect
+  tops.add(seed.copy());
+  for(int i = 0 ; i < points_high ; i++) {
+    vec3 next_top = next_point(seed.copy(), max_to_next_point);
+    R_Line2D next_ridge = new R_Line2D(this, seed.copy(), next_top.copy());
+    tops.add(next_top);
+    // check for crossing line, if that's don't cross we can add the ridge
+    if(ridges.size() > 0) {
+      boolean crossing_is = false;
+      for(R_Line2D previous_ridge : ridges) {
+        // need add the seed coordonanate as exception to avoid the intersection on this point, if we don't do that we cannot link the segment
+        if(previous_ridge.intersection_is(next_ridge, seed.xy())) {
+          crossing_is = true;
           break;
         }
       }
-      if (!crosses) {
-        ridges.add(candidate);
-
-      }
-
-  }
-  // for (Edge e : edges) {
-  //   if (uf.find(e.i) != uf.find(e.j)) {
-  //     // Check if adding this edge would cross existing ridges
-  //     R_Line2D candidate = new R_Line2D(this, tops.get(e.i), tops.get(e.j));
-  //     boolean crosses = false;
-  //     for (R_Line2D existing : ridges) {
-  //       if (candidate.intersection_is(existing)) {
-  //         crosses = true;
-  //         break;
-  //       }
-  //     }
-  //     if (!crosses) {
-  //       ridges.add(candidate);
-  //       uf.union(e.i, e.j);
-  //     }
-  //   }
-  // }
-}
-
-class Edge {
-  int i, j;
-  float d;
-  Edge(int i, int j, float d) {
-    this.i = i;
-    this.j = j;
-    this.d = d;
+      if(!crossing_is) {
+        ridges.add(next_ridge.copy());
+      } 
+    } else {
+      ridges.add(next_ridge.copy());
+    }
+    seed.set(next_top.copy());
   }
 }
 
-class UnionFind {
-  int[] parent;
-  UnionFind(int n) {
-    parent = new int[n];
-    for (int i = 0; i < n; i++) parent[i] = i;
-  }
-  int find(int x) {
-    if (parent[x] != x) parent[x] = find(parent[x]);
-    return parent[x];
-  }
-  void union(int x, int y) {
-    int px = find(x), py = find(y);
-    if (px != py) parent[px] = py;
-  }
+vec3 next_point(vec3 origin, int max) {
+  float dist = random(max);
+  float angle = random(TAU);
+  float x = sin(angle);
+  float y = cos(angle);
+  x = x * dist + origin.x();
+  y = y * dist + origin.y();
+  return new vec3(x,y,origin.z());
 }
+
+
 
 
 
