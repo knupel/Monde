@@ -124,6 +124,17 @@ void clean_talwegs_ridges(ArrayList<R_Line2D> talwegs,  ArrayList<R_Line2D> ridg
 * set grid point to follow the ridges and talwegs
  */
 
+void level_points_grid(Ground grid[], ArrayList<vec3> points) {
+  for(Ground elem : grid) {
+    for(vec3 point : points) {
+      if(point.xy().compare(elem.pos.xy(), elem.radius())) {
+        if(point.z() == 1) elem.pos.z(1);
+        if(point.z() == 0) elem.pos.z(0);
+      }
+    }
+  }
+}
+
 
 void up_point_on_the_ridge(Ground grid[], ArrayList<R_Line2D> lines) {
   level_lines_grid(grid, lines, 1);
@@ -132,7 +143,16 @@ void down_point_on_the_talweg(Ground grid[], ArrayList<R_Line2D> lines){
   level_lines_grid(grid, lines, 0);
 }
 
+
+
 void level_lines_grid(Ground grid[], ArrayList<R_Line2D> lines, float level) {
+  int mut = 1;
+  if(level == 1) mut = - 1;
+  float noise = random(1) * 0.05 * mut;
+
+  // il y a ça qui peut poser un problème danss la fonction smooth_altitudes()
+  // locked[i] = values[i] == 1 || values[i] == 0;
+  println("level", level, "noise", noise);
   for(Ground elem : grid) {
     for(R_Line2D line : lines) {
       if(line.meet_is(elem.pos(), elem.radius())) {
@@ -140,7 +160,6 @@ void level_lines_grid(Ground grid[], ArrayList<R_Line2D> lines, float level) {
         break;
       }
     }
-
   }
 }
 
@@ -210,4 +229,12 @@ void smooth_altitudes(Ground grid[], int passes, float convergence) {
   for(int i = 0; i < grid.length; i++) {
     grid[i].pos.z(values[i]);
   }
+}
+
+void add_noise_altitures(Ground grid[], float range) {
+  for(int i = 0; i < grid.length; i++) {
+    float noise = random(-1,1) * range;
+    grid[i].pos.add_z(noise);
+  }
+
 }
