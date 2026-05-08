@@ -1,9 +1,9 @@
 /**
-* Ground 
+* Sol
 * 2026-2026
-* v 0.0.1
+* v 0.0.2
 */
-class Ground {
+class Sol {
   private vec3 pos = new vec3();
   private int radius = 1;
   private vec3 size = new vec3(1);
@@ -11,7 +11,7 @@ class Ground {
   private int ground = 0;
   private int elements = 0;
   
-  Ground() {
+  Sol() {
   }
 
   // position

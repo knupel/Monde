@@ -1,180 +1,36 @@
 /**
-* Sol
-* Copyleft (c) 2019-2019
-* Stan le Punk
-* https://github.com/StanLepunK
-* http://stanlepunk.xyz/
+* Surface
+* Création d'un maillage triangulaire 
+* à partir d'une grille de points représentant le sol
+* Copyleft (c) 2026-2026
+* Artiste : Knupel
 */
 
-int cols = 10;
-int rows = 10;
-float offset = .25;
-float angle = PI;
-Grid2D grid = new Grid2D();
+import rope.core.Rope;
+import rope.core.R_Graphic;
+import rope.vector.ivec2;
+Rope r = new Rope();
+R_Graphic rg;
+
+// grille du sol
+Sol sols[];
+int cols = 0;
+int rows = 0;
+ivec2 cell = new ivec2(20,40);
+ivec2 offset = new ivec2(0,20);
+ivec2 tempo_offset = new ivec2(0,1); // nombre de ligne ou de colonne à sauter pour le décalage
+// élément du maillage
+
 void setup() {
-	 size(800,800,P2D);
-	 // sol();
-	 
+	rg = new R_Graphic(this);
+	size(1200,1200, P3D);
+	sols = new Sol[init_sol(cell)];
+	set_sol(sols, cell, offset, tempo_offset);
 }
+
 
 void draw() {
-	background(255);
-	println((int)frameRate);
-
-
-	
-	if(mousePressed) {
-		offset = map(mouseX,0,width,.1,1);
-		angle = map(mouseY,0,height,0,TAU);
-	}
-
-	// grid.type_c(cols,rows,angle,offset);
-
-	grid.type_hex(width,height,20,angle);
-	// grid.type_c(width/2,width/2,20,angle,offset);
-
-	// grid.type_b(width/2,width/2,20,offset);
-	// grid.type_a(width/2,width/2,20);
-
-
-	float size = width /(float)cols;
-	int count = 0;
-	int count_show = 0;
-	boolean show_is = true;
-  
-
-  // float ratio = map(mouseY,0,height,10,height);
-  float canvas = height;
-  float ratio_cell = width;
-	// show_point(ratio);
-	// show_text(ratio);
-	show_shape(canvas,ratio_cell);
-
-  stroke(r.BLACK);
-	rect(mouseX,mouseY,20,20);
+	background(r.WHITE);
+	display_sol(sols);
 
 }
-
-
-
-
-
-
-void show_text(int canvas) {
-	textAlign(CENTER);
-	textSize(16);
-	fill(r.BLACK);
-  int count =0;
-	for(vec4 v : grid.get()) {
-		text(count++,new vec2(v).mult(canvas));  
-	}
-}
-
-
-void show_point(int canvas) {
-  strokeWeight(10);
-  stroke(r.BLOOD);
-  noFill();
-	for(vec4 v : grid.get()) {
-		point(new vec2(v.copy().mult(canvas)));   
-	}
-}
-
-void show_shape(float ratio_canvas, float ratio_cell) {
-  strokeWeight(1);
-  stroke(r.BLOOD);
-  noFill();
-  //fill(r.BLACK);
-  // println(grid.get_cell().x);
-  vec3 size = grid.get_cell().mult(ratio_cell*2); // 
- // float size = grid.get_size() *canvas *abs(sin(frameCount*.01));
-  // println(size);
-  // float angle = map(mouseX,0,width,0,TAU);
-	for(vec4 v : grid.get()) {
-		float angle = v.w;
-		// costume(vec2(v.copy().mult(canvas)),vec2(10),angle,TRIANGLE);  
-		// println(v); 
-
-		// costume(vec2(v.copy().mult(ratio_canvas)),vec2(size),angle,TRIANGLE);
-		vec4 buf = new vec4(v.copy().mult(grid.get_canvas()));
-		costume(new vec2(buf.x(), buf.y()), new vec2(size.x(), size.y()),angle,TRIANGLE);   
-	}
-}
-
-
-
-
-
-
-
-
-
-
-
-Sol [][] sol;
-void sol() {
-	sol = new Sol[rows][cols];
-	for(int x = 0 ; x < sol.length ; x++) {
-		for(int y = 0 ; y < sol[0].length ; y++) {
-			sol[x][y]= new Sol(x,y,-1);
-		}
-	}
-
-}
-
-public class Sol {
-	ivec3 coord;
-	Sol (int x, int y, int z) {
-		this.coord = new ivec3(x,y,z);
-	}
-
-	void set_altitude(int z) {
-		this.coord.z = z;
-	}
-
-	ivec3 get_coord() {
-		return coord;
-	}
-
-	vec2 get_pos() {
-		return new vec2(coord.x,coord.y);
-	}
-
-	int get_alt() {
-		return coord.z;
-	}
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

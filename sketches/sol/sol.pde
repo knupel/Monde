@@ -5,15 +5,16 @@ import rope.mesh.R_Line2D;
 
 Rope r = new Rope();
 R_Graphic rg;
-Ground ground[];
+// sol
+Sol sol[];
+int cols = 0;
+int rows = 0;
+int diam = 4;
+// relief
 ArrayList<R_Line2D> ridges = new ArrayList<>();
 ArrayList<R_Line2D> talwegs = new ArrayList<>();
 ArrayList<vec3> tops = new ArrayList<>();
 ArrayList<vec3> bottoms = new ArrayList<>();
-
-int cols = 0;
-int rows = 0;
-int diam = 4;
 
 void setup() {
   rg = new R_Graphic(this);
@@ -22,31 +23,12 @@ void setup() {
   println("width ", width, "| height ", height);
   size(1200,1200,P2D);
 
-  ivec2 step = new ivec2(diam);
-  cols = width/step.x() + 1; // un peu bizarre, mais ça permets de faire les bordures
-  rows = height/step.y() + 2; // juste bizarre de rajouter 2, mais ça permets de faire les bordures
-  int num = cols * rows + rows;
-  ground = new Ground[num];
-  int pos_x = 0;
-  int pos_y = 0;
-  boolean first_is = true;
-  //
-  for(int i = 0 ; i < num ; i++) {
-    if(pos_x > cols) {
-      first_is = false;
-      pos_x = 0;
-    }
-    if(pos_x == 0 && !first_is) pos_y++;
-    ground[i] = new Ground();
-    ground[i].pos(pos_x * step.x(), pos_y * step.y(),0);
-    ground[i].radius(diam/2);
-    int elements = floor(random(100));
-    ground[i].set_elements(elements);
-    pos_x++;
-  }
+  set_sol();
   // réglage tectonique
-  tectonique(ground, tops, bottoms, ridges, talwegs);
+  tectonique(sol, tops, bottoms, ridges, talwegs);
 }
+
+
 
 
 void draw () {
@@ -59,11 +41,11 @@ void draw () {
     vec3 hsb = new vec3(hue(colour), saturation(colour), brightness(colour));
 
     rg.thickness(diam/2);
-    for(int i = 0 ; i < ground.length ; i++) {
-      int c = color(hsb.hue(), hsb.sat(), hsb.bri() * ground[i].pos().z());
+    for(int i = 0 ; i < sol.length ; i++) {
+      int c = color(hsb.hue(), hsb.sat(), hsb.bri() * sol[i].pos().z());
       rg.stroke(c);
       rg.fill(c);
-      rg.point(ground[i].pos());
+      rg.point(sol[i].pos());
       // rg.plot(ground[i].pos());
     }
   }
@@ -80,7 +62,7 @@ void draw () {
 }
 
 void keyPressed() {
-  if(key == 'n') tectonique(ground, tops, bottoms, ridges, talwegs);
+  if(key == 'n') tectonique(sol, tops, bottoms, ridges, talwegs);
   if(key == 'i') display_skeleton();
   if(key == 'm') display_map();
 }
@@ -91,7 +73,7 @@ void keyPressed() {
 /**
 * Create a normal altitude from 0 to 1
  */
-void tectonique(Ground ground[], ArrayList<vec3> tops, ArrayList<vec3> bottoms, ArrayList<R_Line2D> ridges, ArrayList<R_Line2D> talwegs) {
+void tectonique(Sol ground[], ArrayList<vec3> tops, ArrayList<vec3> bottoms, ArrayList<R_Line2D> ridges, ArrayList<R_Line2D> talwegs) {
   int points_high = 50;
   int points_low = 50;
   ridges.clear();
@@ -99,7 +81,7 @@ void tectonique(Ground ground[], ArrayList<vec3> tops, ArrayList<vec3> bottoms, 
   tops.clear();
   bottoms.clear();
   // medium points : : altitude = 0.5
-  for(Ground elem : ground) {
+  for(Sol elem : ground) {
     elem.pos.z(0.5);
   }
   // créer des lignes de crêtes pour les points hauts et des lignes de talwegs pour les points bas
