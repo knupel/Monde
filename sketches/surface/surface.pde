@@ -29,13 +29,25 @@ void setup() {
 	sols = new Sol[init_sol(cell)];
 	set_sol(sols, cell, offset, tempo_offset);
 	create_surface(sols,faces);
+	set_altitude_sol(sols);
 }
 
 
 void draw() {
+	lights();
 	background(r.WHITE);
+	// double translation to have a center rotation for the surface
+	rg.translate(width/2, height/2);
+	rg.push();
+	rg.rotateX(mouseY * 0.01);
+	rg.rotateZ(mouseX * 0.01);
+	rg.translate(-width/2, -height/2);
+	// display part
 	display_sol(sols);
 	display_surface(faces);
-	update_sol(sols);
+	rg.pop();
+}
 
+void keyPressed() {
+	set_altitude_sol(sols);
 }
