@@ -36,5 +36,6 @@ void draw() {
 	background(r.WHITE);
 	display_sol(sols);
 	display_surface(faces);
+	update_sol(sols);
 
 }

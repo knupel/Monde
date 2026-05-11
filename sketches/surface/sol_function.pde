@@ -66,3 +66,14 @@ void display_sol(Sol grid[]) {
     rg.point(elem.pos.xy());
   }
 }
+
+void update_sol(Sol grid[]) {
+  float x = sin(frameCount * 0.01);
+  float y = cos(frameCount * 0.02);
+  for(Sol elem : grid) {
+    float z = cos(frameCount * 0.005);
+    elem.x(elem.x() + x);
+    elem.y(elem.y() + y);
+    elem.z(elem.z() + z);
+  }
+}

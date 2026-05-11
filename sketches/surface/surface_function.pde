@@ -17,29 +17,30 @@ void create_surface(Sol grid[], ArrayList<R_Face> list) {
         rx = 0;
         }
         if(rx == 0 && !first_is) ry++;
-        // code
-        println(rx, ry);
         // les lignes principales
         if(rx < cols - 2) {
-            vec3 a = grid[i].pos();
-            vec3 b = grid[i+1].pos();
-            vec3 c = grid[i+2].pos();
-            R_Face face = new R_Face(this,a,b,c);
+            vec3 a = grid[i].pointer_pos();
+            vec3 b = grid[i+1].pointer_pos();
+            vec3 c = grid[i+2].pointer_pos();
+            R_Face face = new R_Face(this);
+            face.pointer(a,b,c);
             list.add(face);
         }
         // les lignes intermédiaires
-        if(ry > 0 && ry < get_rows() -1 && rx < get_cols() - 2) {
+        if(ry > 0 && ry < get_rows() -1 && rx < get_cols() -2) {
             if(rx%2 == 0) {
-                vec3 a = grid[i - cols -1].pos();
-                vec3 b = grid[i + 1].pos();
-                vec3 c = grid[i- cols +1].pos();
-                R_Face face = new R_Face(this,a,b,c);
+                vec3 a = grid[i -cols -1].pointer_pos();
+                vec3 b = grid[i +1].pointer_pos();
+                vec3 c = grid[i -cols +1].pointer_pos();
+                R_Face face = new R_Face(this);
+                face.pointer(a,b,c);
                 list.add(face);
             } else {
-                vec3 a = grid[i].pos();
-                vec3 b = grid[i -cols].pos();
-                vec3 c = grid[i +2].pos();
-                R_Face face = new R_Face(this,a,b,c);
+                vec3 a = grid[i].pointer_pos();
+                vec3 b = grid[i -cols].pointer_pos();
+                vec3 c = grid[i +2].pointer_pos();
+                R_Face face = new R_Face(this);
+                face.pointer(a,b,c);
                 list.add(face);     
             }
 
@@ -48,6 +49,8 @@ void create_surface(Sol grid[], ArrayList<R_Face> list) {
     }
 
 }
+
+
 
 
 

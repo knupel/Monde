@@ -29,6 +29,38 @@ class Sol {
     return this.pos.copy();
   }
 
+  vec3 pointer_pos() {
+    return this.pos;
+  }
+
+
+  float x() {
+    return this.pos().x();
+  }
+
+  void x(float x) {
+    this.pos.x(x);
+  }
+
+
+  float y() {
+    return this.pos().y();
+  }
+
+  void y(float y) {
+    this.pos.y(y);
+  }
+
+  float z() {
+    return this.pos().z();
+  }
+
+  void z(float z) {
+    this.pos.z(z);
+  }
+
+
+
   // radius
   void radius(int radius) {
     this.radius = radius;
