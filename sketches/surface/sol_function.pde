@@ -5,51 +5,60 @@
 */
 import rope.vector.ivec2;
 
+///////////////
+// SOL
+///////////////
+int cols = 0;
+int rows = 0;
+int get_cols() {
+  return cols;
+}
+
+int get_rows() {
+  return rows;
+}
+
 int init_sol(ivec2 cell) {
   // ivec2 step = new ivec2(diam);
   cols = width/cell.x() + 1; // un peu bizarre, mais ça permets de faire les bordures
   rows = height/cell.y() + 2; // juste bizarre de rajouter 2, mais ça permet de faire les bordures
-  int num = cols * rows + rows;
+  int num = cols * get_rows() + get_rows();
   return num;
 }
 
 void set_sol(Sol grid[], ivec2 cell, ivec2 offset, ivec2 tempo) {
-  // ivec2 step = new ivec2(diam);
-  // cols = width/step.x() + 1; // un peu bizarre, mais ça permets de faire les bordures
-  // rows = height/step.y() + 2; // juste bizarre de rajouter 2, mais ça permet de faire les bordures
-  // int num = cols * rows + rows;
-  // grid = new Sol[num];
-  int num = grid.length;
-  int pos_x = 0;
-  int pos_y = 0;
+  // r_x and r_y it's the rank in the grid
+  int r_x = 0;
+  int r_y = 0;
   boolean first_is = true;
   // offset
   ivec2 os = new ivec2();
 
   //
   int radius = cell.min() /2 ;
-  for(int i = 0 ; i < num ; i++) {
-    if(pos_x > cols) {
+  for(int i = 0 ; i < grid.length ; i++) {
+    if(r_x > get_cols()) {
       first_is = false;
-      pos_x = 0;
+      r_x = 0;
     }
-    if(pos_x == 0 && !first_is) pos_y++;
+    if(r_x == 0 && !first_is) r_y++;
     grid[i] = new Sol();
     // use offset
-    if(pos_x > 0 && pos_x%tempo.x() == 0) os.x(offset.x()); else os.x(0);
-    if(pos_y > 0 && pos_y%tempo.y() == 0) os.y(offset.y()); else os.y(0);
+    if(tempo.y() != 0 && r_y%tempo.y() == 0) os.x(offset.x()); else os.x(0);
+    if(tempo.x() != 0 && r_x%tempo.x() == 0) os.y(offset.y()); else os.y(0);
     // finalize position
-    grid[i].pos(pos_x * cell.x() + os.x(), pos_y * cell.y() + os.y(),0);
+    grid[i].pos(r_x * cell.x() + os.x(), r_y * cell.y() + os.y(),0);
 
     grid[i].radius(radius);
     int elements = floor(random(100));
     grid[i].set_elements(elements);
-    pos_x++;
+    r_x++;
   }
 }
 
+
+
 void display_sol(Sol grid[]) {
-  println("grid size", grid.length);
   rg.thickness(5);
   rg.stroke_is(true);
   rg.stroke(r.GOLD);

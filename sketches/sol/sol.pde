@@ -23,7 +23,7 @@ void setup() {
   println("width ", width, "| height ", height);
   size(1200,1200,P2D);
 
-  set_sol();
+  set_sol(diam);
   // réglage tectonique
   tectonique(sol, tops, bottoms, ridges, talwegs);
 }
