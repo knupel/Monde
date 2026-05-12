@@ -5,12 +5,11 @@
 * @author Knupel
 * @see https://github.com/knupel/Monde
 */
-Urbanist urbanist;
+R_Urbanist urbanist;
 
 
 void set_urbanist() {
-
-		// direction
+	// direction
 	// this proportion is use to choice the direction of the next step of the urbanist
 	// int [] angle_proportion = {0,0,0,0,50,0,0,0,200,0,0,0,50,0,0,0}; // this setting cause a U-turn situation
 	int [] angle_proportion = {100,0,0,0,50,0,0,0,0,0,0,0,50,0,0,100};

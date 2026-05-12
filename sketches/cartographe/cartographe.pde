@@ -2,17 +2,19 @@
 * Projet MONDE
 * Chapitre : Le Cartographe
 * 2019-2026
-* v 2.0.0
+* v 2.1.0
 * @author Knupel
 * https://github.com/knupel
 * http://knupel.art
 */
 import rope.core.*;
 import rope.vector.*;
-import rope.image.R_Pattern;
+import rope.geo.R_Lithos;
+import rope.geo.R_Tectos; 
 
 Rope r = new Rope();
 
+R_Tectos tectos;
 R_Graphic rg;
 
 
@@ -26,11 +28,14 @@ R_Graphic rg;
 
 void setup() {
   rg = new R_Graphic(this);
+  colorMode(HSB,360,100,100);
   println(r.VERSION);
   background(0);
-  fullScreen(P2D,1);
-  set_ground(10);
-  // size(1300,800, P2D);
+  // fullScreen(P2D,1);
+  size(1300,800, P2D);
+  tectos = new R_Tectos(this, width, height);
+  set_sol(3);
+  tectonique(tectos, get_grid_Sol());
   init_map();
   set_urbanist();
 }
@@ -38,12 +43,12 @@ void setup() {
 
 void draw() {
   // build
-  build_map();
+  build_map(get_grid_Sol());
   run_urbanist();
 
   // show
   background(0);
-  show_ground();
+  show_sol(sols);
   show_map();
   show_urbanist(urbanist.get_pos());
   if(show_info_is) {
@@ -59,6 +64,7 @@ void draw() {
 void keyPressed() {
 	if(key == 'n') {
 		init_map();
+    tectonique(tectos, get_grid_Sol());
     set_urbanist();
 	}
 

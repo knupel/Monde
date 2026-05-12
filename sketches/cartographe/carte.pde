@@ -34,7 +34,7 @@ void init_map() {
 	vec3 start_pos = new vec3(random(marge,width -marge),random(marge,height -marge),0);
 	int range_start = 30;
 	vec3 destination = new vec3(start_pos.x+random(-range_start,range_start),start_pos.y+random(-range_start,range_start),0);
-	urbanist = new Urbanist();
+	urbanist = new R_Urbanist();
 	urbanist.set_pos(start_pos);
 	urbanist.set_destination(destination);
   
@@ -54,16 +54,29 @@ void init_map() {
 
 
 
-void build_map() {
-	vec2 area = new vec2(10);
+void build_map(R_Lithos ground[]) {
+	vec2 area_detection = new vec2(10);
+
+	//
+	//
+	float altitude = 100; // pour transcrite l'altidude norma qui est entre 0 et 1 à quelque chose de visuellement intéressant 
+	float diff_altitude_max = 10; // pour tester
+	//
+	//
+
+
 	int min_by_intersection = 2;
 	int max_by_intersection = 5;
 
-	vec6 canvas_birth = new vec6(0,0,-width,   width,height,width);
+	vec6 canvas_birth = new vec6(0, 0, -width, width, height, width);
 
-	boolean show_info = true;
-	if(r.compare(new vec2(urbanist.get_pos()), new vec2(urbanist.get_destination()), area)) {
-		vec3 new_destination = goto_next(urbanist, canvas_birth, grid_nodes_monde, segment_monde, show_info);
+	if(r.compare(new vec2(urbanist.get_pos()), new vec2(urbanist.get_destination()), area_detection)) {
+		//
+		//
+		// c'est dans goto_next() qu'on doit faire la détection de l'altitude
+		//
+		//
+		vec3 new_destination = goto_next(urbanist, canvas_birth, grid_nodes_monde, segment_monde);
 		int id_inter = rank_intersection(urbanist.get_pos());
 		if(id_inter >= 0) {
 			R_Node inter = grid_nodes_monde.get(id_inter);
@@ -168,7 +181,7 @@ void set_id_intersection(int id) {
 add intersection
 */
 R_Node temp_intersection;
-boolean ask_intersection(Urbanist urb) {
+boolean ask_intersection(R_Urbanist urb) {
 
 	boolean add_is = false;
 	temp_intersection = new R_Node(urb.get_destination().copy(),urb.get_from());
@@ -191,7 +204,7 @@ void add_intersection(R_Node node) {
 
 
 // segment
-boolean add_segment(Urbanist urb, boolean build_anytime) {
+boolean add_segment(R_Urbanist urb, boolean build_anytime) {
 	boolean add_is = false;
 	boolean from_is = false;
 	int id_from = rank_intersection(urb.get_from());

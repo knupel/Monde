@@ -3,7 +3,7 @@
 ///////////////
 
 
-void create_surface(Sol grid[], ArrayList<R_Face> list) {
+void create_surface(R_Lithos grid[], ArrayList<R_Face> list) {
     // r_x and r_y it's the rank in the grid
     int rx = 0;
     int ry = 0;

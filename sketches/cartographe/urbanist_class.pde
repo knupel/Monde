@@ -1,9 +1,9 @@
 /**
 * Class Urbanist
 * 2026-2026
-* v 0.1.0
+* v 0.1.1
 */
-public class Urbanist {
+public class R_Urbanist {
 	private vec3 pos;
 	private vec3 dst;
 	private vec3 from;
@@ -18,7 +18,7 @@ public class Urbanist {
 	private int [] intersection_proportion;
 	private float speed;
 	
-	public Urbanist() {
+	public R_Urbanist() {
 		// the speed walk of the agent on the map
 		this.speed = 0.5;
 		// position on the map
@@ -27,7 +27,7 @@ public class Urbanist {
 		this.dst = new vec3();
 		// intersection / careffour setting
 		this.intersection = new ivec2(2,7);
-		// must be proportiona to the number of branch here 7 - 2 = 5 +1 = 6
+		// must be proportional to the number of branch here 7 - 2 = 5 +1 = 6
 		this.intersection_proportion = new int[] {64,32,16,8,4,2}; 
 		// distance to go for the next roap
 		this.dist = new vec2(0,height);

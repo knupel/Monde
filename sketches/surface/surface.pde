@@ -9,13 +9,15 @@
 import rope.core.Rope;
 import rope.core.R_Graphic;
 import rope.vector.ivec2;
+import rope.vector.vec3;
 import rope.mesh.R_Face;
+import rope.geo.R_Lithos;
 
 Rope r = new Rope();
 R_Graphic rg;
 
 // grille du sol
-Sol sols[];
+R_Lithos sols[];
 
 ivec2 cell = new ivec2(20,40);
 ivec2 offset = new ivec2(0,20);
@@ -26,7 +28,7 @@ ArrayList<R_Face> faces = new ArrayList();
 void setup() {
 	rg = new R_Graphic(this);
 	size(600,600, P3D);
-	sols = new Sol[init_sol(cell)];
+	sols = new R_Lithos[init_sol(cell)];
 	set_sol(sols, cell, offset, tempo_offset);
 	create_surface(sols,faces);
 	set_altitude_sol(sols);

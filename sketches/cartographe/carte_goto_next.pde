@@ -3,7 +3,7 @@
 v 0.2.0
 * It's a main method to give the next destination point for urbanist
 */
-vec3 goto_next(Urbanist urb, vec6 canvas, ArrayList<R_Node> inter_list, ArrayList<R_Line2D> seg_list, boolean show_info) {
+vec3 goto_next(R_Urbanist urb, vec6 canvas, ArrayList<R_Node> inter_list, ArrayList<R_Line2D> seg_list) {
 	// find the next good destination
 	vec2 compute_plan_pos = compute_pos_2D(urb, canvas, inter_list, seg_list);
 	count_segment_out_canvas = 0;
@@ -51,7 +51,7 @@ boolean check_meeting_segment(R_Line2D target_segment, ArrayList<R_Line2D> seg_l
 
 // add next step for the urbanist direction, plus distance
 int count_segment_no_cross = 0;
-vec2 compute_pos_2D(Urbanist urb, vec6 canvas, ArrayList<R_Node> inter_list, ArrayList<R_Line2D> seg_list) {
+vec2 compute_pos_2D(R_Urbanist urb, vec6 canvas, ArrayList<R_Node> inter_list, ArrayList<R_Line2D> seg_list) {
 	// set direction
 	float angle = next_angle_direction(urb);
 	// set distance
@@ -72,7 +72,7 @@ vec2 compute_pos_2D(Urbanist urb, vec6 canvas, ArrayList<R_Node> inter_list, Arr
 	return buf_pos;
 }
 
-float next_angle_direction(Urbanist urb) {
+float next_angle_direction(R_Urbanist urb) {
 	float previous_direction = new vec2(urb.get_pos()).angle(new vec2(urb.get_destination()));
 	float angle = urb.next_direction();
 	// println("angle", angle);
@@ -84,7 +84,7 @@ float next_angle_direction(Urbanist urb) {
 
 // out canvas
 int count_segment_out_canvas = 0;
-vec2 compute_pos_2D_out_canvas(Urbanist urb, vec6 canvas, ArrayList<R_Node> inter_list, ArrayList<R_Line2D> seg_list, vec2 pos) {
+vec2 compute_pos_2D_out_canvas(R_Urbanist urb, vec6 canvas, ArrayList<R_Node> inter_list, ArrayList<R_Line2D> seg_list, vec2 pos) {
 	vec3 canvas_min = new vec3(canvas.x(),canvas.y(),canvas.z());
 	vec3 canvas_max = new vec3(canvas.w(),canvas.e(),canvas.f());
 	int max_try_canvas = 10; // limit for the recursive call
@@ -99,7 +99,7 @@ vec2 compute_pos_2D_out_canvas(Urbanist urb, vec6 canvas, ArrayList<R_Node> inte
 	return pos;
 }
 
-vec2 compute_pos_2D_no_cross(Urbanist urb, vec6 canvas, ArrayList<R_Node> inter_list, ArrayList<R_Line2D> seg_list, vec2 pos) {
+vec2 compute_pos_2D_no_cross(R_Urbanist urb, vec6 canvas, ArrayList<R_Node> inter_list, ArrayList<R_Line2D> seg_list, vec2 pos) {
 	R_Line2D target_segment = new R_Line2D(this, new vec3(urb.get_pos().x, urb.get_pos().y, 0), new vec3(pos.x(), pos.y(), 0));
 	int max_try_cross = 10;
 	if(count_segment_no_cross < max_try_cross && check_meeting_segment(target_segment, seg_list, false)) {
