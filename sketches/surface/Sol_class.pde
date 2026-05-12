@@ -33,7 +33,7 @@ class Sol {
     return this.pos;
   }
 
-
+  // x position
   float x() {
     return this.pos().x();
   }
@@ -42,7 +42,7 @@ class Sol {
     this.pos.x(x);
   }
 
-
+  // y position
   float y() {
     return this.pos().y();
   }
@@ -51,6 +51,7 @@ class Sol {
     this.pos.y(y);
   }
 
+  // z position
   float z() {
     return this.pos().z();
   }
@@ -58,8 +59,6 @@ class Sol {
   void z(float z) {
     this.pos.z(z);
   }
-
-
 
   // radius
   void radius(int radius) {
@@ -81,24 +80,25 @@ class Sol {
     return this.size.copy();
   }
 
+  // ground
   void set_ground(int ground) {
     this.ground = ground;
   }
-
-  void set_elements(int elements) {
-    this.elements = elements;
-  }
-
-
-
+  
   int get_ground() {
     return this.ground;
+  }
+
+  // elements
+  void set_elements(int elements) {
+    this.elements = elements;
   }
 
   int get_elements() {
     return this.elements;
   }
 
+  // water
   int get_water() {
     return this.water;
   }

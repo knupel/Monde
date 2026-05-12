@@ -9,7 +9,7 @@
 
 int cols = 0;
 int rows = 0;
-Ground ground[];
+Sol ground[];
 
 
 void set_ground(int radius) {
@@ -17,7 +17,7 @@ void set_ground(int radius) {
     cols = width/step.x() + 1; // un peu bizarre, mais ça permets de faire les bordures
     rows = height/step.y() + 2; // juste bizarre de rajouter 2, mais ça permets de faire les bordures
     int num = cols * rows + rows;
-    ground = new Ground[num];
+    ground = new Sol[num];
 
     int pos_x = 0;
     int pos_y = 0;
@@ -29,8 +29,8 @@ void set_ground(int radius) {
         pos_x = 0;
         }
         if(pos_x == 0 && !first_is) pos_y++;
-        ground[i] = new Ground();
-        ground[i].set_radius(radius);
+        ground[i] = new Sol();
+        ground[i].radius(radius);
         ground[i].pos(pos_x * step.x(), pos_y * step.y(),0);
         int elements = floor(random(100));
         ground[i].set_elements(elements);
@@ -39,7 +39,7 @@ void set_ground(int radius) {
 }
 
 
-Ground [] get_ground() {
+Sol [] get_ground() {
     return ground;
 }
 
@@ -49,7 +49,7 @@ void show_ground() {
     rg.stroke_is(true);
     rg.stroke(r.BLOOD);
     rg.fill(r.BLOOD);
-    rg.thickness(ground[0].get_radius()/4);
+    rg.thickness(ground[0].radius()/4);
     for(int i = 0 ; i < ground.length ; i++) {
         rg.point(ground[i].pos());
     }

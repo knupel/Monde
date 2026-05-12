@@ -1,8 +1,12 @@
 /**
 * Sol
 * 2026-2026
-* v 0.0.2
+* v 0.0.3
 */
+
+import rope.vector.vec3;
+
+
 class Sol {
   private vec3 pos = new vec3();
   private int radius = 1;
@@ -25,6 +29,37 @@ class Sol {
     return this.pos.copy();
   }
 
+  vec3 pointer_pos() {
+    return this.pos;
+  }
+
+  // x position
+  float x() {
+    return this.pos().x();
+  }
+
+  void x(float x) {
+    this.pos.x(x);
+  }
+
+  // y position
+  float y() {
+    return this.pos().y();
+  }
+
+  void y(float y) {
+    this.pos.y(y);
+  }
+
+  // z position
+  float z() {
+    return this.pos().z();
+  }
+
+  void z(float z) {
+    this.pos.z(z);
+  }
+
   // radius
   void radius(int radius) {
     this.radius = radius;
@@ -45,24 +80,25 @@ class Sol {
     return this.size.copy();
   }
 
+  // ground
   void set_ground(int ground) {
     this.ground = ground;
   }
-
-  void set_elements(int elements) {
-    this.elements = elements;
-  }
-
-
-
+  
   int get_ground() {
     return this.ground;
+  }
+
+  // elements
+  void set_elements(int elements) {
+    this.elements = elements;
   }
 
   int get_elements() {
     return this.elements;
   }
 
+  // water
   int get_water() {
     return this.water;
   }
