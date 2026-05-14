@@ -18,8 +18,9 @@ ArrayList<R_Line2D> segment_monde;
 
 
 
+
 // Map
-void init_map() {
+void init_map(R_Cartographe stro) {
 	// init data if nececary
 	if(grid_nodes_monde == null) grid_nodes_monde = new ArrayList<R_Node>();
 	if(segment_monde == null) segment_monde = new ArrayList<R_Line2D>();
@@ -29,24 +30,17 @@ void init_map() {
 	segment_monde.clear();
 	set_id_intersection(0);
   
-	// set data
-	int marge = width/10;
-	vec3 start_pos = new vec3(random(marge,width -marge),random(marge,height -marge),0);
-	int range_start = 30;
-	vec3 destination = new vec3(start_pos.x+random(-range_start,range_start),start_pos.y+random(-range_start,range_start),0);
-	urbanist = new R_Urbanist();
-	urbanist.set_pos(start_pos);
-	urbanist.set_destination(destination);
+
+
   
 	// angle_tracer = angle(start_pos,destination);
-	R_Node intersection = new R_Node(start_pos.copy(),destination.copy()); // copy() it's nessacy to don't point on a same Object
+	R_Node intersection = new R_Node(stro.get_pos().copy(), stro.get_destination().copy()); // copy() it's nessacy to don't point on a same Object
 	intersection.set_branch(8); // the start need a lot of branches
 	intersection.id_a(add_id_intersection());
 
 	grid_nodes_monde.add(intersection);
-	R_Line2D segment = new R_Line2D(this, start_pos,destination.copy());
+	R_Line2D segment = new R_Line2D(this, stro.get_pos().copy(), stro.get_destination().copy());
 	segment_monde.add(segment);
-	println("new street map",urbanist.get_pos());
 }
 
 
@@ -54,7 +48,7 @@ void init_map() {
 
 
 
-void build_map(R_Lithos ground[]) {
+void build_map(R_Lithos grid[], R_Cartographe stro) {
 	vec2 area_detection = new vec2(10);
 
 	//
@@ -69,38 +63,38 @@ void build_map(R_Lithos ground[]) {
 	int max_by_intersection = 5;
 
 	vec6 canvas_birth = new vec6(0, 0, -width, width, height, width);
-
-	if(r.compare(new vec2(urbanist.get_pos()), new vec2(urbanist.get_destination()), area_detection)) {
+	// verification si l'urbaniste est arrivée, si oui on chercher une nouvelle destination
+	if(r.compare(new vec2(stro.get_pos()), new vec2(stro.get_destination()), area_detection)) {
 		//
 		//
 		// c'est dans goto_next() qu'on doit faire la détection de l'altitude
 		//
 		//
-		vec3 new_destination = goto_next(urbanist, canvas_birth, grid_nodes_monde, segment_monde);
-		int id_inter = rank_intersection(urbanist.get_pos());
+		vec3 new_destination = stro.goto_next(grid, canvas_birth, grid_nodes_monde, segment_monde);
+		int id_inter = rank_intersection(stro.get_pos());
 		if(id_inter >= 0) {
 			R_Node inter = grid_nodes_monde.get(id_inter);
-			urbanist.set_destination(new_destination,inter);
+			stro.set_destination(new_destination,inter);
 		} else {
-			urbanist.set_destination(new_destination);
+			stro.set_destination(new_destination);
 		}
 
-    if(!intersection_is()) {
+    if(!stro.intersection_is()) {
     	boolean cycle_add_is = false;
-		cycle_add_is = ask_intersection(urbanist);
+		cycle_add_is = ask_intersection(stro);
 		// check to build segment
 		boolean build_anytime_is = false;
-		cycle_add_is = add_segment(urbanist, build_anytime_is);
+		cycle_add_is = add_segment(stro, build_anytime_is);
 		if(cycle_add_is) {
 			add_intersection(temp_intersection);
 		} else {
 			vec2 back_to_center_pos = new vec2(grid_nodes_monde.get(0).pos());
-			urbanist.set_destination(back_to_center_pos);
+			stro.set_destination(back_to_center_pos);
 		}
     }
-    intersection_is(false);
+    stro.intersection_is(false);
 	}
-	count_segment_meeting = 0;
+	stro.reset_stroll();
 }
 
 void close_dead_end(int range_to_link) {
@@ -181,11 +175,11 @@ void set_id_intersection(int id) {
 add intersection
 */
 R_Node temp_intersection;
-boolean ask_intersection(R_Urbanist urb) {
+boolean ask_intersection(R_Cartographe stro) {
 
 	boolean add_is = false;
-	temp_intersection = new R_Node(urb.get_destination().copy(),urb.get_from());
-	int num_branch = urb.how_many_ways();
+	temp_intersection = new R_Node(stro.get_destination().copy(),stro.get_from());
+	int num_branch = stro.how_many_ways();
 	temp_intersection.set_branch(num_branch);
 	temp_intersection.id_a(add_id_intersection());
 	add_is = true;
@@ -204,10 +198,10 @@ void add_intersection(R_Node node) {
 
 
 // segment
-boolean add_segment(R_Urbanist urb, boolean build_anytime) {
+boolean add_segment(R_Cartographe stro, boolean build_anytime) {
 	boolean add_is = false;
 	boolean from_is = false;
-	int id_from = rank_intersection(urb.get_from());
+	int id_from = rank_intersection(stro.get_from());
 	R_Node inter;
 
 	if(id_from >= 0) {
@@ -218,11 +212,11 @@ boolean add_segment(R_Urbanist urb, boolean build_anytime) {
 	}
 
 	if(build_anytime || from_is) {
-		R_Line2D segment = new R_Line2D(this,temp_intersection.pos(),urb.get_from());
-		if(segment.dist() <= urb.get_dist_max()) {
+		R_Line2D segment = new R_Line2D(this,temp_intersection.pos(),stro.get_from());
+		if(segment.dist() <= stro.get_dist_max()) {
 			segment_monde.add(segment);
 			grid_nodes_monde.get(id_from).add_destination(temp_intersection.pos());
-			temp_intersection.add_destination(urb.get_from());
+			temp_intersection.add_destination(stro.get_from());
 			add_is = true;
 		}
 	}

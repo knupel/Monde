@@ -36,21 +36,22 @@ void setup() {
   tectos = new R_Tectos(this, width, height);
   set_sol(3);
   tectonique(tectos, get_grid_Sol());
-  init_map();
-  set_urbanist();
+  init_stroller();
+  init_map(get_stroller());
+  set_stroller();
 }
 
 
 void draw() {
   // build
-  build_map(get_grid_Sol());
+  build_map(get_grid_Sol(), get_stroller());
   run_urbanist();
 
   // show
   background(0);
   show_sol(sols);
   show_map();
-  show_urbanist(urbanist.get_pos());
+  show_stroller();
   if(show_info_is) {
   	show_center_town(20, r.BLOOD);
   	boussole(new vec2(grid_nodes_monde.get(0).pos()),80);
@@ -63,9 +64,9 @@ void draw() {
 
 void keyPressed() {
 	if(key == 'n') {
-		init_map();
+		init_map(get_stroller());
     tectonique(tectos, get_grid_Sol());
-    set_urbanist();
+    set_stroller();
 	}
 
   if(key == ' '){
