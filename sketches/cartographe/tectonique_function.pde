@@ -12,7 +12,9 @@ void tectonique(R_Tectos tectos, R_Lithos ground[]) {
   tectos.down_point_on_the_talweg(ground);
   tectos.level_points_grid(ground);
   // lissage final autour du réseau
+  // println("ground length 0", ground.length);
   tectos.smooth_altitudes(ground, 1000,0.9);
+  // println("ground length 1", ground.length);
   tectos.add_noise_altitudes(ground, 0.1);
 }
 
@@ -21,7 +23,7 @@ void tectonique(R_Tectos tectos, R_Lithos ground[]) {
 
 
 void show_talwegs(R_Tectos tectos) {
-     // talwegs
+  // talwegs
   for(R_Line2D line : tectos.get_talwegs()) {
     line.show();
   }

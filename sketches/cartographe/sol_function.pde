@@ -1,50 +1,30 @@
 /**
-* ground 
+* Sol
 * 2026-2026
-* v 0.0.1
+* v 0.1.0
 * @author Knupel
 * https://github.com/knupel
 * http://knupel.art
 */
 
-R_Lithos sols[];
+R_Plate plate;
+
+
+
 
 
 /**
 * Function sol
 * 2026-2026
-* V 0.0.2
+* V 0.0.3
 */
-void set_sol(int radius) {
-  int cols = 0;
-  int rows = 0;
-  ivec2 step = new ivec2(radius*2);
-  cols = width/step.x() + 1; // un peu bizarre, mais ça permets de faire les bordures
-  rows = height/step.y() + 2; // juste bizarre de rajouter 2, mais ça permets de faire les bordures
-  int num = cols * rows + rows;
-  sols = new R_Lithos[num];
-  int pos_x = 0;
-  int pos_y = 0;
-  boolean first_is = true;
-  //
-  for(int i = 0 ; i < num ; i++) {
-    if(pos_x > cols) {
-      first_is = false;
-      pos_x = 0;
-    }
-    if(pos_x == 0 && !first_is) pos_y++;
-    sols[i] = new R_Lithos();
-    sols[i].pos(pos_x * step.x(), pos_y * step.y(),0);
-    sols[i].radius(radius);
-    int elements = floor(random(100));
-    sols[i].set_sol(elements);
-    pos_x++;
-  }
+void set_sol(int diam) {
+  plate = new R_Plate(new ivec2(width, height), new ivec2(diam));
 }
 
 
 R_Lithos [] get_grid_Sol() {
-    return sols;
+    return plate.get();
 }
 
 
@@ -55,11 +35,22 @@ void show_sol(R_Lithos grid[]) {
   int colour = r.LUNE;
   vec3 hsb = new vec3(hue(colour), saturation(colour), brightness(colour));
 
+  // rg.thickness(2);
   rg.thickness(grid[0].radius());
   for(int i = 0 ; i < grid.length ; i++) {
     int c = color(hsb.hue(), hsb.sat(), hsb.bri() * grid[i].pos().z());
     rg.stroke(c);
+    // if(plate.get(mouseX,mouseY))
     rg.fill(c);
     rg.point(grid[i].pos());
   }
+  // detection test
+  rg.thickness(grid[0].radius()*4);
+  rg.stroke(r.BLOOD);
+  rg.point(plate.get(mouseX,mouseY).pos());
+
+}
+
+R_Lithos get_lithos(int target_x, int target_y) {
+  return plate.get(target_x, target_y);
 }

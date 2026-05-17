@@ -179,6 +179,11 @@ public class R_Cartographe extends R_Graphic {
 	// the cartographe walk
 	////////////////////////
 
+	// global variable of the few functions below
+	private int count_out_canvas = 0;
+	private int count_road_gradient = 0;
+	private int count_no_cross = 0;
+
 	public vec3 goto_next(R_Lithos grid[], vec6 canvas, ArrayList<R_Node> inter_list, ArrayList<R_Line2D> seg_list) {
 		// find the next good destination
 		//
@@ -186,26 +191,140 @@ public class R_Cartographe extends R_Graphic {
 		// c'est dans compute_pos_2D() qu'on doit faire la détection de l'altitude
 		//
 		//
-		vec2 compute_plan_pos = compute_pos_2D(grid, canvas, inter_list, seg_list);
-		count_segment_out_canvas = 0;
-		count_segment_no_cross = 0;
+		vec2 next_pos = compute_pos_2D(grid, canvas, inter_list, seg_list);
+		count_out_canvas = 0;
+		count_no_cross = 0;
 		// checking the plan 2D
 		// if the new target is close to carrefour, if it is the plotter must go on it
 		for(int i = 0 ; i < grid_nodes_monde.size() ; i++) {
 			vec3 p = grid_nodes_monde.get(i).pos();
-			if(r.compare(compute_plan_pos,new vec2(p.x(),p.y()),new vec2(get_dist_min()))) {
+			if(compare(next_pos,new vec2(p.x(),p.y()),new vec2(get_dist_min()))) {
 				intersection_is(true);
-				compute_plan_pos = new vec2(p.x(),p.y());
+				next_pos = new vec2(p.x(),p.y());
 				break;
 			}
 		}
-
-		// make that in future version
-		vec3 pos = new vec3(compute_plan_pos.xy());
-		return pos;
+		return new vec3(next_pos.xy());
 	}
 
-	
+
+	// add next step for the urbanist direction, plus distance
+
+	private vec2 compute_pos_2D(R_Lithos grid[], vec6 canvas, ArrayList<R_Node> inter_list, ArrayList<R_Line2D> seg_list) {
+		//
+		//
+		// c'est dans compute_pos_2D() qu'on doit faire la détection de l'altitude
+		// C'est là que ça va être dangereux car je vais essyer d'introduire 
+		// une lecture d'une immense liste dans une itération
+		//
+		//
+		// set direction
+		float angle = next_angle_direction();
+		// set distance
+		float dist = next_distance();
+
+		vec2 buf_pos = to_cartesian_2D(angle,dist).add(new vec2(get_destination()));
+
+		// the function below create recursivity
+		buf_pos = compute_pos_2D_out_canvas(grid, canvas, inter_list, seg_list, buf_pos);
+		// the function below create recursivity
+		buf_pos = compute_pos_2D_no_cross(grid, canvas, inter_list, seg_list, buf_pos);
+		// the function brlow crezte recursivity
+
+		// check for to big length for next destination
+		float length_to_go = dist(buf_pos, new vec2(get_pos()));
+		if(length_to_go >= get_dist_max()) {
+			int target = floor(random(inter_list.size()));
+			buf_pos = new vec2(inter_list.get(target).pos());
+		}
+		return buf_pos;
+	}
+
+	// test road gradient of the new road
+
+	private vec2 compute_pos_2D_road_gradient(R_Lithos grid[], vec6 canvas, ArrayList<R_Node> inter_list, ArrayList<R_Line2D> seg_list, vec2 buf_pos) {
+		int max_try_gradient = 10;
+		vec2 a = new vec2(0,0);
+		float d = buf_pos.dist(get_pos());
+		vec2 b = new vec2(0, d);
+		// R_Lithos lithos = 
+		// vec2 c = new vec3(a,d);
+
+
+		if(count_road_gradient < max_try_gradient) {
+			count_road_gradient++;
+			// loop method until is good
+			buf_pos = compute_pos_2D(grid, canvas, inter_list, seg_list); 
+		} else if(count_road_gradient >= max_try_gradient) {
+			// back to starting position in case there is too much recursive call
+			buf_pos = new vec2(inter_list.get(0).pos());
+		}
+		return buf_pos;
+	}
+
+
+
+	// out canvas
+
+	private vec2 compute_pos_2D_out_canvas(R_Lithos grid[], vec6 canvas, ArrayList<R_Node> inter_list, ArrayList<R_Line2D> seg_list, vec2 buf_pos) {
+		// limit for the recursive call
+		int max_try_canvas = 10;
+		// limit for the recursive call
+		vec3 canvas_min = new vec3(canvas.x(),canvas.y(),canvas.z());
+		vec3 canvas_max = new vec3(canvas.w(),canvas.e(),canvas.f());
+
+		if(count_out_canvas < max_try_canvas && (!r.all(greaterThan(buf_pos, new vec2(canvas_min))) || !r.all(lessThan(buf_pos, new vec2(canvas_max))))) {
+			count_out_canvas++;
+			// loop method until is good
+			buf_pos = compute_pos_2D(grid, canvas,inter_list, seg_list); 
+		} else if(count_out_canvas >= max_try_canvas) {
+			// back to starting position in case there is too much recursive call
+			buf_pos = new vec2(inter_list.get(0).pos());
+		}
+		return buf_pos;
+	}
+
+
+	private vec2 compute_pos_2D_no_cross(R_Lithos grid[], vec6 canvas, ArrayList<R_Node> inter_list, ArrayList<R_Line2D> seg_list, vec2 buf_pos) {
+		// limit for the recursive call
+		int max_try_cross = 10;
+		// limit for the recursive call
+		R_Line2D target_segment = new R_Line2D(pa, new vec3(get_pos().x, get_pos().y, 0), new vec3(buf_pos.x(), buf_pos.y(), 0));
+		if(count_no_cross < max_try_cross && check_meeting_segment(target_segment, seg_list, false)) {
+			count_no_cross++;
+			// loop method until is good
+			buf_pos = compute_pos_2D(grid, canvas,inter_list, seg_list);
+		} else if(count_no_cross >= max_try_cross) {
+			int target = floor(random(inter_list.size()));
+			buf_pos = new vec2(inter_list.get(target).pos());
+		}
+		return buf_pos;
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+	// utils
+
+	private float next_angle_direction() {
+		float previous_direction = new vec2(get_pos()).angle(new vec2(get_destination()));
+		float angle = next_direction();
+		// println("angle", angle);
+			if(keyPressed) {
+		}
+		angle += previous_direction;
+		return angle;
+	}
+
+
 	private boolean check_meeting_segment(R_Line2D target_segment, ArrayList<R_Line2D> seg_list, boolean show_info) {
 		boolean is = false;
 		int max_iter_for_meeting = 100;
@@ -229,81 +348,6 @@ public class R_Cartographe extends R_Graphic {
 	}
 
 
-	// add next step for the urbanist direction, plus distance
-	int count_segment_no_cross = 0;
-	private vec2 compute_pos_2D(R_Lithos grid[], vec6 canvas, ArrayList<R_Node> inter_list, ArrayList<R_Line2D> seg_list) {
-		//
-		//
-		// c'est dans compute_pos_2D() qu'on doit faire la détection de l'altitude
-		// C'est là que ça va être dangereux car je vais essyer d'introduire 
-		// une lecture d'une immense liste dans une itération
-		//
-		//
-		// set direction
-		float angle = next_angle_direction();
-		// set distance
-		float dist = next_distance();
-
-		vec2 buf_pos = r.to_cartesian_2D(angle,dist).add(new vec2(get_destination()));
-		// the function below create recursivity
-		buf_pos = compute_pos_2D_out_canvas(grid, canvas, inter_list, seg_list, buf_pos);
-		// the function below create recursivity
-		buf_pos = compute_pos_2D_no_cross(grid, canvas, inter_list, seg_list, buf_pos);
-
-		// check for to big length for next destination
-		float length_to_go = r.dist(buf_pos, new vec2(get_pos()));
-		if(length_to_go >= get_dist_max()) {
-			int target = floor(random(inter_list.size()));
-			buf_pos = new vec2(inter_list.get(target).pos());
-		}
-		return buf_pos;
-	}
-
-	private float next_angle_direction() {
-		float previous_direction = new vec2(get_pos()).angle(new vec2(get_destination()));
-		float angle = next_direction();
-		// println("angle", angle);
-			if(keyPressed) {
-		}
-		angle += previous_direction;
-		return angle;
-	}
-
-	// out canvas
-	int count_segment_out_canvas = 0;
-	private vec2 compute_pos_2D_out_canvas(R_Lithos grid[], vec6 canvas, ArrayList<R_Node> inter_list, ArrayList<R_Line2D> seg_list, vec2 pos) {
-		// limit for the recursive call
-		int max_try_canvas = 10;
-		// limit for the recursive call
-		vec3 canvas_min = new vec3(canvas.x(),canvas.y(),canvas.z());
-		vec3 canvas_max = new vec3(canvas.w(),canvas.e(),canvas.f());
-
-		if(count_segment_out_canvas < max_try_canvas && (!r.all(r.greaterThan(pos, new vec2(canvas_min))) || !r.all(r.lessThan(pos, new vec2(canvas_max))))) {
-			count_segment_out_canvas++;
-			// loop method until is good
-			pos = compute_pos_2D(grid, canvas,inter_list, seg_list); 
-		} else if(count_segment_out_canvas >= max_try_canvas) {
-			// back to starting position in case there is too much recursive call
-			pos = new vec2(inter_list.get(0).pos());
-		}
-		return pos;
-	}
-
-	private vec2 compute_pos_2D_no_cross(R_Lithos grid[], vec6 canvas, ArrayList<R_Node> inter_list, ArrayList<R_Line2D> seg_list, vec2 pos) {
-		// limit for the recursive call
-		int max_try_cross = 10;
-		// limit for the recursive call
-		R_Line2D target_segment = new R_Line2D(pa, new vec3(get_pos().x, get_pos().y, 0), new vec3(pos.x(), pos.y(), 0));
-		if(count_segment_no_cross < max_try_cross && check_meeting_segment(target_segment, seg_list, false)) {
-			count_segment_no_cross++;
-			// loop method until is good
-			pos = compute_pos_2D(grid, canvas,inter_list, seg_list);
-		} else if(count_segment_no_cross >= max_try_cross) {
-			int target = floor(random(inter_list.size()));
-			pos = new vec2(inter_list.get(target).pos());
-		}
-		return pos;
-	}
 
 	boolean intersection_is = false;
 	public boolean intersection_is() {

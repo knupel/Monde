@@ -31,10 +31,10 @@ void setup() {
   colorMode(HSB,360,100,100);
   println(r.VERSION);
   background(0);
-  // fullScreen(P2D,1);
-  size(1300,800, P2D);
+  fullScreen(P2D,1);
+  // size(1300,800, P2D);
   tectos = new R_Tectos(this, width, height);
-  set_sol(3);
+  set_sol(7);
   tectonique(tectos, get_grid_Sol());
   init_stroller();
   init_map(get_stroller());
@@ -43,13 +43,15 @@ void setup() {
 
 
 void draw() {
+  String title = "Cartographe | FPS : " + (int)frameRate + " | Grille : " + get_grid_Sol().length;
+  surface.setTitle(title);
   // build
   build_map(get_grid_Sol(), get_stroller());
   run_urbanist();
 
   // show
   background(0);
-  show_sol(sols);
+  show_sol(get_grid_Sol());
   show_map();
   show_stroller();
   if(show_info_is) {
