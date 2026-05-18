@@ -44,11 +44,20 @@ void init_map(R_Cartographe stro) {
 }
 
 
+ArrayList<R_Line2D> get_roads() {
+	return segment_monde;
+}
+
+
+ArrayList<R_Node> get_nodes() {
+	return grid_nodes_monde;
+}
 
 
 
 
-void build_map(R_Lithos grid[], R_Cartographe stro) {
+
+void build_map(R_Plate plate, R_Cartographe stro) {
 	vec2 area_detection = new vec2(10);
 
 	//
@@ -70,7 +79,7 @@ void build_map(R_Lithos grid[], R_Cartographe stro) {
 		// c'est dans goto_next() qu'on doit faire la détection de l'altitude
 		//
 		//
-		vec3 new_destination = stro.goto_next(grid, canvas_birth, grid_nodes_monde, segment_monde);
+		vec3 new_destination = stro.goto_next(plate, canvas_birth, grid_nodes_monde, segment_monde);
 		int id_inter = rank_intersection(stro.get_pos());
 		if(id_inter >= 0) {
 			R_Node inter = grid_nodes_monde.get(id_inter);

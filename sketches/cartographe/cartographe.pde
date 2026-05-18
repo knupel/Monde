@@ -16,6 +16,8 @@ Rope r = new Rope();
 
 R_Tectos tectos;
 R_Graphic rg;
+R_Plate plate;
+
 
 
 /**
@@ -31,8 +33,8 @@ void setup() {
   colorMode(HSB,360,100,100);
   println(r.VERSION);
   background(0);
-  fullScreen(P2D,1);
-  // size(1300,800, P2D);
+  // fullScreen(P2D,1);
+  size(1300,800, P2D);
   tectos = new R_Tectos(this, width, height);
   set_sol(7);
   tectonique(tectos, get_grid_Sol());
@@ -43,18 +45,19 @@ void setup() {
 
 
 void draw() {
-  String title = "Cartographe | FPS : " + (int)frameRate + " | Grille : " + get_grid_Sol().length;
+  String title = "Cartographe | FPS : " + (int)frameRate + " | Grille : " + get_grid_Sol().length + " | Routes " + get_roads().size();
   surface.setTitle(title);
   // build
-  build_map(get_grid_Sol(), get_stroller());
-  run_urbanist();
+  build_map(plate, get_stroller());
+  run_stroller();
 
   // show
   background(0);
-  show_sol(get_grid_Sol());
-  show_map();
+  if(display_sol_is()) show_sol(get_grid_Sol());
+  if(display_map_is()) show_map();
+  if(display_failure_is()) show_failure();
   show_stroller();
-  if(show_info_is) {
+  if(display_info_is()) {
   	show_center_town(20, r.BLOOD);
   	boussole(new vec2(grid_nodes_monde.get(0).pos()),80);
     show_intersection();
@@ -75,14 +78,12 @@ void keyPressed() {
     freeze();
   }
 
-	if(key == 'i') {
-		if(show_info_is) {
-			show_info_is = false;
-		} else {
-			show_info_is = true;
-		}
-    
-	}
+	if(key == 'i') display_info_switch();
+  if(key == 's') display_sol_switch();
+  if(key == 'm') display_map_switch();
+  if(key == 'f') display_failure_switch();
+
+
 
 
   if(key == 'p') {

@@ -8,7 +8,7 @@
 */
 
 
-boolean show_info_is = true;
+
 
 
 

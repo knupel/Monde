@@ -40,13 +40,15 @@ void set_stroller() {
 	int [] dist_proportion = {32,64,128,64,32,16,8,4,2};
 	stroller.set_dist_proportion(dist_proportion);
 	// intersection
-	int [] inter_proportion = {32,64,64,32,4,2}; 
-	stroller.set_intersection_ways(inter_proportion);
+	int [] intersection_proportion = {32,64,64,32,4,2}; 
+	stroller.set_intersection_ways(intersection_proportion);
 	stroller.set_speed(0.2);
+	stroller.set_tilt(8.5); // 8.5 est la valeur maximum française pour les pentes en France
+	stroller.reset();
 }
 
 vec3 buf_follow = new vec3();
-void run_urbanist() {
+void run_stroller() {
 	stroller.set_pos(follow(stroller.get_destination(),stroller.get_speed(),buf_follow));
 }
 
@@ -56,4 +58,17 @@ void show_stroller() {
 	rg.fill(r.YELLOW);
 	rg.stroke_is(false);
 	rg.ellipse(stroller.get_pos(),50);
+}
+
+
+void show_failure() {
+	println("total failure ", stroller.get_failure().size());
+	for(R_Line2D line : stroller.get_failure()) {
+		line.thickness(1);
+		if(line.id().a() == r.YELLOW) {
+			line.show(0);
+		}
+		
+	}
+
 }

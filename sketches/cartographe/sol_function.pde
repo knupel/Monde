@@ -7,10 +7,6 @@
 * http://knupel.art
 */
 
-R_Plate plate;
-
-
-
 
 
 /**
@@ -19,7 +15,8 @@ R_Plate plate;
 * V 0.0.3
 */
 void set_sol(int diam) {
-  plate = new R_Plate(new ivec2(width, height), new ivec2(diam));
+  float amplitude = 40;
+  plate = new R_Plate(new ivec2(width, height), new ivec2(diam), amplitude);
 }
 
 
@@ -31,7 +28,6 @@ R_Lithos [] get_grid_Sol() {
 void show_sol(R_Lithos grid[]) {
   rg.fill_is(true);
   rg.stroke_is(true);
-  // int colour = r.BLOOD;
   int colour = r.LUNE;
   vec3 hsb = new vec3(hue(colour), saturation(colour), brightness(colour));
 
@@ -45,10 +41,13 @@ void show_sol(R_Lithos grid[]) {
     rg.point(grid[i].pos());
   }
   // detection test
+}
+
+
+void show_target_lithos(R_Lithos grid[]) {
   rg.thickness(grid[0].radius()*4);
   rg.stroke(r.BLOOD);
   rg.point(plate.get(mouseX,mouseY).pos());
-
 }
 
 R_Lithos get_lithos(int target_x, int target_y) {
