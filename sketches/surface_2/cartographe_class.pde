@@ -276,13 +276,13 @@ public class R_Cartographe extends R_Graphic {
 		// current position
 		R_Lithos current_lithos = plate.get(cx, cy);
 		float current_alt = 0.5 *amp; // start with average altitude, for the case of tne null pointer exception.
-		if(current_lithos != null ) current_alt = current_lithos.pos().z() *amp;
+		if(current_lithos != null ) current_alt = current_lithos.altitude().y();
 		vec2 current = new vec2(0, current_alt);
 
 		// next position
 		R_Lithos next_lithos = plate.get(nx, ny);
 		float next_alt = current_alt; // start with current altitude, for the case of tne null pointer exception.
-		if(next_lithos != null ) next_alt = next_lithos.pos().z() *amp;
+		if(next_lithos != null ) next_alt = next_lithos.altitude().y();
 		float d = buf_pos.dist(get_pos());
 		vec2 next = new vec2(d, next_alt);
 
