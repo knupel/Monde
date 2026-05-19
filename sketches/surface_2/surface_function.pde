@@ -63,9 +63,9 @@ void create_surface(R_Plate plate, ArrayList<R_Face> list) {
 void display_surface(ArrayList<R_Face> list) {
     rg.thickness(1);
     rg.stroke_is(true);
-    rg.fill_is(false);
-    rg.stroke(r.BLOOD);
-    rg.fill(r.CYAN); // need to write this line, if not there is a colour by default :(
+    rg.fill_is(true);
+    rg.stroke(r.TENEBRE);
+    rg.fill(r.BLOOD); // need to write this line, if not there is a colour by default :(
     for(R_Face elem : list) {
         elem.show();
     }

@@ -39,9 +39,9 @@ void setup() {
   size(1300,800, P3D);
   tectos = new R_Tectos(this, width, height);
   init_sol(12);
-    set_sol();
+  set_sol();
   tectonique(tectos, get_grid_Sol());
-
+  set_sol_altitude();
   init_stroller();
   init_map(get_stroller());
   set_stroller();
@@ -76,9 +76,6 @@ void draw() {
   }
   // 3D part
   lights();
-
-
-
   rg.translate(width/2, height/2);
 	rg.push();
 	rg.rotateX(mouseY * 0.01);
@@ -95,6 +92,7 @@ void draw() {
 void keyPressed() {
 	if(key == 'n') {
     tectonique(tectos, get_grid_Sol());
+    set_sol_altitude();
     set_stroller();
     init_map(stroller);
 	}

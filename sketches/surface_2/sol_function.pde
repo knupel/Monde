@@ -55,13 +55,21 @@ void set_sol() {
     float y = r_y * cell.y() + os.y();
     plate.get(i).pointer_pos().x(x);
     plate.get(i).pointer_pos().y(y);
-    // plate.get(i).pos(r_x * cell.x() + os.x(), r_y * cell.y() + os.y(),0);
 
     int elements = floor(random(100));
     plate.get(i).set_sous_sol(elements);
     r_x++;
   }
 
+}
+
+void set_sol_altitude() {
+  for(R_Lithos lithos : plate.get()) {
+    float norm_alt = lithos.pos().z();
+    float alt = lithos.pos().z() * plate.amplitude();
+    lithos.pointer_pos().z(alt);
+    lithos.altitude(norm_alt, alt);
+  }
 }
 
 
@@ -79,7 +87,9 @@ void show_sol(R_Lithos grid[]) {
   // rg.thickness(2);
   rg.thickness(grid[0].radius());
   for(int i = 0 ; i < grid.length ; i++) {
-    int c = color(hsb.hue(), hsb.sat(), hsb.bri() * grid[i].pos().z());
+    float normal_altitude = grid[i].altitude().x();
+    int c = color(hsb.hue(), hsb.sat(), hsb.bri() * normal_altitude);
+    // int c = color(hsb.hue(), hsb.sat(), hsb.bri() * grid[i].pos().z());
     rg.stroke(c);
     // if(plate.get(mouseX,mouseY))
     rg.fill(c);
