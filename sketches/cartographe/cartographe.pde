@@ -54,12 +54,12 @@ void draw() {
                   " | Échec " + stroller.get_failure().size();
   surface.setTitle(title);
   // build
-  build_map(plate, get_stroller());
+  build_map(plate, stroller);
   run_stroller();
   // reset stroller
-  if(get_stroller().reset) {
-
-  }
+  if(stroller.reset_is()) {
+    reset_stroller();
+	}
 
   // show
   background(r.TENEBRE);
@@ -79,13 +79,13 @@ void draw() {
 
 void keyPressed() {
 	if(key == 'n') {
-		
     tectonique(tectos, get_grid_Sol());
-
     set_stroller();
-    init_map(get_stroller());
-
+    init_map(stroller);
 	}
+  if(key == 'N') {
+    reset_stroller();
+  }
 
   if(key == ' '){
     freeze();

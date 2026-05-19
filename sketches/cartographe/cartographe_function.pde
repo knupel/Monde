@@ -42,15 +42,15 @@ void set_stroller() {
 	stroller.set_intersection_ways(intersection_proportion);
 	stroller.set_speed(0.2);
 	stroller.set_tilt(8.5); // 8.5 est la valeur maximum française pour les pentes en France
-	// stroller.reset();
+	stroller.reset();
 }
 
 
 void reset_stroller() {
-	if(stroller.reset_is()) {
-		init_stroller();
-		set_stroller();
-	}
+	init_stroller();
+	set_stroller();
+	set_map(stroller);
+	
 }
 
 vec3 buf_follow = new vec3();
