@@ -29,18 +29,26 @@ void init_map(R_Cartographe stro) {
 	grid_nodes_monde.clear();
 	segment_monde.clear();
 	set_id_intersection(0);
-  
+	set_map(stro);
+}
 
-
-  
-	// angle_tracer = angle(start_pos,destination);
-	R_Node intersection = new R_Node(stro.get_pos().copy(), stro.get_destination().copy()); // copy() it's nessacy to don't point on a same Object
-	intersection.set_branch(8); // the start need a lot of branches
-	intersection.id_a(add_id_intersection());
-
-	grid_nodes_monde.add(intersection);
+void set_map(R_Cartographe stro) {
+	vec3 a = stro.get_pos().copy();
+	vec3 b = stro.get_destination().copy();
+	R_Node start_node = new R_Node(a, b);
+	start_node.set_branch(8); // the start need a lot of branches
+	start_node.id_a(add_id_intersection());
+	grid_nodes_monde.add(start_node);
+	// segment
 	R_Line2D segment = new R_Line2D(this, stro.get_pos().copy(), stro.get_destination().copy());
 	segment_monde.add(segment);
+	// node
+	R_Node end_node = new R_Node(b, a); 
+	int num_branch = stro.how_many_ways() + 1; // to garanty it's not a dead end
+	end_node.set_branch(num_branch);
+	grid_nodes_monde.add(end_node);
+	// need add node to end of the segment
+
 }
 
 
@@ -60,13 +68,8 @@ ArrayList<R_Node> get_nodes() {
 void build_map(R_Plate plate, R_Cartographe stro) {
 	vec2 area_detection = new vec2(10);
 
-	//
-	//
 	float altitude = 100; // pour transcrite l'altidude norma qui est entre 0 et 1 à quelque chose de visuellement intéressant 
 	float diff_altitude_max = 10; // pour tester
-	//
-	//
-
 
 	int min_by_intersection = 2;
 	int max_by_intersection = 5;

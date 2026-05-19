@@ -36,13 +36,16 @@ void setup() {
   // fullScreen(P2D,1);
   size(1300,800, P2D);
   tectos = new R_Tectos(this, width, height);
-  set_sol(7);
+  set_sol(24);
   tectonique(tectos, get_grid_Sol());
   init_stroller();
   init_map(get_stroller());
   set_stroller();
 }
 
+// void draw() {
+//   background(r.BLOOD);
+// }
 
 void draw() {
   String title =  "Cartographe | FPS : " + (int)frameRate + 
@@ -53,9 +56,13 @@ void draw() {
   // build
   build_map(plate, get_stroller());
   run_stroller();
+  // reset stroller
+  if(get_stroller().reset) {
+
+  }
 
   // show
-  background(0);
+  background(r.TENEBRE);
   if(display_sol_is()) show_sol(get_grid_Sol());
   if(display_map_is()) show_map();
   if(display_failure_is()) show_failure();
@@ -72,9 +79,12 @@ void draw() {
 
 void keyPressed() {
 	if(key == 'n') {
-		init_map(get_stroller());
+		
     tectonique(tectos, get_grid_Sol());
+
     set_stroller();
+    init_map(get_stroller());
+
 	}
 
   if(key == ' '){

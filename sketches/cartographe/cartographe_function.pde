@@ -14,13 +14,11 @@ R_Cartographe get_stroller() {
 // Cartographe / Stroller
 void init_stroller() {
 	stroller = new R_Cartographe(this);
-
-		// set data
 	int marge = width/10;
+	// position
 	vec3 start_pos = new vec3(random(marge,width -marge),random(marge,height -marge),0);
 	int range_start = 30;
-	vec3 destination = new vec3(start_pos.x+random(-range_start,range_start),start_pos.y+random(-range_start,range_start),0);
-
+	vec3 destination = new vec3(start_pos.x()+random(-range_start,range_start),start_pos.y()+random(-range_start,range_start),0);
 	stroller.set_pos(start_pos);
 	stroller.set_destination(destination);
 }
@@ -44,7 +42,15 @@ void set_stroller() {
 	stroller.set_intersection_ways(intersection_proportion);
 	stroller.set_speed(0.2);
 	stroller.set_tilt(8.5); // 8.5 est la valeur maximum française pour les pentes en France
-	stroller.reset();
+	// stroller.reset();
+}
+
+
+void reset_stroller() {
+	if(stroller.reset_is()) {
+		init_stroller();
+		set_stroller();
+	}
 }
 
 vec3 buf_follow = new vec3();

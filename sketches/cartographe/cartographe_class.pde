@@ -23,12 +23,15 @@ public class R_Cartographe extends R_Graphic {
 	private int count_road_gradient = 0;
 	private float tilt = 10;
 	private int count_no_cross = 0;
+	private boolean reset = false;
 
-	ArrayList<R_Line2D> failures = new ArrayList();
+	R_Fail failures;
+	// ArrayList<R_Line2D> failures = new ArrayList();
 	ArrayList<R_Node> free_nodes = new ArrayList();
 	
 	public R_Cartographe(PApplet pa) {
 		super(pa);
+		failures = new R_Fail(pa);
 		// the speed walk of the agent on the map
 		this.speed = 0.5;
 		// position on the map
@@ -39,7 +42,7 @@ public class R_Cartographe extends R_Graphic {
 		this.intersection = new ivec2(2,7);
 		// must be proportional to the number of branch here 7 - 2 = 5 +1 = 6
 		this.intersection_proportion = new int[] {64,32,16,8,4,2}; 
-		// distance to go for the next roap
+		// distance to go for the next road
 		this.dist = new vec2(0,height);
 		this.dist_proportion = new int[] {64,32,16,8,4,2,1};
 		// direction to take when a new intersection is create
@@ -186,7 +189,12 @@ public class R_Cartographe extends R_Graphic {
 
 	// reset
 	public void reset() {
-		failures.clear();
+		reset = false;
+		failures.clear_lines();
+	}
+
+	public boolean reset_is() {
+		return reset;
 	}
   
 
@@ -205,6 +213,7 @@ public class R_Cartographe extends R_Graphic {
 	// global variable of the few functions below
 	public vec3 goto_next(R_Plate plate, vec6 canvas, ArrayList<R_Node> nodes, ArrayList<R_Line2D> segments) {
 		vec2 next_pos = compute_pos_2D(plate, canvas, nodes, segments);
+		
 		update_free_nodes(nodes);
 		count_out_canvas = 0;
 		count_no_cross = 0;
@@ -218,6 +227,13 @@ public class R_Cartographe extends R_Graphic {
 				intersection_is(true);
 				next_pos = new vec2(p.x(),p.y());
 				break;
+			}
+		}
+
+		if(all(equal(next_pos.xy(), get_pos().xy()))) {
+			if(failures.get_count_lines() > 1000) {
+				reset = true;
+				failures.clear_count();
 			}
 		}
 		return new vec3(next_pos.xy());
@@ -355,16 +371,14 @@ public class R_Cartographe extends R_Graphic {
 
 	// utils failure
 	private void add_failure(vec2 a, vec2 b, int c) {
-		R_Line2D line = new R_Line2D(this.pa, a,b);
-		line.id_a(c);
-		line.palette(c);
-		failures.add(line);
+		failures.add_line(a,b,c);
 	}
 
 
 	public ArrayList<R_Line2D> get_failure() {
-		return failures;
+		return failures.get_lines();
 	}
+
 
 	// utils angle
 	private float next_angle_direction() {
