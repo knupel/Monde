@@ -183,19 +183,6 @@ public class R_Cartographe extends R_Graphic {
 		}
 	}
 
-	private void free_nodes(ArrayList<R_Node> nodes) {
-		free_nodes.clear();
-		for(R_Node node : nodes) {
-			if(node.get_branch_available() > 0) {
-				free_nodes.add(node);
-			}
- 		}
-	}
-
-	// public ArrayList<R_Node> get_free_nodes() {
-	// 	return free_nodes;
-	// }
-
 
 	// reset
 	public void reset() {
@@ -216,10 +203,9 @@ public class R_Cartographe extends R_Graphic {
 	////////////////////////
 
 	// global variable of the few functions below
-
-
 	public vec3 goto_next(R_Plate plate, vec6 canvas, ArrayList<R_Node> nodes, ArrayList<R_Line2D> segments) {
 		vec2 next_pos = compute_pos_2D(plate, canvas, nodes, segments);
+		update_free_nodes(nodes);
 		count_out_canvas = 0;
 		count_no_cross = 0;
 		count_road_gradient = 0;
@@ -249,9 +235,12 @@ public class R_Cartographe extends R_Graphic {
 		vec2 buf_pos = to_cartesian_2D(angle,dist).add(new vec2(get_destination()));
 
 		// the functions below create recursivity
-		buf_pos = compute_pos_2D_out_canvas(plate, canvas, nodes, segments, buf_pos);
-		buf_pos = compute_pos_2D_no_cross(plate, canvas, nodes, segments, buf_pos);
-		buf_pos = compute_pos_2D_road_gradient(plate, canvas, nodes, segments, buf_pos);
+		int max_try_canvas = 10;
+		buf_pos = compute_pos_2D_out_canvas(plate, canvas, nodes, segments, buf_pos, max_try_canvas);
+		int max_try_gradient = 10;
+		buf_pos = compute_pos_2D_road_gradient(plate, canvas, nodes, segments, buf_pos, max_try_gradient);
+		int max_try_canvas_cross = 10;
+		buf_pos = compute_pos_2D_no_cross(plate, canvas, nodes, segments, buf_pos, max_try_canvas_cross);
 
 		// check for to big length for next destination
 		float length_to_go = dist(buf_pos, new vec2(get_pos()));
@@ -262,98 +251,109 @@ public class R_Cartographe extends R_Graphic {
 		return buf_pos;
 	}
 
-	// test road gradient of the new road
-
-	private vec2 compute_pos_2D_road_gradient(R_Plate plate, vec6 canvas, ArrayList<R_Node> nodes, ArrayList<R_Line2D> segments, vec2 buf_pos) {
-		int max_try_gradient = 10;
+	private vec2 compute_pos_2D_road_gradient(R_Plate plate, vec6 canvas, ArrayList<R_Node> nodes, ArrayList<R_Line2D> segments, vec2 buf_pos, int max_try) {
 		float amp = plate.amplitude();
+		int cx = (int)get_pos().x();
+		int cy = (int)get_pos().y();
+		int nx = (int)buf_pos.x();
+		int ny = (int)buf_pos.y();
+
 		// current position
-		R_Lithos current_lithos = plate.get((int)get_pos().x(), (int)get_pos().y());
-		float current_alt = current_lithos.pos().z() *amp;
+		R_Lithos current_lithos = plate.get(cx, cy);
+		float current_alt = 0.5 *amp; // start with average altitude, for the case of tne null pointer exception.
+		if(current_lithos != null ) current_alt = current_lithos.pos().z() *amp;
 		vec2 current = new vec2(0, current_alt);
+
 		// next position
-		R_Lithos next_lithos = plate.get((int)buf_pos.x(), (int)buf_pos.y());
-		float next_alt = next_lithos.pos().z() *amp;
+		R_Lithos next_lithos = plate.get(nx, ny);
+		float next_alt = current_alt; // start with current altitude, for the case of tne null pointer exception.
+		if(next_lithos != null ) next_alt = next_lithos.pos().z() *amp;
 		float d = buf_pos.dist(get_pos());
 		vec2 next = new vec2(d, next_alt);
+
 		// tilt of the road
 		float angle = current.angle(next);
 		float angle_deg = abs(angle) * 57.295776; // 180°/PI = 57.295776
 
-		if(angle_deg > tilt && count_road_gradient < max_try_gradient) {
+		if(angle_deg > tilt && count_road_gradient < max_try) {
 			add_failure(get_pos().xy(), buf_pos, r.YELLOW);
 			count_road_gradient++;
 			// loop method until is good
 			buf_pos = compute_pos_2D(plate, canvas, nodes, segments); 
-		} else if(count_road_gradient >= max_try_gradient) {
-			// back to starting position in case there is too much recursive call or tp node with free slot
-			//
-			//
-			// Maintenant c'est ici qu'on doit regarder free_nodes
-			//
-			//
-			buf_pos = new vec2(nodes.get(0).pos());
+		} else if(count_road_gradient >= max_try) {
+			buf_pos = goto_free_nodes(nodes);
 		}
-		// return buf_pos;
 		return buf_pos;
 	}
 
 
-
 	// out canvas
-
-	private vec2 compute_pos_2D_out_canvas(R_Plate plate, vec6 canvas, ArrayList<R_Node> nodes, ArrayList<R_Line2D> segments, vec2 buf_pos) {
-		// limit for the recursive call
-		int max_try_canvas = 10;
+	private vec2 compute_pos_2D_out_canvas(R_Plate plate, vec6 canvas, ArrayList<R_Node> nodes, ArrayList<R_Line2D> segments, vec2 buf_pos, int max_try) {
 		// limit for the recursive call
 		vec3 canvas_min = new vec3(canvas.x(),canvas.y(),canvas.z());
 		vec3 canvas_max = new vec3(canvas.w(),canvas.e(),canvas.f());
 
-		if(count_out_canvas < max_try_canvas && (!r.all(greaterThan(buf_pos, new vec2(canvas_min))) || !r.all(lessThan(buf_pos, new vec2(canvas_max))))) {
+		if(count_out_canvas < max_try && (!r.all(greaterThan(buf_pos, new vec2(canvas_min))) || !r.all(lessThan(buf_pos, new vec2(canvas_max))))) {
 			add_failure(get_pos().xy(), buf_pos, r.BLUE);
 			count_out_canvas++;
 			// loop method until is good
 			buf_pos = compute_pos_2D(plate, canvas,nodes, segments); 
-		} else if(count_out_canvas >= max_try_canvas) {
-			// back to starting position in case there is too much recursive call or tp node with free slot
-			//
-			//
-			// Maintenant c'est ici qu'on doit regarder free_nodes
-			//
-			//
-			buf_pos = new vec2(nodes.get(0).pos());
+		} else if(count_out_canvas >= max_try) {
+			buf_pos = goto_free_nodes(nodes);
 		}
 		return buf_pos;
 	}
 
 
-	private vec2 compute_pos_2D_no_cross(R_Plate plate, vec6 canvas, ArrayList<R_Node> nodes, ArrayList<R_Line2D> segments, vec2 buf_pos) {
-		// limit for the recursive call
-		int max_try_cross = 10;
+	private vec2 compute_pos_2D_no_cross(R_Plate plate, vec6 canvas, ArrayList<R_Node> nodes, ArrayList<R_Line2D> segments, vec2 buf_pos, int max_try) {
 		// limit for the recursive call
 		R_Line2D target_segment = new R_Line2D(pa, new vec3(get_pos().x, get_pos().y, 0), new vec3(buf_pos.x(), buf_pos.y(), 0));
-		if(count_no_cross < max_try_cross && check_meeting_segment(target_segment, segments, false)) {
+		if(count_no_cross < max_try && check_meeting_segment(target_segment, segments, false)) {
 			add_failure(get_pos().xy(), buf_pos, r.GREEN);
 			count_no_cross++;
 			// loop method until is good
 			buf_pos = compute_pos_2D(plate, canvas,nodes, segments);
-		} else if(count_no_cross >= max_try_cross) {
+		} else if(count_no_cross >= max_try) {
 
 			// HERE IT'S WEIRD ??????
 			int target = floor(random(nodes.size()));
 			buf_pos = new vec2(nodes.get(target).pos());
-						// back to starting position in case there is too much recursive call or tp node with free slot
-			//
-			//
-			// Maintenant c'est ici qu'on doit regarder free_nodes
-			//
-			//
-			buf_pos = new vec2(nodes.get(0).pos());
+			// back to starting position in case there is too much recursive call or tp node with free slot
+			buf_pos = goto_free_nodes(nodes);
 		}
 		return buf_pos;
 	}
 
 
+
+
+	//
+	// UTILS
+	//
+
+
+	// utils free node management
+	private vec2 goto_free_nodes(ArrayList<R_Node> nodes) {
+		float arg = random(1);
+		float choice = 0.5;
+		if(arg < choice || free_nodes.size() < 1) {
+			return new vec2(nodes.get(0).pos());
+		}
+		int index = floor(random(free_nodes.size()));
+		return free_nodes.get(index).pos().xy();
+	}
+
+
+	private void update_free_nodes(ArrayList<R_Node> nodes) {
+		free_nodes.clear();
+		for(R_Node node : nodes) {
+			if(node.get_branch_available() > 0) {
+				free_nodes.add(node);
+			}
+ 		}
+	}
+
+	// utils failure
 	private void add_failure(vec2 a, vec2 b, int c) {
 		R_Line2D line = new R_Line2D(this.pa, a,b);
 		line.id_a(c);
@@ -366,25 +366,10 @@ public class R_Cartographe extends R_Graphic {
 		return failures;
 	}
 
-
-
-
-
-
-
-
-
-
-
-
-	// utils
-
+	// utils angle
 	private float next_angle_direction() {
 		float previous_direction = new vec2(get_pos()).angle(new vec2(get_destination()));
 		float angle = next_direction();
-		// println("angle", angle);
-			if(keyPressed) {
-		}
 		angle += previous_direction;
 		return angle;
 	}

@@ -62,7 +62,7 @@ void show_stroller() {
 
 
 void show_failure() {
-	println("total failure ", stroller.get_failure().size());
+	// println("total failure ", stroller.get_failure().size());
 	for(R_Line2D line : stroller.get_failure()) {
 		line.thickness(1);
 		if(line.id().a() == r.YELLOW) {

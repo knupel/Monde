@@ -45,7 +45,10 @@ void setup() {
 
 
 void draw() {
-  String title = "Cartographe | FPS : " + (int)frameRate + " | Grille : " + get_grid_Sol().length + " | Routes " + get_roads().size();
+  String title =  "Cartographe | FPS : " + (int)frameRate + 
+                  " | Grille : " + get_grid_Sol().length + 
+                  " | Routes " + get_roads().size() + 
+                  " | Échec " + stroller.get_failure().size();
   surface.setTitle(title);
   // build
   build_map(plate, get_stroller());
