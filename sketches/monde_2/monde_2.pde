@@ -13,6 +13,7 @@ import rope.geo.R_Lithos;
 import rope.geo.R_Tectos;
 import rope.geo.R_Plate;
 import rope.mesh.R_Face;
+import rope.colour.R_Colour;
 
 Rope r = new Rope();
 
@@ -25,6 +26,8 @@ ArrayList<R_Face> faces = new ArrayList();
 int CELL = 12;
 float ALTITUDE = 120;
 float NOISE_ALT = 0.02;
+
+int SURFACE_HOME = 100;
 
 
 /**
@@ -76,6 +79,15 @@ void draw() {
   // build
   build_map(plate, stroller);
   run_stroller();
+
+  // cadastre
+  vec3 size_world = new vec3(3*width,width,3*width);
+  int urban_mode = 0;
+  int min_lot = 10;
+  int max_lot = 20;
+  int tempo_build = 20; // tempo is a modulo of the size of the street map.
+  boolean use_relief_is = true;
+  cadastre_update(urban_mode,min_lot,max_lot,tempo_build,size_world, use_relief_is);
 
   // reset stroller
   if(stroller.reset_is()) {
