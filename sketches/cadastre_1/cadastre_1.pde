@@ -26,7 +26,7 @@ void setup() {
 void draw() {
   background(255);
   draw_shape();
-  show_triangle();
+  // show_triangle();
 }
 
 void keyPressed() {
@@ -69,10 +69,15 @@ void set_cadastre() {
   int offset = 5;
   // create_cadastre_1(size, offset, roads);
   create_cadastre_2(offset, roads, cadastre_polys);
+  println("set_cadastre() cadastre_polys", cadastre_polys.size());
 }
 
 
 void draw_shape() {
+  rg.thickness(1);
+  rg.stroke_is(true);
+  rg.fill_is(true);
+  rg.fill(r.GOLD);
   for(R_Shape shape : cadastre_polys) {
     shape.show();
   }
@@ -81,23 +86,72 @@ void draw_shape() {
 
 
 void create_cadastre_2(int offset, ArrayList<R_Line2D> lines, ArrayList<R_Shape> cadastre) {
+  cadastre.clear();
   float step = 0.1;
+  float margin = offset;
+  // create lot
   for(R_Line2D line : lines) {
-    float abscissa = 0;
-    while(abscissa < 1) {
-      abscissa += random(step);
-      float ordinate = 0.1;
-      vec2 a = line.get_point(abscissa, ordinate);
-      vec2 aa = line.get_point(abscissa, ordinate *3);
-      abscissa += random(step);
-      vec2 b = line.get_point(abscissa, ordinate);
-      vec2 bb = line.get_point(abscissa, ordinate *3);
-      R_Shape shape = new R_Shape(this);
-      shape.add_points(a,b,bb,aa);
-      cadastre.add(shape);
+    float abscissa_right = 0;
+    float abscissa_left = 0;
+    while(abscissa_right < 1) {
+      abscissa_right = create_lots(true, abscissa_right, step, margin, line, cadastre);
+    }
+    while( abscissa_left < 1) {
+      abscissa_left = create_lots(false, abscissa_left, step, margin, line, cadastre);
+    }
+  }
+  // remove lot of the road
+  remove_lot(lines, cadastre);
+  println("create_cadastre_2() cadastre 1", cadastre.size());
+}
+
+void remove_lot(ArrayList<R_Line2D> roads, ArrayList<R_Shape> cadastre) {
+  ArrayList<R_Shape> buf = new ArrayList();
+  for(R_Shape shape : cadastre) {
+    boolean meet_is = false;
+    R_Line2D [] lines = shape.get_lines();
+    for(int i = 0 ; i < lines.length ; i++) {
+      for(R_Line2D road : roads) {
+        if(road.intersection_is(lines[i])) {
+          meet_is = true;
+          continue;
+        }
+      }
+      if(meet_is) continue;
+    }
+    if(!meet_is) {
+      buf.add(shape);
+      println("shape", shape.get_points()[0], shape.get_points()[1], shape.get_points()[2], shape.get_points()[3]);
     }
 
   }
+  cadastre.clear();
+  // cadastre = (ArrayList<R_Shape>)buf.clone(); // we cannot use the function clone, else the clone die
+  // cadastre =  new ArrayList<R_Shape>(buf); // same that's don't work
+  for(R_Shape shape : buf) {
+    cadastre.add(shape);
+  }
+  println("remove_lot() cadastre 1", cadastre.size());
+}
+
+float create_lots(boolean side, float abscissa, float step, float margin, R_Line2D line, ArrayList<R_Shape> cadastre) {
+  // abscissa += random(step);
+  float dir = 1;
+  if(side) dir = -1;
+  float dist = line.a().dist(line.b());
+  float deep = (margin + random(margin, margin *4)) / dist;
+  float ordinate = margin / dist;
+  // compute point
+  vec2 a = line.get_point(abscissa, ordinate *dir);
+  vec2 aa = line.get_point(abscissa, deep *dir);
+  abscissa += random(step);
+  if(abscissa > 1) abscissa = 1;
+  vec2 b = line.get_point(abscissa, ordinate *dir);
+  vec2 bb = line.get_point(abscissa, deep *dir);
+  R_Shape shape = new R_Shape(this);
+  shape.add_points(a,b,bb,aa);
+  cadastre.add(shape);
+  return abscissa;
 
 }
 
