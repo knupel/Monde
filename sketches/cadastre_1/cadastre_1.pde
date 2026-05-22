@@ -101,11 +101,31 @@ void create_cadastre_2(int offset, ArrayList<R_Line2D> lines, ArrayList<R_Shape>
     }
   }
   // remove lot of the road
-  remove_lot(lines, cadastre);
-  println("create_cadastre_2() cadastre 1", cadastre.size());
+  remove_lot_crossing_road(lines, cadastre);
+  // remove overlapping lots
+  check_overlapping_lots(cadastre);
 }
 
-void remove_lot(ArrayList<R_Line2D> roads, ArrayList<R_Shape> cadastre) {
+void check_overlapping_lots(ArrayList<R_Shape> cadastre) {
+  for(R_Shape shape_1 : cadastre) {
+      for(R_Shape shape_2 : cadastre) {
+        // detect if there is overloapping 
+
+        // cela peut se supperposer 
+        // soit partielement : détecté par le croisement des lignes
+        // soit supperposition totale et dans ce cas tous les sommets de l'une des formes se situe dans l'aire de l'autre forme
+        // soit elle se superpose exactment et dans ce cas le barycentre est le même.
+
+
+        
+        // solution 1 remove the overlap
+        // solution 2 join the two overlappings shapes
+
+    }
+  }
+}
+
+void remove_lot_crossing_road(ArrayList<R_Line2D> roads, ArrayList<R_Shape> cadastre) {
   ArrayList<R_Shape> buf = new ArrayList();
   for(R_Shape shape : cadastre) {
     boolean meet_is = false;
@@ -121,7 +141,6 @@ void remove_lot(ArrayList<R_Line2D> roads, ArrayList<R_Shape> cadastre) {
     }
     if(!meet_is) {
       buf.add(shape);
-      println("shape", shape.get_points()[0], shape.get_points()[1], shape.get_points()[2], shape.get_points()[3]);
     }
 
   }
@@ -131,7 +150,6 @@ void remove_lot(ArrayList<R_Line2D> roads, ArrayList<R_Shape> cadastre) {
   for(R_Shape shape : buf) {
     cadastre.add(shape);
   }
-  println("remove_lot() cadastre 1", cadastre.size());
 }
 
 float create_lots(boolean side, float abscissa, float step, float margin, R_Line2D line, ArrayList<R_Shape> cadastre) {
