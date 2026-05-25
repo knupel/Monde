@@ -24,9 +24,7 @@ void setup() {
 void draw() {
   background(255);
   rg.fill_is(true);
-  rg.fill(r.GOLD);
   show_shapes(raw_list);
-  rg.fill(r.BLOOD);
   show_shapes(final_list);
 }
 
@@ -116,10 +114,10 @@ void select_overlaps_shapes(ArrayList<R_Shape> start, ArrayList<R_Shape> end) {
             if(sa.id().a() == Integer.MIN_VALUE && sb.id().a() == Integer.MIN_VALUE) sa.id_a(id);
             if(sb.id().a() != Integer.MIN_VALUE) {
               sa.id_a(sb.id().a());
-              id++;
-            }
-            // sa.id_a(0);
-            println("id", sa.id().a());
+              id = sa.id().a()+1;
+            }     
+            // println("shape id", sa.id().a());
+            // println("id", id);
             end.add(sa);
             //
             //
@@ -137,6 +135,16 @@ void select_overlaps_shapes(ArrayList<R_Shape> start, ArrayList<R_Shape> end) {
 
 void show_shapes(ArrayList<R_Shape> list) {
   for(R_Shape s : list) {
+    if(s.id().a() < 0) rg.fill(r.GOLD);
+    else if(s.id().a()== 1) rg.fill(r.SHAKUDOU);
+    else if(s.id().a()== 2) rg.fill(r.OUTREMER);
+    else if(s.id().a()== 3) rg.fill(r.PISTACHE);
+    else if(s.id().a()== 4) rg.fill(r.CANARD);
+    else if(s.id().a()== 5) rg.fill(r.CORAIL);
+    else if(s.id().a()== 6) rg.fill(r.MAUVE);
+    else if(s.id().a()== 7) rg.fill(r.AUBERGINE);
+
+    else  rg.fill(r.BLOOD);
     s.show();
   }
 }
