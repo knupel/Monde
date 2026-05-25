@@ -34,6 +34,7 @@ void draw() {
 void keyPressed() {
   create_shapes(raw_list);
   clear_shapes(raw_list, final_list);
+
 }
 
 
@@ -43,8 +44,7 @@ void create_shapes(ArrayList<R_Shape> list) {
   set_shapes(list, new vec2(width/2, height/2), new vec2(width, height));
   set_shapes(list, new vec2(0, height/2), new vec2(width/2, height));
   set_shapes(list, new vec2(width/2, 0), new vec2(width, height/2));
-      
-
+    
 }
 
 void set_shapes(ArrayList<R_Shape> list, vec2 min, vec2 max) {
@@ -71,13 +71,32 @@ void clear_shapes(ArrayList<R_Shape> start, ArrayList<R_Shape> end) {
 
 
 void group_overlap_shape(ArrayList<R_Shape> overlaps) {
+  int id = 1;
+  for(R_Shape sa : overlaps) {
+    R_Line2D [] sal = sa.get_lines();
+    boolean is = false;
+    for(R_Shape sb : overlaps) {
+      R_Line2D [] sbl = sb.get_lines();
+       for(int i = 0 ; i < sal.length ; i++) {
+        for(int k = 0 ; k < sbl.length ; k++) {
+          // on ajoute des exceptions pour éciter la superposition des points de jonction des segments des formes
+          vec2 a = sal[i].a();
+          vec2 b = sal[i].b();
+          vec2 c = sbl[k].a();
+          vec2 d = sbl[k].b();
+
+        }
+      }
+    }
+
+  }
   
 
 }
 
 void select_overlaps_shapes(ArrayList<R_Shape> start, ArrayList<R_Shape> end) {
-  ArrayList<R_Shape> overlaps = new ArrayList();
   // un systeme de 4 boucles sera peut-être trop lent ?
+  int id = 0;
   for(R_Shape sa : start) {
     R_Line2D [] sal = sa.get_lines();
     boolean is = false;
@@ -85,14 +104,25 @@ void select_overlaps_shapes(ArrayList<R_Shape> start, ArrayList<R_Shape> end) {
       R_Line2D [] sbl = sb.get_lines();
       for(int i = 0 ; i < sal.length ; i++) {
         for(int k = 0 ; k < sbl.length ; k++) {
-          // on ajoute des exceptions pour éciter la superposition des points de jonction des segments des formes
+          // on ajoute des exceptions pour éviter la superposition des points de jonction des segments des formes
           vec2 a = sal[i].a();
           vec2 b = sal[i].b();
           vec2 c = sbl[k].a();
           vec2 d = sbl[k].b();
           if(sal[i].intersection_is(sbl[k], a, b, c, d)) {
             is = true;
-            overlaps.add(sa);
+            //
+            // le résultat de tout ce boulot
+            if(sa.id().a() == Integer.MIN_VALUE && sb.id().a() == Integer.MIN_VALUE) sa.id_a(id);
+            if(sb.id().a() != Integer.MIN_VALUE) {
+              sa.id_a(sb.id().a());
+              id++;
+            }
+            // sa.id_a(0);
+            println("id", sa.id().a());
+            end.add(sa);
+            //
+            //
             break;
           }
           if(is) break;
@@ -101,10 +131,6 @@ void select_overlaps_shapes(ArrayList<R_Shape> start, ArrayList<R_Shape> end) {
       }
       if(is) break;
     }
-  }
-  // finalisation
-  for(R_Shape s : overlaps) {
-    end.add(s);
   }
 }
 
