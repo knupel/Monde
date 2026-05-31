@@ -70,6 +70,8 @@ void set_shapes(ArrayList<R_Shape> list, vec2 min, vec2 max) {
     vec2 c = new vec2(random(min.x(), max.x()), random(min.y(), max.y()));
     R_Shape shape = new R_Shape(this);
     shape.add_points(a,b,c);
+    int id = (int)random(Integer.MAX_VALUE);
+    shape.id_a(id);
     list.add(shape);
   }
 }
@@ -95,7 +97,7 @@ void group_overlap_shape(ArrayList<ArrayList> group, ArrayList<R_Shape> overlaps
   }
 
   for(R_Shape s : overlaps) {
-    int index = s.id().a();
+    int index = s.id().b();
     group.get(index).add(s);
   }
 }
@@ -119,16 +121,12 @@ int select_overlaps_shapes(ArrayList<R_Shape> start, ArrayList<R_Shape> end) {
             is = true;
             //
             // le résultat de tout ce boulot
-            if(sa.id().a() == Integer.MIN_VALUE && sb.id().a() == Integer.MIN_VALUE) sa.id_a(id);
-            if(sb.id().a() != Integer.MIN_VALUE) {
-              sa.id_a(sb.id().a());
-              id = sa.id().a()+1;
+            if(sa.id().b() == Integer.MIN_VALUE && sb.id().b() == Integer.MIN_VALUE) sa.id_b(id);
+            if(sb.id().b() != Integer.MIN_VALUE) {
+              sa.id_b(sb.id().b());
+              id = sa.id().b()+1;
             }     
-            // println("shape id", sa.id().a());
-            // println("id", id);
             end.add(sa);
-            //
-            //
             break;
           }
           if(is) break;
@@ -151,14 +149,14 @@ void show_group_shapes(ArrayList<ArrayList> group) {
 void show_shapes(ArrayList<R_Shape> list) {
   for(R_Shape s : list) {
     if(s.id().a() < 0) rg.fill(r.GOLD);
-    else if(s.id().a()== 1) rg.fill(r.PURPLE);
-    else if(s.id().a()== 2) rg.fill(r.OUTREMER);
-    else if(s.id().a()== 3) rg.fill(r.PISTACHE);
-    else if(s.id().a()== 4) rg.fill(r.CANARD);
-    else if(s.id().a()== 5) rg.fill(r.CORAIL);
-    else if(s.id().a()== 6) rg.fill(r.MAUVE);
-    else if(s.id().a()== 7) rg.fill(r.AUBERGINE);
-    else if(s.id().a()== Integer.MAX_VALUE) rg.fill(r.BLOOD);
+    else if(s.id().b()== 1) rg.fill(r.PURPLE);
+    else if(s.id().b()== 2) rg.fill(r.OUTREMER);
+    else if(s.id().b()== 3) rg.fill(r.PISTACHE);
+    else if(s.id().b()== 4) rg.fill(r.CANARD);
+    else if(s.id().b()== 5) rg.fill(r.CORAIL);
+    else if(s.id().b()== 6) rg.fill(r.MAUVE);
+    else if(s.id().b()== 7) rg.fill(r.AUBERGINE);
+    else if(s.id().b()== Integer.MAX_VALUE) rg.fill(r.BLOOD);
     else rg.fill(r.GRAY[5]);
     s.show();
   }
@@ -179,12 +177,9 @@ void union_shapes(ArrayList<ArrayList> group, ArrayList<R_Shape> union) {
     for(int i = 0 ; i < shapes.size() ; i++) {
       R_Shape s = shapes.get(i);
       union_shape(s, united_shape);
-
-    }
-    
+    }    
     union.add(united_shape);
   }
-  println("union", union.size());
 }
 
 void union_shape(R_Shape origin, R_Shape target) {
@@ -194,6 +189,7 @@ void union_shape(R_Shape origin, R_Shape target) {
   // cas de départ
   if(target.length() == 0) {
     target.add_points(origin.get_points());
+    target.id(origin.id());
     return;
   }
   ///////////////////
@@ -212,13 +208,19 @@ void union_shape(R_Shape origin, R_Shape target) {
   ArrayList<R_Line2D> new_lines = new ArrayList();
   R_Line2D [] arr_ln_origin = origin.get_lines();
   R_Line2D [] arr_ln_target = target.get_lines();
-  // add_full_lines(arr_ln_origin, arr_ln_target , new_lines);
-  // add_full_lines(arr_ln_target, arr_ln_origin , new_lines);
 
   add_keys(arr_ln_origin, arr_ln_target);
 
   add_cut_lines(arr_ln_origin, new_lines);
   add_cut_lines(arr_ln_target, new_lines);
+
+  for(R_Line2D l : new_lines) {
+    l.thickness(1);
+    l.stroke_is(true);
+    l.show(0);
+  }
+
+  clean_lines(origin, target, new_lines);
 
 
   ArrayList<vec2> res = new ArrayList();
@@ -226,7 +228,6 @@ void union_shape(R_Shape origin, R_Shape target) {
   for(R_Line2D l : new_lines) {
     l.thickness(4);
     l.stroke_is(true);
-    // l.stroke(r.BLACK);
     l.show(0);
   }
   rg.stroke_is(false);
@@ -235,7 +236,7 @@ void union_shape(R_Shape origin, R_Shape target) {
   // }
 
 
-  println("new points", res.size());
+  // println("new points", res.size());
   for(vec2 v : res) {
     println(v);
   }
@@ -244,18 +245,18 @@ void union_shape(R_Shape origin, R_Shape target) {
 ///////////////////////////////////////////
 // START ADD LINES and SPLITED LINES
 ///////////////////////////////////////////
-void add_full_lines(R_Line2D [] src_a, R_Line2D [] src_b , ArrayList<R_Line2D> new_lines) {
-  for(R_Line2D  ln_a : src_a) {
+void clean_lines(R_Shape origin, R_Shape target, ArrayList<R_Line2D> lines) {
+  ArrayList<R_Line2D> buf = new ArrayList();
+  for(R_Line2D l : lines) {
+    vec2 barycenter = l.barycenter();
     boolean is = false;
-    for(R_Line2D ln_b : src_b) {
-      if(ln_a.intersection_is(ln_b)) {
-        is = true;
-      }
-    }
-    if(!is) {
-      ln_a.palette(r.BLOOD);
-      new_lines.add(ln_a);
-    }
+    if(origin.in_polygon(barycenter, 2)) is = true;
+    if(target.in_polygon(barycenter, 2)) is = true;
+    if(!is) buf.add(l);
+  }
+  lines.clear();
+  for(R_Line2D l : buf) {
+    lines.add(l);
   }
 }
 
@@ -279,7 +280,7 @@ void add_cut_lines(R_Line2D [] src_lines, ArrayList<R_Line2D> new_lines) {
     int index = 0;
     for(R_Line2D l2 : l_cut) {
       println("index", index);
-      l2.id_a(get_color(index));
+      l2.id_b(get_color(index));
       l2.palette(get_color(index));
       index++;
       new_lines.add(l2);
