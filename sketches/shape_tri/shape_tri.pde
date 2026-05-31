@@ -10,8 +10,8 @@ import rope.vector.vec2;
 import rope.vector.vec3;
 import rope.mesh.R_Line2D;
 
-ArrayList<R_Shape> raw_list = new ArrayList();
-ArrayList<R_Shape> final_list = new ArrayList();
+ArrayList<R_Shape> start_list = new ArrayList();
+ArrayList<R_Shape> end_list = new ArrayList();
 ArrayList<ArrayList> group = new ArrayList();
 ArrayList<R_Shape> union = new ArrayList();
 Rope r = new Rope();
@@ -20,24 +20,34 @@ R_Graphic rg;
 void setup() {
   size(600,600);
   rg = new R_Graphic(this);
-  create_shapes(raw_list);
-  clear_shapes(raw_list, final_list);
+  create_shapes(start_list);
+  clear_shapes(start_list, end_list);
   union_shapes(group, union);
+  rg.fill_is(true);
+  rg.stroke_is(false);
+  // show_shapes(end_list);
 }
 
 void draw() {
-  background(255);
-  rg.fill_is(true);
-  // show_shapes(raw_list);
-  // show_shapes(final_list);
-  show_group_shapes(group);
-  show_shapes(union);
+  // background(255);
+
 }
 
 
 void keyPressed() {
-  create_shapes(raw_list);
-  clear_shapes(raw_list, final_list);
+  background(255);
+  // display
+  rg.fill_is(true);
+  rg.stroke_is(false);
+  rg.thickness(1);
+  // show_shapes(start_list);
+  // show_shapes(end_list);
+  // show_group_shapes(group);
+  // show_shapes(union);
+
+  // create
+  create_shapes(start_list);
+  clear_shapes(start_list, end_list);
   union_shapes(group, union);
 
 }
@@ -53,7 +63,7 @@ void create_shapes(ArrayList<R_Shape> list) {
 }
 
 void set_shapes(ArrayList<R_Shape> list, vec2 min, vec2 max) {
-  int num = 3;
+  int num = 2;
   for(int k = 0 ; k < num ; k++) {
     vec2 a = new vec2(random(min.x(), max.x()), random(min.y(), max.y()));
     vec2 b = new vec2(random(min.x(), max.x()), random(min.y(), max.y()));
@@ -73,6 +83,7 @@ void clear_shapes(ArrayList<R_Shape> start, ArrayList<R_Shape> end) {
   int num = select_overlaps_shapes(start, end);
   // select_overlaps_shapes(start, end);
   group_overlap_shape(group, end, num);
+  start.clear();
 }
 
 
@@ -194,96 +205,152 @@ void union_shape(R_Shape origin, R_Shape target) {
   // points de la forme 1
 
 
-  // ArrayList<vec3> pts_origin = new ArrayList();
-  // vec3 [] arr_pts = origin.get_points();
-  // for(int i = 0 ; i < arr_pts.length ; i++) {
-  //   pts_origin.add(arr_pts[i]);
-  // }
-  // // points de la forme 2
-  // ArrayList<vec3> pts_target = new ArrayList();
-  // arr_pts = target.get_points();
-  // for(int i = 0 ; i < arr_pts.length ; i++) {
-  //   pts_target.add(arr_pts[i]);
-  // }
-  // // points de la forme d'intersections
-  // ArrayList<vec2> pts_intersection = new ArrayList();
-  // R_Line2D [] arr_ln_origin = origin.get_lines();
-  // R_Line2D [] arr_ln_target = target.get_lines();
-  // for(R_Line2D ln_o : arr_ln_origin) {
-  //   for(R_Line2D ln_t : arr_ln_target) {
-  //     vec2 pts = ln_o.intersection(ln_t);
-  //     if(pts != null) pts_intersection.add(pts);
-  //   }
-  // }
-  // println("000", pts_origin.size(), pts_target.size(), pts_intersection.size());
-
-
   ////////////////////////
   // nettoyage des points
   ///////////////////////
   // netoyage des points inutiles, ceux qui sont à l'intérieurs des formes
-
-
-
   ArrayList<R_Line2D> new_lines = new ArrayList();
   R_Line2D [] arr_ln_origin = origin.get_lines();
   R_Line2D [] arr_ln_target = target.get_lines();
-  for(R_Line2D ln_o : arr_ln_origin) {
-    for(R_Line2D ln_t : arr_ln_target) {
-      vec2 pts = ln_o.intersection(ln_t);
-      if(pts == null) {
-        new_lines.add(ln_t);
-        new_lines.add(ln_o);
-      } else {
-        // création de 4 nouveaux segments à partir du point d'intersection
-        // https://thecodingtrain.com/challenges/145-ray-casting-2d
-        // println("pts", pts);
-        // println("ln_o.a()", ln_o.a());
-        R_Line2D l1 = new R_Line2D(this, pts, ln_o.a().xy());   
-        R_Line2D l2 = new R_Line2D(this, pts, ln_o.b().xy());
-        R_Line2D l3 = new R_Line2D(this, pts, ln_t.a().xy());
-        R_Line2D l4 = new R_Line2D(this, pts, ln_t.b().xy());
-        // supression des deux segments intérieurs aux formes
-        // test de collision avec les segments de l'autre polygone
-        // si il y a colision il faut supprimer
-        if(!meet_is(l1, target)) new_lines.add(l1);
-        if(!meet_is(l2, target)) new_lines.add(l2);
-        if(!meet_is(l3, origin)) new_lines.add(l3);
-        if(!meet_is(l4, origin)) new_lines.add(l4);
+  // add_full_lines(arr_ln_origin, arr_ln_target , new_lines);
+  // add_full_lines(arr_ln_target, arr_ln_origin , new_lines);
 
+  add_keys(arr_ln_origin, arr_ln_target);
+
+  add_cut_lines(arr_ln_origin, new_lines);
+  add_cut_lines(arr_ln_target, new_lines);
+
+
+  ArrayList<vec2> res = new ArrayList();
+
+  for(R_Line2D l : new_lines) {
+    l.thickness(4);
+    l.stroke_is(true);
+    // l.stroke(r.BLACK);
+    l.show(0);
+  }
+  rg.stroke_is(false);
+  // while(new_lines.size() > 0) {
+  //   sort_lines(new_lines, res, 0);
+  // }
+
+
+  println("new points", res.size());
+  for(vec2 v : res) {
+    println(v);
+  }
+}
+
+///////////////////////////////////////////
+// START ADD LINES and SPLITED LINES
+///////////////////////////////////////////
+void add_full_lines(R_Line2D [] src_a, R_Line2D [] src_b , ArrayList<R_Line2D> new_lines) {
+  for(R_Line2D  ln_a : src_a) {
+    boolean is = false;
+    for(R_Line2D ln_b : src_b) {
+      if(ln_a.intersection_is(ln_b)) {
+        is = true;
+      }
+    }
+    if(!is) {
+      ln_a.palette(r.BLOOD);
+      new_lines.add(ln_a);
+    }
+  }
+}
+
+void add_keys(R_Line2D [] src_a, R_Line2D [] src_b) {
+  // search key point
+  for(R_Line2D  ln_a : src_a) {
+    for(R_Line2D ln_b : src_b) {
+      if(ln_a.intersection_is(ln_b)) {
+        vec2 key_point = ln_a.intersection(ln_b);
+        ln_a.add_keys(key_point);
+        ln_b.add_keys(key_point);
       }
     }
   }
-  // maintenant il faut assembler les segments dans l'ordre pour retrouver l'union polygon
-  ArrayList<vec2> new_points = new ArrayList();
-  int count = 0;
-  int count_equal = 0;
-  println("new lines", new_lines.size());
-  for(R_Line2D l1 : new_lines) {
-      if(count == 0) new_points.add(l1.a());
-      for(R_Line2D l2 : new_lines) {
-        if(l1 == l2) {
-          println("l1", l1);
-          println("l2", l2);
-          // juste on ne fait rien
-          // println("break");
-          // continue;
-          count_equal++;
-        }
-        // println("l1.b()", l1.b(), "l2.a()", l2.a());
-        if(l1.b().equals(l2.a())) {
-          // println("je suis là", l1.b(), l2.a());
-          new_points.add(l2.a());
-        }
-        count++;
-      
+}
+
+void add_cut_lines(R_Line2D [] src_lines, ArrayList<R_Line2D> new_lines) {
+  R_Line2D [] l_cut;
+  for(R_Line2D  l1 : src_lines) {
+    l_cut = l1.cut();
+    int index = 0;
+    for(R_Line2D l2 : l_cut) {
+      println("index", index);
+      l2.id_a(get_color(index));
+      l2.palette(get_color(index));
+      index++;
+      new_lines.add(l2);
     }
   }
+}
 
-  // println("new points", new_points.size(), "égalité", count_equal);
-  // for(vec2 v : new_points) {
-  //   println(v);
-  // }
+int get_color(int index) {
+  switch(index) {
+    case 0 : return r.GRAY[5];
+    case 1 : return r.BLOOD;
+    case 2 : return r.GOLD;
+    case 3 : return r.BLUE;
+    case 4 : return r.ORANGE;
+    case 5 : return r.GREEN;
+    case 6 : return r.VERT_DE_GRIS;
+    default : return r.GRAY[5];
+  }
+  
+}
+
+
+///////////////////////////////////////////
+// END ADD LINES and SPLITED LINES
+///////////////////////////////////////////
+
+void sort_lines(ArrayList<R_Line2D> lines_src, ArrayList<vec2> res, int id) {
+  R_Line2D l1 = new R_Line2D(this);
+  println("0000 lines_src.size()", lines_src.size());
+  for(int i = 0 ; i < lines_src.size() ; i++) {
+    R_Line2D l = lines_src.get(i);
+   
+    if(l.id().a() == id) {
+      l1 = l.copy();
+      lines_src.remove(i);
+      break;
+    }
+  }
+  println("1111 lines_src.size()", lines_src.size(), l1.id().a(), lines_src.get(0).id().a());
+  // println("l.id().a()", l1.id().a(), "id", id);
+  // println("size lines_src", lines_src.size());
+  int index = 0;
+  // int id = 0;
+  for( ; index < lines_src.size() ; index++) {
+    R_Line2D l2 = lines_src.get(index);
+    if(l1.id().a() == l2.id().a()) {
+      // LE SOUCIS EST LA, c'est ici que ça fait tourner en rond
+      // id = l2.id().a();
+      println("--- l1.id().a() == l2.id().a()");
+      continue;
+    }
+    // peut-être pas besoin de la ligne ci-dessus normalement elle a été supprimée
+
+    if(l1.b() == l2.a()) {
+      id = l2.id().a();
+      println("*** l1.b() == l2.a()");
+      res.add(l2.a().copy());
+      break;
+    }
+    if(l1.b() == l2.b()) {
+      println("/// l1.b() == l2.b()");
+      id = l2.id().a();
+      res.add(l2.b().copy());
+      // besoin d'inverser le segment AB
+      vec2 buf = l2.a().copy();
+      l2.a(l2.b());
+      l2.b(buf.x(), buf.y());
+      break;
+    }
+  }
+  sort_lines(lines_src, res, id);
 }
 
 
