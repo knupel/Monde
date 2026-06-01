@@ -35,20 +35,29 @@ void draw() {
 
 
 void keyPressed() {
-  background(255);
-  // display
-  rg.fill_is(true);
-  rg.stroke_is(false);
-  rg.thickness(1);
-  // show_shapes(start_list);
-  // show_shapes(end_list);
-  // show_group_shapes(group);
-  // show_shapes(union);
+    if(key == 'a') a_switch();
+  if(key == 'z') z_switch();
+  if(key == 'e') e_switch();
 
-  // create
-  create_shapes(start_list);
-  clear_shapes(start_list, end_list);
-  union_shapes(group, union);
+  if(key == 'n') {
+    background(255);
+    // display
+    rg.fill_is(true);
+    rg.stroke_is(false);
+    rg.thickness(1);
+    // show_shapes(start_list);
+    // show_shapes(end_list);
+    // show_group_shapes(group);
+    // show_shapes(union);
+
+    // create
+    create_shapes(start_list);
+    clear_shapes(start_list, end_list);
+    union_shapes(group, union);
+
+    // show_shapes(union);
+  }
+
 
 }
 
@@ -183,9 +192,6 @@ void union_shapes(ArrayList<ArrayList> group, ArrayList<R_Shape> union) {
 }
 
 void union_shape(R_Shape origin, R_Shape target) {
-  ArrayList<R_Shape> shapes = new ArrayList();
-  shapes.add(origin);
-  shapes.add(target);
   // cas de départ
   if(target.length() == 0) {
     target.add_points(origin.get_points());
@@ -203,12 +209,21 @@ void union_shape(R_Shape origin, R_Shape target) {
   add_cut_lines(arr_ln_origin, new_lines);
   add_cut_lines(arr_ln_target, new_lines);
 
-
-  show_line(new_lines, 1);
+  // println("0", new_lines.size());
+  // show_line(new_lines, 1);
   clean_lines(origin, target, new_lines);
-  show_line(new_lines, 4);
+  // show_line(new_lines, 4);
+  // println("1", new_lines.size());
 
   sort_lines(new_lines);
+  show_line(new_lines, 1);
+  //  println("2", new_lines.size());
+  fusion(new_lines, target);
+  // println("3", new_lines.size());
+
+
+  // show_shape(target);
+  // show_line(new_lines, 4);
 
   // ArrayList<vec2> res = new ArrayList();
 
@@ -222,7 +237,15 @@ void union_shape(R_Shape origin, R_Shape target) {
 // SORT
 /////////////////////////
 
-R_Line2D [] sort_lines(ArrayList<R_Line2D> lines_src) {
+void fusion(ArrayList<R_Line2D> lines, R_Shape target) {
+  target.clear();
+  for(int i = 0 ; i < lines.size(); i++) {
+    vec2 p = lines.get(i).a().copy();
+    target.add_points(p);
+  }
+}
+
+void sort_lines(ArrayList<R_Line2D> lines_src) {
   ArrayList<R_Line2D> sort = new ArrayList();
   R_Line2D line = lines_src.get(0);
   sort.add(line.copy());
@@ -235,13 +258,16 @@ R_Line2D [] sort_lines(ArrayList<R_Line2D> lines_src) {
   int len = sort.size();
   int max_iter = lines_src.size() *10;
   int iter = 0;
-  while(sort.size() < lines_src.size() && iter < max_iter) {
+  // while(lines_src.size() < 1 && iter < max_iter) {
+  // while(sort.size() < lines_src.size() && iter < max_iter) {
+  int goal = lines_src.size();
+  println("goal", goal);
+  while(sort.size() >= goal && iter < max_iter) {
     if(sort.size() != len) {
       len = sort.size();
       line = sort.get(len -1);
     }
     iter++;
-    // println("iter", iter);
     for(int i = 1 ; i < lines_src.size() ; i++) {
       vec2 a = line.a().copy();
       vec2 b = line.b().copy();
@@ -250,66 +276,57 @@ R_Line2D [] sort_lines(ArrayList<R_Line2D> lines_src) {
         float marge = 0.2;
         if(a.compare(test.a(), marge)) {
           sort.add(test.copy());
+          lines_src.remove(i);
+          println("AA reste", lines_src.size());
           break;
         }
         if(a.compare(test.b(), marge)) {
           sort.add(test.copy());
+          lines_src.remove(i);
+          println("AB reste", lines_src.size());
           break;
         }
         if(b.compare(test.a(), marge)) {
           sort.add(test.copy());
+          lines_src.remove(i);
+          println("BA reste", lines_src.size());
           break;
         }
         if(b.compare(test.b(), marge)) {
           sort.add(test.copy());
+          lines_src.remove(i);
+          println("BB reste", lines_src.size());
           break;
         }
       }
-      
     }
   }
+  println("goal", goal, "sort.size()", sort.size());
+  // vec2 first = sort.get(0).a();
+  // vec2 last = sort.get(sort.size()-1).b(); // this point can be a b()
 
 
 
-  if(sort.size() == lines_src.size()) {
-    println("BINGO");
-  } else {
-    println("ÉCHEC");
-    println("src len", lines_src.size());
-    r.print_array(lines_src);
-    println("sort len", sort.size());
-    r.print_array(sort);
-  }
-  // println("1 je suis là");
 
-
-  // while(sort.size() == lines_src.size() || iter < max_iter) {
-  //   iter += index;
-  //   index = 1;
-  //   // il faudrait optimiser pour retirer les éléments trouvés de la liste.
-  //   for( ; index < lines_src.size() ; index++) {
-  //     R_Line2D l1 = sort.get(index_sort);
-  //     R_Line2D l2 = lines_src.get(index).copy();
-  //     if(l1.a().equals(l2.a())) {
-  //       println("Bingo AA", l1.a(), l2.a(), index);
-  //       index_sort++;
-  //       sort.add(l2);
-  //       break;
-  //     }
-
-  //     if(l1.a().equals(l2.b())) {
-  //       println("Bingo AB", l1.a(), l2.b());
-  //       index_sort++;
-  //       sort.add(l2);
-  //       break;
-  //     }
-      
-  //     index++;
-  //   }
+  // if(sort.size() == lines_src.size()) {
+  //   println("BINGO");
+  // } else {
+  //   println("ÉCHEC");
+  //   println("src len", lines_src.size());
+  //   r.print_array(lines_src);
+  //   println("sort len", sort.size());
+  //   r.print_array(sort);
   // }
-  // println("frameCount", frameCount, "src", lines_src.size(), "sort", sort.size());
-  R_Line2D [] buf = new R_Line2D[sort.size()];
-  return sort.toArray(buf);
+
+  // R_Line2D [] buf = new R_Line2D[sort.size()];
+  // return sort.toArray(buf);
+  println("reste à la fin", lines_src.size());
+  lines_src.clear();
+  for(R_Line2D l : sort) {
+    // println(l);
+    lines_src.add(l.copy());
+  }
+
 }
 
 /////////////////////////
@@ -414,16 +431,33 @@ int get_color(int index) {
 
 
 
-
 // UTILS SHOW
 void show_line(ArrayList<R_Line2D> lines, int thickness) {
-    for(R_Line2D l : lines) {
+  for(int i = 0 ; i < lines.size(); i++) {
+    R_Line2D l = lines.get(i);
+    // println(l);
+    l.fill_is(true);
+    l.fill(r.BLACK);
+    l.text(i, l.barycenter());
+    l.fill_is(false);
     l.thickness(thickness);
     l.stroke_is(true);
+
+
     l.show(0);
   }
   rg.stroke_is(false);
 }
+
+
+void show_shape(R_Shape s) {
+  s.thickness(0);
+  s.stroke_is(false);
+  s.fill_is(true);
+  s.fill(r.PINK);
+  s.show();
+}
+
 
 
 

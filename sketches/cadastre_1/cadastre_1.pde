@@ -1,3 +1,10 @@
+/**
+* cadatre 
+* 2026-2026
+* V 0.1.0
+*/
+
+
 import rope.mesh.R_Line2D;
 import rope.vector.vec2;
 import rope.core.Rope;

@@ -13,6 +13,7 @@ import rope.geo.R_Lithos;
 import rope.geo.R_Tectos;
 import rope.geo.R_Plate;
 import rope.mesh.R_Face;
+import rope.mesh.R_Shape;
 
 Rope r = new Rope();
 
@@ -20,6 +21,7 @@ R_Tectos tectos;
 R_Graphic rg;
 R_Plate plate;
 ArrayList<R_Face> faces = new ArrayList();
+ArrayList<R_Shape> cadastre_polys = new ArrayList();
 
 
 int CELL = 12;
@@ -82,10 +84,17 @@ void draw() {
     reset_stroller();
 	}
 
+  // build cadastre
+  if(build_cadastre_is()) {
+    create_cadastre(6, get_roads(), cadastre_polys);
+    build_cadastre(false);
+  }
+
   // show
   background(r.BLACK);
   lights();
   
+  if(display_cadastre_is()) show_cadastre(cadastre_polys);
   if(display_sol_is()) show_sol(get_grid_Sol(), P3D); // possible to choice P2D
   if(display_map_is()) show_map();
   if(display_failure_is()) show_failure();
@@ -103,32 +112,7 @@ void draw() {
 
 
 void keyPressed() {
-	if(key == 'n') {
-    tectonique(tectos, get_grid_Sol(), NOISE_ALT);
-    set_sol_altitude();
-    set_stroller();
-    init_map(stroller);
-	}
-  if(key == 'N') {
-    reset_stroller();
-  }
-
-  if(key == ' '){
-    freeze();
-  }
-
-	if(key == 'i') display_info_switch();
-  if(key == 's') display_sol_switch();
-  if(key == 'S') display_surface_switch();
-  if(key == 'm') display_map_switch();
-  if(key == 'f') display_failure_switch();
-
-
-
-
-  if(key == 'p') {
-    close_dead_end(15);
-  }
+  key_pressed_gui();
 }
 
 
