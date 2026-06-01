@@ -192,18 +192,7 @@ void union_shape(R_Shape origin, R_Shape target) {
     target.id(origin.id());
     return;
   }
-  ///////////////////
-  // cas usuel
-  ///////////////////
-  /////////////////////
-  // ajouts des points
-  ////////////////////
-  // points de la forme 1
-
-
   ////////////////////////
-  // nettoyage des points
-  ///////////////////////
   // netoyage des points inutiles, ceux qui sont à l'intérieurs des formes
   ArrayList<R_Line2D> new_lines = new ArrayList();
   R_Line2D [] arr_ln_origin = origin.get_lines();
@@ -214,33 +203,127 @@ void union_shape(R_Shape origin, R_Shape target) {
   add_cut_lines(arr_ln_origin, new_lines);
   add_cut_lines(arr_ln_target, new_lines);
 
-  for(R_Line2D l : new_lines) {
-    l.thickness(1);
-    l.stroke_is(true);
-    l.show(0);
-  }
 
+  show_line(new_lines, 1);
   clean_lines(origin, target, new_lines);
+  show_line(new_lines, 4);
 
+  sort_lines(new_lines);
 
-  ArrayList<vec2> res = new ArrayList();
-
-  for(R_Line2D l : new_lines) {
-    l.thickness(4);
-    l.stroke_is(true);
-    l.show(0);
-  }
-  rg.stroke_is(false);
-  // while(new_lines.size() > 0) {
-  //   sort_lines(new_lines, res, 0);
-  // }
-
+  // ArrayList<vec2> res = new ArrayList();
 
   // println("new points", res.size());
-  for(vec2 v : res) {
-    println(v);
-  }
+  // for(vec2 v : res) {
+  //   println(v);
+  // }
 }
+
+/////////////////////////
+// SORT
+/////////////////////////
+
+R_Line2D [] sort_lines(ArrayList<R_Line2D> lines_src) {
+  ArrayList<R_Line2D> sort = new ArrayList();
+  R_Line2D line = lines_src.get(0);
+  sort.add(line.copy());
+  
+  // int index = 1;
+  // int index_sort = 0;
+
+  // println("0 je suis là");
+  //r.print_array(lines_src);
+  int len = sort.size();
+  int max_iter = lines_src.size() *10;
+  int iter = 0;
+  while(sort.size() < lines_src.size() && iter < max_iter) {
+    if(sort.size() != len) {
+      len = sort.size();
+      line = sort.get(len -1);
+    }
+    iter++;
+    // println("iter", iter);
+    for(int i = 1 ; i < lines_src.size() ; i++) {
+      vec2 a = line.a().copy();
+      vec2 b = line.b().copy();
+      R_Line2D test = lines_src.get(i);
+      if(!line.equals(test,false)) {
+        float marge = 0.2;
+        if(a.compare(test.a(), marge)) {
+          sort.add(test.copy());
+          break;
+        }
+        if(a.compare(test.b(), marge)) {
+          sort.add(test.copy());
+          break;
+        }
+        if(b.compare(test.a(), marge)) {
+          sort.add(test.copy());
+          break;
+        }
+        if(b.compare(test.b(), marge)) {
+          sort.add(test.copy());
+          break;
+        }
+      }
+      
+    }
+  }
+
+
+
+  if(sort.size() == lines_src.size()) {
+    println("BINGO");
+  } else {
+    println("ÉCHEC");
+    println("src len", lines_src.size());
+    r.print_array(lines_src);
+    println("sort len", sort.size());
+    r.print_array(sort);
+  }
+  // println("1 je suis là");
+
+
+  // while(sort.size() == lines_src.size() || iter < max_iter) {
+  //   iter += index;
+  //   index = 1;
+  //   // il faudrait optimiser pour retirer les éléments trouvés de la liste.
+  //   for( ; index < lines_src.size() ; index++) {
+  //     R_Line2D l1 = sort.get(index_sort);
+  //     R_Line2D l2 = lines_src.get(index).copy();
+  //     if(l1.a().equals(l2.a())) {
+  //       println("Bingo AA", l1.a(), l2.a(), index);
+  //       index_sort++;
+  //       sort.add(l2);
+  //       break;
+  //     }
+
+  //     if(l1.a().equals(l2.b())) {
+  //       println("Bingo AB", l1.a(), l2.b());
+  //       index_sort++;
+  //       sort.add(l2);
+  //       break;
+  //     }
+      
+  //     index++;
+  //   }
+  // }
+  // println("frameCount", frameCount, "src", lines_src.size(), "sort", sort.size());
+  R_Line2D [] buf = new R_Line2D[sort.size()];
+  return sort.toArray(buf);
+}
+
+/////////////////////////
+// END SORT
+/////////////////////////
+
+
+
+
+
+
+
+
+
 
 ///////////////////////////////////////////
 // START ADD LINES and SPLITED LINES
@@ -279,7 +362,6 @@ void add_cut_lines(R_Line2D [] src_lines, ArrayList<R_Line2D> new_lines) {
     l_cut = l1.cut();
     int index = 0;
     for(R_Line2D l2 : l_cut) {
-      println("index", index);
       l2.id_b(get_color(index));
       l2.palette(get_color(index));
       index++;
@@ -299,15 +381,70 @@ int get_color(int index) {
     case 6 : return r.VERT_DE_GRIS;
     default : return r.GRAY[5];
   }
-  
 }
-
-
 ///////////////////////////////////////////
 // END ADD LINES and SPLITED LINES
 ///////////////////////////////////////////
 
-void sort_lines(ArrayList<R_Line2D> lines_src, ArrayList<vec2> res, int id) {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// UTILS SHOW
+void show_line(ArrayList<R_Line2D> lines, int thickness) {
+    for(R_Line2D l : lines) {
+    l.thickness(thickness);
+    l.stroke_is(true);
+    l.show(0);
+  }
+  rg.stroke_is(false);
+}
+
+
+
+
+
+
+
+// OLD
+
+
+// boolean meet_is(R_Line2D ln, R_Shape shape) {
+//   R_Line2D [] arr = shape.get_lines();
+//   for(R_Line2D line : arr) {
+//     if(line.intersection_is(ln, ln.a(), ln.b())) return true;
+//   }
+//   return false;
+// }
+
+
+
+void sort_lines_old(ArrayList<R_Line2D> lines_src, ArrayList<vec2> res, int id) {
   R_Line2D l1 = new R_Line2D(this);
   println("0000 lines_src.size()", lines_src.size());
   for(int i = 0 ; i < lines_src.size() ; i++) {
@@ -351,14 +488,5 @@ void sort_lines(ArrayList<R_Line2D> lines_src, ArrayList<vec2> res, int id) {
       break;
     }
   }
-  sort_lines(lines_src, res, id);
-}
-
-
-boolean meet_is(R_Line2D ln, R_Shape shape) {
-  R_Line2D [] arr = shape.get_lines();
-  for(R_Line2D line : arr) {
-    if(line.intersection_is(ln, ln.a(), ln.b())) return true;
-  }
-  return false;
+  sort_lines_old(lines_src, res, id);
 }
