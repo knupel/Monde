@@ -23,9 +23,9 @@ public class Maison {
 
   float from_center;
   R_House house;
-  public Maison(PApplet pa, vec pos, int surface, float from_center, int max_level) {
+  public Maison(PApplet pa, int surface, float from_center, int max_level) {
     house = new R_House(pa);
-    this.pos = pos.xyz();
+    
     this.from_center = from_center;
     this.surface = surface;
     float avg_side = sqrt(surface) ;
@@ -50,6 +50,10 @@ public class Maison {
   ///////////////////
   // GEOMETRY
   /////////////////
+  public void pos(vec pos) {
+    this.pos = pos.xyz();
+  }
+
   public vec3 pos() {
     return this.pos;
   }

@@ -6,9 +6,9 @@
 
 ArrayList<Maison> maisons = new ArrayList();
 
-void create_maisons(ArrayList<R_Shape> cadastre) {
+void create_maisons(ArrayList<R_Shape> cadastre, R_Plate plate) {
     int surface = 1; // set after with the cadastre
-    int max_level = 3;
+    int max_level = 8;
     int fill_ground = r.BLACK;
     int stroke = r.GRAY[4];
     float thickness = 1;
@@ -19,10 +19,14 @@ void create_maisons(ArrayList<R_Shape> cadastre) {
         R_Shape s =  cadastre.get(i);
 
         surface = (int)s.area();
-        vec2 pos = s.barycenter().xy();
+        vec3 pos = s.barycenter();
+        float altitude = plate.get((int)pos.x(), (int)pos.y()).altitude().y();
+        // println("altitude", altitude);
+        pos.z(altitude);
         float from_center = r.dist(new vec2(pos.x(),pos.z()),center);
         // from_center est utilisé pour la hauter de la maison, plus on est proche du centre plus elle est haut et grand si j'ai bien compris mon vieil algo
-        Maison maison = new Maison(this, pos, surface,from_center,max_level);
+        Maison maison = new Maison(this, surface, from_center, max_level);
+        maison.pos(pos);
         int fill_roof = color(random(0,30),random(80,100),random(60,90));
         int fill_wall = color(random(360),random(0,10),random(50,100));
         float peak = random(1);

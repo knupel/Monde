@@ -15,6 +15,9 @@ vec3 rotate_house = new vec3(0);
 vec3 rotate_town = new vec3(0);
 vec3 rotate_surface = new vec3(0);
 
+vec3 rotate_world = new vec3(0);
+
+
 void update_gui() {
     // touche 1 / 2 / 3
     if(keyPressed) {
@@ -40,6 +43,14 @@ void update_gui() {
             rotate_surface.z(mouseX * 0.01);
         }
         if(key == '!') rotate_surface.y(mouseX * 0.1); // 8
+    }
+
+    // 0 ) -
+    if(keyPressed) {
+        // JE dois séparer les valeurs pour de la cohérence, pas comme Surface, bizarre
+        if(key == 'à') rotate_world.x(mouseX * 0.01); // 4
+        if(key == ')')  rotate_world.y(mouseX * 0.1); // 5
+        if(key == '-')  rotate_world.z(mouseX * 0.01); // 6
     }
 
 }

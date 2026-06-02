@@ -94,28 +94,40 @@ void draw() {
 
   // build maison / commune
   if(build_maison_is()) {
-    create_maisons(get_cadastre());
+    create_maisons(get_cadastre(), plate);
     build_maison(false);
   }
 
   // show
   background(r.BLACK);
   lights();
-  
+
+  // start matrix
+  rg.push();
+  rg.translate(width/2, height/2);
+  rg.rotateXYZ(rotate_world);
+  rg.translate(-width/2, -height/2);
+  // 2D
   if(display_cadastre_is()) show_cadastre();
   if(display_sol_is()) show_sol(get_grid_Sol(), P3D); // possible to choice P2D
   if(display_map_is()) show_map();
   if(display_failure_is()) show_failure();
   show_stroller();
+
+  // 3D
+  if(display_surface_is()) show_surface();
+  if(display_maison_is()) show_commune();
+  // end matrix
+  rg.pop();
+
+
+  // INFO
   if(display_info_is()) {
   	show_center_town(20, r.BLOOD);
   	boussole(get_center_commune().xy(),80);
     show_intersection();
     show_info();
   }
-  // 3D part
-  if(display_surface_is()) show_surface();
-  if(display_maison_is()) show_commune();
 }
 
 
