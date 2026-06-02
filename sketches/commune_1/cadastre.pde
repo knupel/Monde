@@ -3,27 +3,31 @@
 * 2026-2026
 * V 0.2.0
 */
+ArrayList<R_Shape> cadastre_polys = new ArrayList();
 
+ArrayList<R_Shape> get_cadastre() {
+  return cadastre_polys;
+}
 
-void show_cadastre(ArrayList<R_Shape> cadastre) {
+void show_cadastre() {
   rg.thickness(1);
   rg.stroke_is(true);
   rg.fill_is(true);
   rg.fill(r.GOLD);
-  for(R_Shape shape : cadastre) {
+  for(R_Shape shape : cadastre_polys) {
     shape.show();
   }
 }
 
 
-void clear_cadastre(ArrayList<R_Shape> cadastre) {
-    cadastre.clear();
+void clear_cadastre() {
+    cadastre_polys.clear();
 }
 
 
 
-void create_cadastre(int offset, ArrayList<R_Line2D> lines, ArrayList<R_Shape> cadastre) {
-  clear_cadastre(cadastre);
+void create_cadastre(int offset, ArrayList<R_Line2D> lines) {
+  clear_cadastre();
   float step = offset * 0.1;
   float margin = offset;
   // create lot
@@ -31,17 +35,17 @@ void create_cadastre(int offset, ArrayList<R_Line2D> lines, ArrayList<R_Shape> c
     float abscissa_right = 0;
     float abscissa_left = 0;
     while(abscissa_right < 1) {
-      abscissa_right = create_lots(true, abscissa_right, step, margin, line, cadastre);
+      abscissa_right = create_lots(true, abscissa_right, step, margin, line, cadastre_polys);
     }
     while( abscissa_left < 1) {
-      abscissa_left = create_lots(false, abscissa_left, step, margin, line, cadastre);
+      abscissa_left = create_lots(false, abscissa_left, step, margin, line, cadastre_polys);
     }
   }
   // remove lot of the road
-  remove_lot_crossing_road(lines, cadastre);
+  remove_lot_crossing_road(lines, cadastre_polys);
   // remove overlapping lots
   // Fail and don't work after 5 full day of coding... no more time to work on it.
-  check_overlapping_lots(cadastre);
+  check_overlapping_lots(cadastre_polys);
 }
 
 
@@ -110,6 +114,7 @@ float create_lots(boolean side, float abscissa, float step, float margin, R_Line
   vec2 bb = line.get_point(abscissa, deep *dir);
   R_Shape shape = new R_Shape(this);
   shape.add_points(a,b,bb,aa);
+  shape.angle_x(a.angle(b));
   cadastre.add(shape);
   return abscissa;
 

@@ -21,7 +21,7 @@ R_Tectos tectos;
 R_Graphic rg;
 R_Plate plate;
 ArrayList<R_Face> faces = new ArrayList();
-ArrayList<R_Shape> cadastre_polys = new ArrayList();
+
 
 
 int CELL = 12;
@@ -68,11 +68,13 @@ void setup() {
 }
 
 void draw() {
+  update_info();
+  update_gui();
   // info top window
-  String title =  "Cartographe | FPS : " + (int)frameRate + 
-                  " | Grille : " + get_grid_Sol().length + 
-                  " | Routes " + get_roads().size() + 
-                  " | Échec " + stroller.get_failure().size();
+  String title =  "Cartographe | FPS : " + info_fps + 
+                  " | Grille : " + info_grid_size + 
+                  " | Routes " + info_num_roads + 
+                  " | Échec " + info_num_fail;
   surface.setTitle(title);
 
   // build map
@@ -86,32 +88,34 @@ void draw() {
 
   // build cadastre
   if(build_cadastre_is()) {
-    create_cadastre(6, get_roads(), cadastre_polys);
+    create_cadastre(6, get_roads());
     build_cadastre(false);
   }
 
   // build maison / commune
   if(build_maison_is()) {
-    create_maisons(cadastre_polys);
+    create_maisons(get_cadastre());
     build_maison(false);
   }
 
   // show
   background(r.BLACK);
   lights();
-  if(display_maison_is()) show_commune();
-  if(display_cadastre_is()) show_cadastre(cadastre_polys);
+  
+  if(display_cadastre_is()) show_cadastre();
   if(display_sol_is()) show_sol(get_grid_Sol(), P3D); // possible to choice P2D
   if(display_map_is()) show_map();
   if(display_failure_is()) show_failure();
   show_stroller();
   if(display_info_is()) {
   	show_center_town(20, r.BLOOD);
-  	boussole(new vec2(grid_nodes_monde.get(0).pos()),80);
+  	boussole(get_center_commune().xy(),80);
     show_intersection();
+    show_info();
   }
   // 3D part
   if(display_surface_is()) show_surface();
+  if(display_maison_is()) show_commune();
 }
 
 

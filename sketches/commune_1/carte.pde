@@ -51,6 +51,9 @@ void set_map(R_Cartographe stro) {
 
 }
 
+//////////////
+// GET
+/////////////////////
 
 ArrayList<R_Line2D> get_roads() {
 	return segment_monde;
@@ -59,6 +62,10 @@ ArrayList<R_Line2D> get_roads() {
 
 ArrayList<R_Node> get_nodes() {
 	return grid_nodes_monde;
+}
+
+vec3 get_center_commune() {
+	return grid_nodes_monde.get(0).pos();
 }
 
 

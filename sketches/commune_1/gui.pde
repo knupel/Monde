@@ -1,8 +1,8 @@
-// GUI VARAIBLE
+// GUI VARIABLE
 boolean build_cadastre_is = false;
 boolean build_maison_is = false;
 
-boolean display_maison_is = false;
+boolean display_maison_is = true;
 boolean display_cadastre_is = false;
 boolean display_info_is = false;
 boolean display_sol_is = false;
@@ -10,6 +10,39 @@ boolean display_surface_is = false;
 boolean display_map_is = true;
 boolean display_failure_is = false;
 
+// variable 3D
+vec3 rotate_house = new vec3(0);
+vec3 rotate_town = new vec3(0);
+vec3 rotate_surface = new vec3(0);
+
+void update_gui() {
+    // touche 1 / 2 / 3
+    if(keyPressed) {
+        if(key == '&') rotate_house.x(mouseX * 0.1); // 1
+        if(key == 'é') rotate_house.y(mouseX * 0.1); // 2
+        if(key == '"') rotate_house.z(mouseX * 0.1); // 3
+    }
+
+    // touche 4 / 5 / 6
+    if(keyPressed) {
+        // JE dois séparer les valeurs pour de la cohérence, pas comme Surface, bizarre
+        if(key == '\'') rotate_town.x(mouseX * 0.01); // 4
+        if(key == '(')  rotate_town.y(mouseX * 0.1); // 5
+        if(key == '§')  rotate_town.z(mouseX * 0.01); // 6
+    }
+
+
+     // touche 7 / 8  / 9
+    if(keyPressed) {
+        // 7
+        if(key == 'è') {
+            rotate_surface.x(mouseY * 0.01);
+            rotate_surface.z(mouseX * 0.01);
+        }
+        if(key == '!') rotate_surface.y(mouseX * 0.1); // 8
+    }
+
+}
 
 // GUI
 void key_pressed_gui() {
@@ -19,7 +52,7 @@ void key_pressed_gui() {
         set_sol_altitude();
         set_stroller();
         init_map(stroller);
-        clear_cadastre(cadastre_polys);
+        clear_cadastre();
 	}
 
     if(key== 'T') build_maison(true); // T for town > Commune
@@ -32,10 +65,10 @@ void key_pressed_gui() {
     if(key == 'm') display_map_switch();
     if(key == 'f') display_failure_switch();
 
-    if(key == 'p')  close_dead_end(15);
+    // if(key == 'p')  close_dead_end(15);
 
     // FREEZE
-    if(key == ' ') freeze();
+    if(key == 'p') freeze();
 }
 // COMMUNE / MAISON / TOWN
 ////////////////////////////////
