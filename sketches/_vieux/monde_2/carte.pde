@@ -1,0 +1,334 @@
+/**
+* Carte
+* v 0.7.0
+* Copyleft (c) 2019-2026
+* @author Knupel
+* @see https://github.com/knupel/Monde
+*/
+/**
+french guide
+boussole : compass
+carte : map
+*/
+import rope.mesh.R_Node;
+import rope.mesh.R_Line2D;
+
+ArrayList<R_Node> grid_nodes_monde;
+ArrayList<R_Line2D> segment_monde;
+
+
+
+
+// Map
+void init_map(R_Cartographe stro) {
+	// init data if nececary
+	if(grid_nodes_monde == null) grid_nodes_monde = new ArrayList<R_Node>();
+	if(segment_monde == null) segment_monde = new ArrayList<R_Line2D>();
+
+	// reset data
+	grid_nodes_monde.clear();
+	segment_monde.clear();
+	set_id_intersection(0);
+	set_map(stro);
+}
+
+void set_map(R_Cartographe stro) {
+	vec3 a = stro.get_pos().copy();
+	vec3 b = stro.get_destination().copy();
+	R_Node start_node = new R_Node(a, b);
+	start_node.set_branch(8); // the start need a lot of branches
+	start_node.id_a(add_id_intersection());
+	grid_nodes_monde.add(start_node);
+	// segment
+	R_Line2D segment = new R_Line2D(this, stro.get_pos().copy(), stro.get_destination().copy());
+	segment_monde.add(segment);
+	// node
+	R_Node end_node = new R_Node(b, a); 
+	int num_branch = stro.how_many_ways() + 1; // to garanty it's not a dead end
+	end_node.set_branch(num_branch);
+	grid_nodes_monde.add(end_node);
+	// need add node to end of the segment
+
+}
+
+
+ArrayList<R_Line2D> get_roads() {
+	return segment_monde;
+}
+
+
+ArrayList<R_Node> get_nodes() {
+	return grid_nodes_monde;
+}
+
+
+
+
+
+void build_map(R_Plate plate, R_Cartographe stro) {
+	vec2 area_detection = new vec2(10);
+
+	float altitude = 100; // pour transcrite l'altidude norma qui est entre 0 et 1 à quelque chose de visuellement intéressant 
+	float diff_altitude_max = 10; // pour tester
+
+	int min_by_intersection = 2;
+	int max_by_intersection = 5;
+
+	vec6 canvas_birth = new vec6(0, 0, -width, width, height, width);
+	// verification si l'urbaniste est arrivée, si oui on chercher une nouvelle destination
+	if(r.compare(new vec2(stro.get_pos()), new vec2(stro.get_destination()), area_detection)) {
+		//
+		//
+		// c'est dans goto_next() qu'on doit faire la détection de l'altitude
+		//
+		//
+		vec3 new_destination = stro.goto_next(plate, canvas_birth, grid_nodes_monde, segment_monde);
+		int id_inter = rank_intersection(stro.get_pos());
+		if(id_inter >= 0) {
+			R_Node inter = grid_nodes_monde.get(id_inter);
+			stro.set_destination(new_destination,inter);
+		} else {
+			stro.set_destination(new_destination);
+		}
+
+    if(!stro.intersection_is()) {
+    	boolean cycle_add_is = false;
+		cycle_add_is = ask_intersection(stro);
+		// check to build segment
+		boolean build_anytime_is = false;
+		cycle_add_is = add_segment(stro, build_anytime_is);
+		if(cycle_add_is) {
+			add_intersection(temp_intersection);
+		} else {
+			vec2 back_to_center_pos = new vec2(grid_nodes_monde.get(0).pos());
+			stro.set_destination(back_to_center_pos);
+		}
+    }
+    stro.intersection_is(false);
+	}
+	stro.reset_stroll();
+}
+
+void close_dead_end(int range_to_link) {
+	// the path must be close, it's patch with only one entry or dead end
+	// select path with only one entry and make a list
+	ArrayList <R_Node> list_dead_end = new ArrayList();
+	ArrayList <R_Node> list_crossroad_free = new ArrayList();
+	int rank = 0; // set rank to refind the node in thee next step
+	for(R_Node node : grid_nodes_monde){
+		int entry = node.get_branch() - node.get_branch_available();
+		if(entry == 1) {
+			list_dead_end.add(node.copy().id_a(rank)); // use copy to avoid the pointer problem affectation
+		}
+		if(entry > 1) {
+			list_crossroad_free.add(node.copy().id_a(rank)); // use copy to avoid the pointer problem affectation
+		}
+		rank++;
+	}
+	println("intersection : ", grid_nodes_monde.size());
+	println("dead end : ", list_dead_end.size());
+	println("crossroad free : ", list_crossroad_free.size());
+	// close ead end if it's in the range
+	int num_possible_links = 0;
+	for(R_Node dead : list_dead_end) {
+		for(R_Node cross : list_crossroad_free) {
+			float dist = dead.pos().dist(cross.pos());
+			if(dist <= range_to_link && dist > 0) {
+				num_possible_links++;
+				// add segment
+				R_Line2D segment = new R_Line2D(this,dead.pos(),cross.pos());
+				segment_monde.add(segment);
+				// update node
+				grid_nodes_monde.get(dead.id().a()).add_destination(cross.pos());
+				grid_nodes_monde.get(cross.id().a()).add_destination(dead.pos());
+				break; // to don't more links than dead end
+			}
+		}
+	}
+	println("dead end link to network : ", num_possible_links);
+}
+
+void show_map() {
+	// draw road map
+  	rg.stroke_is(true);
+	rg.stroke(r.BLOOD);
+	rg.fill_is(false);
+	rg.thickness(2);
+	// show segment
+	for(R_Line2D s : segment_monde) {
+		rg.line(s.a(),s.b());
+	}
+}	
+
+
+
+
+
+
+/**
+intersection
+*/
+
+int intersection_id;
+
+int get_id_intersection() {
+	return intersection_id;
+}
+
+int add_id_intersection() {
+	return intersection_id++;
+}
+
+void set_id_intersection(int id) {
+	intersection_id = id;
+}
+
+/**
+add intersection
+*/
+R_Node temp_intersection;
+boolean ask_intersection(R_Cartographe stro) {
+
+	boolean add_is = false;
+	temp_intersection = new R_Node(stro.get_destination().copy(),stro.get_from());
+	int num_branch = stro.how_many_ways();
+	temp_intersection.set_branch(num_branch);
+	temp_intersection.id_a(add_id_intersection());
+	add_is = true;
+	return add_is;
+}
+
+void add_intersection(R_Node node) {
+	grid_nodes_monde.add(node);
+}
+
+
+
+
+
+
+
+
+// segment
+boolean add_segment(R_Cartographe stro, boolean build_anytime) {
+	boolean add_is = false;
+	boolean from_is = false;
+	int id_from = rank_intersection(stro.get_from());
+	R_Node inter;
+
+	if(id_from >= 0) {
+		inter = grid_nodes_monde.get(id_from);
+		if(inter.get_branch_available() > 0) {
+			from_is = true;
+		}
+	}
+
+	if(build_anytime || from_is) {
+		R_Line2D segment = new R_Line2D(this,temp_intersection.pos(),stro.get_from());
+		if(segment.dist() <= stro.get_dist_max()) {
+			segment_monde.add(segment);
+			grid_nodes_monde.get(id_from).add_destination(temp_intersection.pos());
+			temp_intersection.add_destination(stro.get_from());
+			add_is = true;
+		}
+	}
+	return add_is;
+}
+
+
+
+int rank_intersection(vec target) {
+	int rank = -1;
+	int area = 5; // detection area
+	for(int i = 0 ; i < grid_nodes_monde.size() ; i++) {
+		vec3 p = grid_nodes_monde.get(i).pos();
+		if(r.compare(target.xy(),p.xy(),new vec2(area))) {
+			rank = i;
+			break;
+		}
+	}
+	return rank;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
