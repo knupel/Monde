@@ -112,7 +112,14 @@ void draw() {
   if(display_sol_is()) show_sol(get_grid_Sol(), P3D); // possible to choice P2D
   if(display_map_is()) show_map();
   if(display_failure_is()) show_failure();
-  show_stroller();
+  
+  // 2D texte
+  if(display_info_is()) {
+    show_stroller();
+    show_center_town(20, r.BLOOD);
+  	boussole(get_center_commune().xy(),80);
+    show_intersection();
+  }
 
   // 3D
   if(display_surface_is()) show_surface();
@@ -123,9 +130,6 @@ void draw() {
 
   // INFO
   if(display_info_is()) {
-  	show_center_town(20, r.BLOOD);
-  	boussole(get_center_commune().xy(),80);
-    show_intersection();
     show_info();
   }
 }

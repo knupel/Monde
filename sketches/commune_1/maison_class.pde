@@ -148,6 +148,7 @@ public class Maison {
   // SHOW
   /////////////////
   public void show() {
+
     // PI * 1.5 >>> maison vue du dessus dans ce contexte.
     float rot_x = 4.712389;
     // display house
