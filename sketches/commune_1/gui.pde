@@ -4,23 +4,29 @@ boolean build_maison_is = false;
 // display object
 boolean display_maison_is = true;
 boolean display_cadastre_is = false;
-boolean display_info_is = false;
 boolean display_sol_is = false;
 boolean display_surface_is = false;
 boolean display_map_is = true;
 boolean display_failure_is = false;
+// display info
+boolean display_info_is = false;
+boolean display_stroller_is = true;
+boolean display_dataviz_is = false;
 // display aspect
 boolean use_fill_is = true;
 boolean use_stroke_is = true;
+boolean use_bg_is = true;
 
 
 
 // variable 3D
-vec3 rotate_house = new vec3(0);
-vec3 rotate_town = new vec3(0);
-vec3 rotate_surface = new vec3(0);
+vec3 rotate_house = new vec3();
+vec3 rotate_town = new vec3();
+vec3 rotate_surface = new vec3();
 
-vec3 rotate_world = new vec3(0);
+vec2 translate_world = new vec2()
+vec3 rotate_world = new vec3();
+float zoom_world = 0;
 
 float mouse_speed = 0.01;
 float mouse_wheel_count = 0;
@@ -33,6 +39,7 @@ void update_gui() {
         rotate_town.set(0);
         rotate_surface.set(0);
         rotate_world.set(0);
+        zoom_world = 0;
     }
     // touche 1 / 2 / 3
     if(keyPressed) {
@@ -68,31 +75,41 @@ void update_gui() {
         if(key == '-')  rotate_world.z(mouseX * mouse_speed); // 6
     }
 
-    if(mousePressed && keyPressed) {
-        if(key == 'v') {
+
+    // MOUSE ACTION
+    if(keyPressed && key == 'v') {
+        if(mousePressed) {
+            //
+            //
+            // voir le fichier mouse
+            //
+            //
             if(mouseButton == LEFT) {
-                rotate_world.x(mouseX * mouse_speed);
-                rotate_world.y(mouseY * mouse_speed);
+                translate_world.x(PmouseX);
+                translate_world.y(PmouseY);
             }
 
             if(mouseButton == RIGHT) {
                 rotate_world.x(mouseY * mouse_speed);
-                rotate_world.y(mouseX * mouse_speed);
+                rotate_world.z(mouseX * mouse_speed);
             }
 
         }
-        
+        zoom_world -= mouse_wheel_count;
     }
+    mouse_wheel_count = 0;
+   
+
+
+
 }
 
 void mouseWheel(MouseEvent event) {
     if(keyPressed) {
         if(key == 'v') {
-            mouse_wheel_count += event.getCount();
+            mouse_wheel_count += (event.getCount() * 0.1);
         }
     }
-//   float e = event.getCount();
-    println("mouseWheel(MouseEvent event)", mouse_wheel_count);
 }
 
 // GUI
@@ -120,9 +137,14 @@ void key_pressed_gui() {
     // ASPECT
     if(key == 'a') use_fill_switch();
     if(key == 'z') use_stroke_switch();
+    if(key == 'e') use_bg_switch();
    
-    // MISC
+    // INFO
+    if(key == 'u') display_dataviz_switch();
     if(key == 'i') display_info_switch();
+    if(key == 'o') display_stroller_switch();
+
+    // MISC
     // if(key == 'p')  close_dead_end(15);
 
     // FREEZE
@@ -152,6 +174,17 @@ void use_stroke_switch() {
 boolean use_stroke_is() {
     return  use_stroke_is;
 }
+
+void use_bg_switch() {
+    use_bg_is = !use_bg_is;
+}
+
+boolean use_bg_is() {
+    return  use_bg_is;
+}
+
+
+
 
 // COMMUNE / MAISON / TOWN
 ////////////////////////////////
@@ -204,6 +237,22 @@ void display_info_switch() {
 
 boolean display_info_is() {
     return  display_info_is;
+}
+
+void display_dataviz_switch() {
+    display_dataviz_is = !display_dataviz_is;
+}
+
+boolean display_dataviz_is() {
+    return  display_dataviz_is;
+}
+
+void display_stroller_switch() {
+    display_stroller_is = !display_stroller_is;
+}
+
+boolean display_stroller_is() {
+    return  display_stroller_is;
 }
 
 

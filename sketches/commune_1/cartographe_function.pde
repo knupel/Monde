@@ -21,6 +21,9 @@ void init_stroller() {
 	vec3 destination = new vec3(start_pos.x()+random(-range_start,range_start),start_pos.y()+random(-range_start,range_start),0);
 	stroller.set_pos(start_pos);
 	stroller.set_destination(destination);
+	int radius_stroller = 5;
+	int marge_stroller = 2;
+	stroller.create_stroller(radius_stroller,marge_stroller);
 }
 
 
@@ -60,10 +63,12 @@ void run_stroller() {
 
 
 void show_stroller() {
-	rg.fill_is(true);
-	rg.fill(r.YELLOW);
-	rg.stroke_is(false);
-	rg.ellipse(stroller.get_pos(),50);
+	rg.fill_is(use_fill_is());
+	rg.fill(r.GOLD);
+	rg.stroke_is(use_stroke_is());
+	rg.stroke(r.TENEBRE);
+	rg.thickness(1);
+	stroller.show();
 }
 
 

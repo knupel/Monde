@@ -99,27 +99,32 @@ void draw() {
   }
 
   // show
-  background(r.BLACK);
+  if(use_bg_is()) background(r.TENEBRE); 
+  else  background(ciel()); 
   lights();
 
   // start matrix
   rg.push();
-  rg.translate(width/2, height/2);
+  rg.translate(width/2, height/2, zoom_world);
   rg.rotateXYZ(rotate_world);
   rg.translate(-width/2, -height/2);
+  // rg.translateZ(zoom_world);
   // 2D
   if(display_cadastre_is()) show_cadastre();
   if(display_sol_is()) show_sol(get_grid_Sol(), P3D); // possible to choice P2D
   if(display_map_is()) show_map();
   if(display_failure_is()) show_failure();
   
-  // 2D texte
-  if(display_info_is()) {
-    show_stroller();
+  // INFO 2D
+  if(display_dataviz_is()) {
     show_center_town(20, r.BLOOD);
   	boussole(get_center_commune().xy(),80);
     show_intersection();
   }
+  if(display_stroller_is()) {
+    show_stroller();
+  }
+
 
   // 3D
   if(display_surface_is()) show_surface();

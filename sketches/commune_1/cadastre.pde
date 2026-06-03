@@ -10,10 +10,12 @@ ArrayList<R_Shape> get_cadastre() {
 }
 
 void show_cadastre() {
+  
+  rg.stroke_is(use_stroke_is());
+  rg.fill_is(use_fill_is());
   rg.thickness(1);
-  rg.stroke_is(true);
-  rg.fill_is(true);
   rg.fill(r.GOLD);
+  rg.stroke(r.TENEBRE);
   for(R_Shape shape : cadastre_polys) {
     shape.show();
   }

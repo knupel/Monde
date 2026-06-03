@@ -1,8 +1,13 @@
 /**
 * Class R_Cartographe
 * 2026-2026
-* v 0.2.0
+* v 0.3.0
 */
+import rope.mesh.R_Face;
+import rope.costume.R_Icosahedron;
+
+
+
 public class R_Cartographe extends R_Graphic {
 	private vec3 pos;
 	private vec3 dst;
@@ -27,6 +32,14 @@ public class R_Cartographe extends R_Graphic {
 
 	R_Fail failures;
 	ArrayList<R_Node> free_nodes = new ArrayList();
+
+
+	// STROLLER DESIGN BONUS
+	R_Icosahedron stroller;
+	int st_radius = 1;
+	int st_marge = 1;
+	// END STROLLER BONUS
+
 	
 	public R_Cartographe(PApplet pa) {
 		super(pa);
@@ -48,10 +61,59 @@ public class R_Cartographe extends R_Graphic {
 		this.angle = new vec2(-PI,PI);
 		this.angle_proportion = new int[] {1,2,3,4,5,6,7,6,5,4,3,2,1};
 	}
+
+
+	////////////////////
+	// STROLLER
+	// it's juste to create an artitisc stroller, 
+	// is not not linked with the main function
+	//it's just a visuel bonus
+	////////////////////
+	public void create_stroller(int radius, int marge) {
+		this.st_radius = radius;
+		this.st_marge = marge;
+		stroller = new R_Icosahedron(this.pa, radius);
+	}
+
+	public void show() {
+		float size = map(sin(frameCount * 0.005),-1,1,st_radius -st_marge, st_radius +st_marge);
+		float distance = map(sin(frameCount * 0.01),-1,1, 0.1f,1.15f);
+		rg.push();
+		rg.translate(get_pos());
+		rg.rotateX(frameCount*PI/185);
+		rg.rotateY(frameCount*PI/-200);
+		show_stroller_by_face(size, distance);
+		rg.pop();
+
+	}
+
+	private void show_stroller_by_face(float size, float dist) {
+		stroller.size(size);
+		stroller.update();
+		R_Face [] faces = stroller.get_faces().toArray(new R_Face[0]);
+		vec3 [] normals = stroller.get_normals().toArray(new vec3[0]);
+		for(int i = 0 ; i < faces.length ; i++) {
+			normals[i].mult(dist);
+			faces[i].offset(normals[i]);
+			faces[i].show();
+		}
+	}
+
+
+
+
+
+
+
+
+	//////////////////
+	// END STROLLER
+	///////////////////////////
   
-  	/**
-	* distance management
-	*/
+
+	//////////////////////////////////
+	// distance management
+	///////////////////////////////////
 	public void set_dist_range(float min, float max) {
 		this.dist.set(min,max);
 	}
@@ -82,10 +144,9 @@ public class R_Cartographe extends R_Graphic {
 
 
 
-
-	/**
-	* angle and direction management
-	*/
+	//////////////////////////////////
+	// angle and direction management
+	///////////////////////////////////
 	public void set_angle(float start, float end) {
 		this.angle.set(start,end);
 	}
@@ -105,9 +166,9 @@ public class R_Cartographe extends R_Graphic {
 	}
 
 
-	/**
-	* Intersetion management
-	 */
+	/////////////////////////////
+	// Intersetion management
+	/////////////////////////////
 
 	public float get_ways_min() {
 		return this.intersection.x();
@@ -186,15 +247,7 @@ public class R_Cartographe extends R_Graphic {
 	}
 
 
-	// reset
-	public void reset() {
-		reset = false;
-		failures.clear_lines();
-	}
 
-	public boolean reset_is() {
-		return reset;
-	}
   
 
 
@@ -206,7 +259,7 @@ public class R_Cartographe extends R_Graphic {
 
 
 	////////////////////////
-	// the cartographe walk
+	// WALKING / STROLLING
 	////////////////////////
 
 	// global variable of the few functions below
@@ -342,10 +395,16 @@ public class R_Cartographe extends R_Graphic {
 
 
 
-	//
-	// UTILS
-	//
 
+
+
+
+
+
+
+	///////////////////////////
+	// UTILS
+	//////////////////////////
 
 	// utils free node management
 	private vec2 goto_free_nodes(ArrayList<R_Node> nodes) {
@@ -387,7 +446,6 @@ public class R_Cartographe extends R_Graphic {
 		return angle;
 	}
 
-
 	private boolean check_meeting_segment(R_Line2D target_segment, ArrayList<R_Line2D> seg_list, boolean show_info) {
 		boolean is = false;
 		int max_iter_for_meeting = 100;
@@ -410,8 +468,6 @@ public class R_Cartographe extends R_Graphic {
 	return is;
 	}
 
-
-
 	boolean intersection_is = false;
 	public boolean intersection_is() {
 		return intersection_is;
@@ -422,7 +478,22 @@ public class R_Cartographe extends R_Graphic {
 	}
 
 
+
+
+	///////////////
+	// reset
+	/////////////
 	public void reset_stroll() {
 		count_segment_meeting = 0;
-	} 
+	}
+
+
+	public void reset() {
+		reset = false;
+		failures.clear_lines();
+	}
+
+	public boolean reset_is() {
+		return reset;
+	}
 }
