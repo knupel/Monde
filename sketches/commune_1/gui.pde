@@ -35,10 +35,18 @@ float mouse_wheel_count = 0;
 // PROCESSING FUNCTION
 ////////////////////////
 boolean mouse_clicked = false;
-vec2 mouse_buf = new vec2();
-vec2 mouse_offset = new vec2();
+// vec2 mouse_buf = new vec2();
+// vec2 mouse_offset = new vec2();
+// translate
+vec2 mouse_translate_buf = new vec2();
+vec2 mouse_translate_offset = new vec2();
 vec2 translate_offset = new vec2();
 vec2 ref_translate_offset = new vec2();
+// rotate
+vec2 mouse_rotate_buf = new vec2();
+vec2 mouse_rotate_offset = new vec2();
+vec2 rotate_offset = new vec2();
+vec2 ref_rotate_offset = new vec2();
 
 void mouseWheel(MouseEvent event) {
     if(keyPressed) {
@@ -50,13 +58,15 @@ void mouseWheel(MouseEvent event) {
 
 void mouseReleased() {
   mouse_clicked = false;
-  mouse_buf.set(mouseX, mouseY);
+  mouse_translate_buf.set(mouseX, mouseY);
+  mouse_rotate_buf.set(mouseX, mouseY);
 //   mouse_buf.y(mouseY);
 }
 
 void mousePressed() {
     if(!mouse_clicked) {
-        mouse_buf.set(mouseX, mouseY);
+        mouse_translate_buf.set(mouseX, mouseY);
+        mouse_rotate_buf.set(mouseX, mouseY);
     }
     mouse_clicked = true;  
 }
@@ -72,23 +82,68 @@ void keyPressed() {
 // GUI FUNCTION
 /////////////////////
 void update_gui() {
-    update_mouse();
+    update_translate(mousePressed, mouseButton == LEFT);
     update_keyboard();
     mouse_wheel_count = 0;
 }
 
-void update_mouse() {
-    if(mousePressed) {
-        mouse_offset.x(mouseX - mouse_buf.x());
-        mouse_offset.y(mouseY - mouse_buf.y());
-        translate_offset.x(ref_translate_offset.x() + mouse_offset.x());
-        translate_offset.y(ref_translate_offset.y() + mouse_offset.y());
+// common function to update offset
+// the offset can be for any data like translate, rotate, etc.
+// maybe mouseX, mouseY can be passed more universaly like a global position ????
+void update_offset(boolean is_a, boolean is_b, vec2 offset, vec2 buf) {
+    if(is_a && is_b) {
+        offset.x(mouseX - buf.x());
+        offset.y(mouseY - buf.y());
     } else {
-        ref_translate_offset.x( translate_offset.x());
-        ref_translate_offset.y( translate_offset.y());
-        mouse_offset.set(0);
+        offset.set(0);
     }
 }
+
+/////////////////////////////////
+// specific function for translate
+/////////////////////////////////
+
+void update_translate_impl(boolean is_a, boolean is_b, vec2 arg, vec2 ref, vec2 offset) {
+    if(is_a && is_b) {
+        arg.x(ref.x() + offset.x());
+        arg.y(ref.y() + offset.y());
+    } else {
+        ref.x(arg.x());
+        ref.y(arg.y());
+    }
+}
+
+
+void update_translate(boolean is_a, boolean is_b) {
+    update_offset(is_a, is_b, mouse_translate_offset, mouse_translate_buf);
+    update_translate_impl(is_a, is_b, translate_offset, ref_translate_offset, mouse_translate_offset);
+    // update_rotate(rotate_offset, ref_rotate_offset, mouse_offset);
+}
+
+
+
+/////////////////////////////////
+// specific function for rotate
+/////////////////////////////////
+void update_rotate(boolean is_a, boolean is_b, vec2 arg, vec2 ref, vec2 offset) {
+    // if(mousePressed) {
+    //     arg.x(mouseX * mouse_speed);
+    //     arg.y(mouseY * mouse_speed);
+    // }
+    if(is_a && is_b) {
+        arg.x((ref.x() + offset.x()) * mouse_speed);
+        arg.y((ref.y() + offset.y()) * mouse_speed);
+    } else {
+        ref.x(arg.x());
+        ref.y(arg.y());
+    }
+}
+
+
+
+
+
+
 
 
 //
@@ -144,8 +199,10 @@ void update_keyboard() {
                 translate_world.set(translate_offset);
             }
             if(mouseButton == RIGHT) {
-                rotate_world.x(mouseY * mouse_speed);
-                rotate_world.z(mouseX * mouse_speed);
+                rotate_world.x(rotate_offset.y());
+                rotate_world.z(rotate_offset.x());
+                // rotate_world.x(mouseY * mouse_speed);
+                // rotate_world.z(mouseX * mouse_speed);
             }
         }
         zoom_world -= mouse_wheel_count;
