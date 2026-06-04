@@ -105,7 +105,7 @@ void draw() {
 
   // start matrix
   rg.push();
-  rg.translate(width/2, height/2, zoom_world);
+  rg.translate(width/2 + translate_world.x(), height/2 + translate_world.y(), zoom_world);
   rg.rotateXYZ(rotate_world);
   rg.translate(-width/2, -height/2);
   // rg.translateZ(zoom_world);
@@ -142,9 +142,6 @@ void draw() {
 
 
 
-void keyPressed() {
-  key_pressed_gui();
-}
 
 
 

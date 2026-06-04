@@ -3,7 +3,7 @@ boolean build_cadastre_is = false;
 boolean build_maison_is = false;
 // display object
 boolean display_maison_is = true;
-boolean display_cadastre_is = false;
+boolean display_cadastre_is = true;
 boolean display_sol_is = false;
 boolean display_surface_is = false;
 boolean display_map_is = true;
@@ -24,21 +24,82 @@ vec3 rotate_house = new vec3();
 vec3 rotate_town = new vec3();
 vec3 rotate_surface = new vec3();
 
-vec2 translate_world = new vec2()
+vec2 translate_world = new vec2();
 vec3 rotate_world = new vec3();
 float zoom_world = 0;
 
 float mouse_speed = 0.01;
 float mouse_wheel_count = 0;
 
+////////////////////////
+// PROCESSING FUNCTION
+////////////////////////
+boolean mouse_clicked = false;
+vec2 mouse_buf = new vec2();
+vec2 mouse_offset = new vec2();
+vec2 translate_offset = new vec2();
+vec2 ref_translate_offset = new vec2();
 
+void mouseWheel(MouseEvent event) {
+    if(keyPressed) {
+        if(key == 'v') {
+            mouse_wheel_count += (event.getCount() * 0.1);
+        }
+    }
+}
+
+void mouseReleased() {
+  mouse_clicked = false;
+  mouse_buf.set(mouseX, mouseY);
+//   mouse_buf.y(mouseY);
+}
+
+void mousePressed() {
+    if(!mouse_clicked) {
+        mouse_buf.set(mouseX, mouseY);
+    }
+    mouse_clicked = true;  
+}
+
+
+void keyPressed() {
+  key_pressed_gui();
+}
+
+
+
+///////////////////////
+// GUI FUNCTION
+/////////////////////
 void update_gui() {
+    update_mouse();
+    update_keyboard();
+    mouse_wheel_count = 0;
+}
+
+void update_mouse() {
+    if(mousePressed) {
+        mouse_offset.x(mouseX - mouse_buf.x());
+        mouse_offset.y(mouseY - mouse_buf.y());
+        translate_offset.x(ref_translate_offset.x() + mouse_offset.x());
+        translate_offset.y(ref_translate_offset.y() + mouse_offset.y());
+    } else {
+        ref_translate_offset.x( translate_offset.x());
+        ref_translate_offset.y( translate_offset.y());
+        mouse_offset.set(0);
+    }
+}
+
+
+//
+void update_keyboard() {
     // touche @
     if(key == '@') {
         rotate_house.set(0);
         rotate_town.set(0);
         rotate_surface.set(0);
         rotate_world.set(0);
+        translate_world.set(0);
         zoom_world = 0;
     }
     // touche 1 / 2 / 3
@@ -50,7 +111,7 @@ void update_gui() {
 
     // touche 4 / 5 / 6
     if(keyPressed) {
-        // JE dois séparer les valeurs pour de la cohérence, pas comme Surface, bizarre
+        // Je dois séparer les valeurs pour de la cohérence, pas comme Surface, bizarre
         if(key == '\'') rotate_town.x(mouseX * mouse_speed); // 4
         if(key == '(')  rotate_town.y(mouseX * mouse_speed); // 5
         if(key == '§')  rotate_town.z(mouseX * mouse_speed); // 6
@@ -69,7 +130,7 @@ void update_gui() {
 
     // 0 ) -
     if(keyPressed) {
-        // JE dois séparer les valeurs pour de la cohérence, pas comme Surface, bizarre
+        // Je dois séparer les valeurs pour de la cohérence, pas comme Surface, bizarre
         if(key == 'à') rotate_world.x(mouseX * mouse_speed); // 4
         if(key == ')')  rotate_world.y(mouseX * mouse_speed); // 5
         if(key == '-')  rotate_world.z(mouseX * mouse_speed); // 6
@@ -79,38 +140,19 @@ void update_gui() {
     // MOUSE ACTION
     if(keyPressed && key == 'v') {
         if(mousePressed) {
-            //
-            //
-            // voir le fichier mouse
-            //
-            //
             if(mouseButton == LEFT) {
-                translate_world.x(PmouseX);
-                translate_world.y(PmouseY);
+                translate_world.set(translate_offset);
             }
-
             if(mouseButton == RIGHT) {
                 rotate_world.x(mouseY * mouse_speed);
                 rotate_world.z(mouseX * mouse_speed);
             }
-
         }
         zoom_world -= mouse_wheel_count;
     }
-    mouse_wheel_count = 0;
-   
-
-
-
 }
 
-void mouseWheel(MouseEvent event) {
-    if(keyPressed) {
-        if(key == 'v') {
-            mouse_wheel_count += (event.getCount() * 0.1);
-        }
-    }
-}
+
 
 // GUI
 void key_pressed_gui() {
@@ -132,7 +174,6 @@ void key_pressed_gui() {
     if(key == 'S') display_surface_switch();
     if(key == 'm') display_map_switch();
     if(key == 'f') display_failure_switch();
-
 
     // ASPECT
     if(key == 'a') use_fill_switch();
@@ -289,8 +330,6 @@ void display_map_switch() {
 boolean display_map_is() {
     return  display_map_is;
 }
-
-
 
 
 // FAILURE
