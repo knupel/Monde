@@ -37,12 +37,12 @@ float mouse_wheel_count = 0;
 boolean mouse_clicked = false;
 // vec2 mouse_buf = new vec2();
 // vec2 mouse_offset = new vec2();
-// translate
+// translate world
 vec2 mouse_translate_buf = new vec2();
 vec2 mouse_translate_offset = new vec2();
 vec2 translate_offset = new vec2();
 vec2 ref_translate_offset = new vec2();
-// rotate
+// rotate world
 vec2 mouse_rotate_buf = new vec2();
 vec2 mouse_rotate_offset = new vec2();
 vec2 rotate_offset = new vec2();
@@ -83,6 +83,7 @@ void keyPressed() {
 /////////////////////
 void update_gui() {
     update_translate(mousePressed, mouseButton == LEFT);
+    update_rotate(mousePressed, mouseButton == RIGHT);
     update_keyboard();
     mouse_wheel_count = 0;
 }
@@ -99,6 +100,27 @@ void update_offset(boolean is_a, boolean is_b, vec2 offset, vec2 buf) {
     }
 }
 
+
+/////////////////////////////////
+// specific function for rotate
+/////////////////////////////////
+
+void update_rotate(boolean is_a, boolean is_b) {
+    update_offset(is_a, is_b, mouse_rotate_offset, mouse_rotate_buf);
+    update_rotate_impl(is_a, is_b, rotate_offset, ref_rotate_offset, mouse_rotate_offset);
+}
+
+void update_rotate_impl(boolean is_a, boolean is_b, vec2 arg, vec2 ref, vec2 offset) {
+    if(is_a && is_b) {
+        arg.x(ref.x() + offset.x() * mouse_speed); 
+        arg.y(ref.y() + offset.y() * mouse_speed);
+    } else {
+        ref.x(arg.x());
+        ref.y(arg.y());
+    }
+}
+
+
 /////////////////////////////////
 // specific function for translate
 /////////////////////////////////
@@ -113,31 +135,13 @@ void update_translate_impl(boolean is_a, boolean is_b, vec2 arg, vec2 ref, vec2 
     }
 }
 
-
 void update_translate(boolean is_a, boolean is_b) {
     update_offset(is_a, is_b, mouse_translate_offset, mouse_translate_buf);
     update_translate_impl(is_a, is_b, translate_offset, ref_translate_offset, mouse_translate_offset);
-    // update_rotate(rotate_offset, ref_rotate_offset, mouse_offset);
 }
 
 
 
-/////////////////////////////////
-// specific function for rotate
-/////////////////////////////////
-void update_rotate(boolean is_a, boolean is_b, vec2 arg, vec2 ref, vec2 offset) {
-    // if(mousePressed) {
-    //     arg.x(mouseX * mouse_speed);
-    //     arg.y(mouseY * mouse_speed);
-    // }
-    if(is_a && is_b) {
-        arg.x((ref.x() + offset.x()) * mouse_speed);
-        arg.y((ref.y() + offset.y()) * mouse_speed);
-    } else {
-        ref.x(arg.x());
-        ref.y(arg.y());
-    }
-}
 
 
 
@@ -201,8 +205,6 @@ void update_keyboard() {
             if(mouseButton == RIGHT) {
                 rotate_world.x(rotate_offset.y());
                 rotate_world.z(rotate_offset.x());
-                // rotate_world.x(mouseY * mouse_speed);
-                // rotate_world.z(mouseX * mouse_speed);
             }
         }
         zoom_world -= mouse_wheel_count;
