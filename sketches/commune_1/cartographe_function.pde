@@ -14,9 +14,9 @@ R_Cartographe get_stroller() {
 // Cartographe / Stroller
 void init_stroller() {
 	stroller = new R_Cartographe(this);
-	int marge = width/10;
+	int marge = int(SIZE.x()/10);
 	// position
-	vec3 start_pos = new vec3(random(marge,width -marge),random(marge,height -marge),0);
+	vec3 start_pos = new vec3(random(marge,SIZE.x() -marge),random(marge,SIZE.y() -marge),0);
 	int range_start = 30;
 	vec3 destination = new vec3(start_pos.x()+random(-range_start,range_start),start_pos.y()+random(-range_start,range_start),0);
 	stroller.set_pos(start_pos);
@@ -35,8 +35,8 @@ void set_stroller() {
 
 	stroller.set_angle_proportion(angle_proportion);
 	// distance
-	float min_range = height/100;
-	float max_range = width/10;
+	float min_range = SIZE.y()/100;
+	float max_range = SIZE.x()/10;
 	stroller.set_dist_range(min_range, max_range);
 	int [] dist_proportion = {32,64,128,64,32,16,8,4,2};
 	stroller.set_dist_proportion(dist_proportion);

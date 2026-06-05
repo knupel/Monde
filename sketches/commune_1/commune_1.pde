@@ -27,6 +27,7 @@ ArrayList<R_Face> faces = new ArrayList();
 int CELL = 12;
 float ALTITUDE = 120;
 float NOISE_ALT = 0.02;
+ivec2 SIZE = new ivec2(100);
 
 
 /**
@@ -45,7 +46,8 @@ void setup() {
   // fullScreen(P3D,1);
   size(1300,800, P3D);
   // size(1300,800, P2D);
-  tectos = new R_Tectos(this, width, height);
+  SIZE.set(int(width*1.5), int(height*1.5));
+  tectos = new R_Tectos(this, SIZE.x(), SIZE.y());
 
   init_sol(CELL, ALTITUDE);
   set_sol();
@@ -100,15 +102,18 @@ void draw() {
 
   // show
   if(use_bg_is()) background(r.TENEBRE); 
-  else  background(ciel()); 
+  else  background(ciel(r.BLOOD)); 
   lights();
-
+  
   // start matrix
+  float tx_1 = width/2;
+  float ty_1 =  height/2;
+  float tx_2 = SIZE.x()*0.5;
+  float ty_2 =  SIZE.y()*0.5;
   rg.push();
-  rg.translate(width/2 + translate_world.x(), height/2 + translate_world.y(), zoom_world);
+  rg.translate(tx_1 + translate_world.x(), ty_1 + translate_world.y(), zoom_world);
   rg.rotateXYZ(rotate_world);
-  rg.translate(-width/2, -height/2);
-  // rg.translateZ(zoom_world);
+  rg.translate(-tx_2, -ty_2);
   // 2D
   if(display_cadastre_is()) show_cadastre();
   if(display_sol_is()) show_sol(get_grid_Sol(), P3D); // possible to choice P2D

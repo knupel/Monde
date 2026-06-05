@@ -20,7 +20,7 @@
 
 
 void init_sol(int diam, float amplitude) {
-  plate = new R_Plate(new ivec2(width, height), new ivec2(diam), amplitude);
+  plate = new R_Plate(new ivec2(SIZE.x(), SIZE.y()), new ivec2(diam), amplitude);
   
 }
 

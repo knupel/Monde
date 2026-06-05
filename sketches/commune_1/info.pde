@@ -31,6 +31,7 @@ void show_info() {
 	int step = 20;
 	pos_text(marge_left, marge_top + step);
 	rg.textAlign(LEFT);
+	rg.text("Taille: " + SIZE.x() + " x " + SIZE.y(), pos_text(step));
 	rg.text("Grille: " + info_grid_size, pos_text(step));
 	rg.text("Routes: " + info_num_roads, pos_text(step));
 	rg.text("Cadastre nombre de lots: " + info_num_lot, pos_text(step));
@@ -82,8 +83,6 @@ void boussole(vec2 pos, int size) {
 void show_center_town(int diam, int colour) {
 	rg.fill_is(true);
 	rg.stroke_is(false);
-	// rg.thickness(2);
-	// rg.stroke(r.YELLOW);
 	rg.fill(colour);
 	rg.stroke(colour);
 	if(grid_nodes_monde.size() > 0) {
@@ -97,11 +96,7 @@ void show_intersection() {
 	if(grid_nodes_monde.size() > 0) {
 		for(R_Node inter : grid_nodes_monde) {
 			textAlign(CENTER);
-			// String txt = inter.get_branch() + " / " + inter.id().a();
-			// rg.text(txt,inter.pos());
 			rg.text(inter.get_branch(),inter.pos());
-			// rg.text(inter.id().a(),inter.pos());
-			// point(inter.get_pos());
 		}
 	}
 }

@@ -81,7 +81,8 @@ void build_map(R_Plate plate, R_Cartographe stro) {
 	int min_by_intersection = 2;
 	int max_by_intersection = 5;
 
-	vec6 canvas_birth = new vec6(0, 0, -width, width, height, width);
+	// vec6 canvas_birth = new vec6(0, 0, -width, width, height, width);
+	vec6 canvas_birth = new vec6(0, 0, -SIZE.x(), SIZE.x(), SIZE.y(), SIZE.x());
 	// verification si l'urbaniste est arrivée, si oui on chercher une nouvelle destination
 	if(r.compare(new vec2(stro.get_pos()), new vec2(stro.get_destination()), area_detection)) {
 		//

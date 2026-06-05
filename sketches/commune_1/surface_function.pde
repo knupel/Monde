@@ -57,10 +57,10 @@ void create_surface(R_Plate plate, ArrayList<R_Face> list) {
 
 void show_surface() {
     rg.push();
-    rg.translate(width/2, height/2);
+    rg.translate(SIZE.x()/2, SIZE.y()/2);
 	rg.push();
     rg.rotateXYZ(rotate_surface);
-	rg.translate(-width/2, -height/2);
+    rg.translate(-SIZE.x()/2, -SIZE.y()/2);
     render_surface(faces);
     rg.pop();
     rg.pop();
