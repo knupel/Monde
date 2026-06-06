@@ -1,3 +1,10 @@
+/**
+ * GUI
+ * 2026-2026
+ * v 0.0.2
+ * 
+ * */
+
 // GUI VARIABLE
 boolean build_cadastre_is = false;
 boolean build_maison_is = false;
@@ -5,7 +12,7 @@ boolean build_maison_is = false;
 boolean display_maison_is = true;
 boolean display_cadastre_is = true;
 boolean display_sol_is = false;
-boolean display_surface_is = false;
+boolean display_surface_is = true;
 boolean display_map_is = true;
 boolean display_failure_is = false;
 // display info
@@ -13,9 +20,13 @@ boolean display_info_is = false;
 boolean display_stroller_is = true;
 boolean display_dataviz_is = false;
 // display aspect
+boolean use_temp_aspect_is = false;
 boolean use_fill_is = true;
 boolean use_stroke_is = true;
 boolean use_bg_is = true;
+boolean stroke_dark_is = true;
+// camera
+boolean use_cam_is = false;
 
 
 
@@ -49,18 +60,16 @@ vec2 rotate_offset = new vec2();
 vec2 ref_rotate_offset = new vec2();
 
 void mouseWheel(MouseEvent event) {
-    if(keyPressed) {
-        if(key == 'v') {
-            mouse_wheel_count += (event.getCount() * 0.1);
-        }
-    }
+    boolean is = false;
+    if(keyPressed && key == k_cam) is = true;
+    if(use_cam_is()) is = true;
+    if(is) mouse_wheel_count += (event.getCount() * 0.1);
 }
 
 void mouseReleased() {
   mouse_clicked = false;
   mouse_translate_buf.set(mouseX, mouseY);
   mouse_rotate_buf.set(mouseX, mouseY);
-//   mouse_buf.y(mouseY);
 }
 
 void mousePressed() {
@@ -153,7 +162,7 @@ void update_translate(boolean is_a, boolean is_b) {
 //
 void update_keyboard() {
     // touche @
-    if(key == '@') {
+    if(key == k_reset_cam) {
         rotate_house.set(0);
         rotate_town.set(0);
         rotate_surface.set(0);
@@ -163,41 +172,32 @@ void update_keyboard() {
     }
     // touche 1 / 2 / 3
     if(keyPressed) {
-        if(key == '&') rotate_house.x(mouseX * mouse_speed); // 1
-        if(key == 'é') rotate_house.y(mouseX * mouse_speed); // 2
-        if(key == '"') rotate_house.z(mouseX * mouse_speed); // 3
+        if(key == k_rot_house_x) rotate_house.x(mouseX * mouse_speed); // 1
+        if(key == k_rot_house_y) rotate_house.y(mouseX * mouse_speed); // 2
+        if(key == k_rot_house_z) rotate_house.z(mouseX * mouse_speed); // 3
     }
 
     // touche 4 / 5 / 6
     if(keyPressed) {
         // Je dois séparer les valeurs pour de la cohérence, pas comme Surface, bizarre
-        if(key == '\'') rotate_town.x(mouseX * mouse_speed); // 4
-        if(key == '(')  rotate_town.y(mouseX * mouse_speed); // 5
-        if(key == '§')  rotate_town.z(mouseX * mouse_speed); // 6
+        if(key == k_rot_town_x) rotate_town.x(mouseX * mouse_speed); // 4
+        if(key == k_rot_town_y)  rotate_town.y(mouseX * mouse_speed); // 5
+        if(key == k_rot_town_z)  rotate_town.z(mouseX * mouse_speed); // 6
     }
 
 
      // touche 7 / 8  / 9
     if(keyPressed) {
         // 7
-        if(key == 'è') {
+        if(key == k_rot_surface_xz) {
             rotate_surface.x(mouseY * mouse_speed);
             rotate_surface.z(mouseX * mouse_speed);
         }
-        if(key == '!') rotate_surface.y(mouseX * mouse_speed); // 8
+        if(key == k_rot_surface_y) rotate_surface.y(mouseX * mouse_speed); // 8
     }
-
-    // 0 ) -
-    if(keyPressed) {
-        // Je dois séparer les valeurs pour de la cohérence, pas comme Surface, bizarre
-        if(key == 'à') rotate_world.x(mouseX * mouse_speed); // 4
-        if(key == ')')  rotate_world.y(mouseX * mouse_speed); // 5
-        if(key == '-')  rotate_world.z(mouseX * mouse_speed); // 6
-    }
-
 
     // MOUSE ACTION
-    if(keyPressed && key == 'v') {
+    if((keyPressed && key == k_cam) || use_cam_is()) {
         if(mousePressed) {
             if(mouseButton == LEFT) {
                 translate_world.set(translate_offset);
@@ -215,50 +215,81 @@ void update_keyboard() {
 
 // GUI
 void key_pressed_gui() {
-    if(key == 'n') reset_stroller();
-    if(key == 'N') {
+    if(key == k_reset_world) {
         tectonique(tectos, get_grid_Sol(), NOISE_ALT);
         set_sol_altitude();
         set_stroller();
         init_map(stroller);
         clear_cadastre();
+        clear_maisons();
 	}
-    // OBJECT
-    if(key== 'T') build_maison(true); // T for town > Commune
-    if(key== 't') display_maison_switch(); // t for town > Commune
-    if(key== 'R') build_cadastre(true);
-    if(key== 'r') display_cadastre_switch();
 
-    if(key == 's') display_sol_switch();
-    if(key == 'S') display_surface_switch();
-    if(key == 'm') display_map_switch();
-    if(key == 'f') display_failure_switch();
+    // CAMERA
+    if(key == k_use_cam_lock) use_cam_switch();
+
+    
+    // OBJECT
+    if(key== k_build_maison) build_maison(true); // T for town > Commune
+    if(key== k_display_maison) display_maison_switch(); // t for town > Commune
+    if(key== k_build_cadastre) build_cadastre(true);
+    if(key== k_display_cadastre) display_cadastre_switch();
+
+    // SURFACE
+    if(key == k_display_sol) display_sol_switch();
+    if(key == k_display_surface) display_surface_switch();
+    if(key == k_display_road) display_map_switch();
+
+    // DEV TOOL
+    if(key == k_fail) display_failure_switch();
 
     // ASPECT
-    if(key == 'a') use_fill_switch();
-    if(key == 'z') use_stroke_switch();
-    if(key == 'e') use_bg_switch();
+    if(key == k_temp_aspect) aspect_temp_switch();
+    if(key == k_fill) use_fill_switch();
+    if(key == k_stroke) use_stroke_switch();
+    if(key == k_stroke_dark_is) stroke_dark_switch();
+    if(key == k_background) use_bg_switch();
    
     // INFO
-    if(key == 'u') display_dataviz_switch();
-    if(key == 'i') display_info_switch();
-    if(key == 'o') display_stroller_switch();
+    if(key == k_dataviz) display_dataviz_switch();
+    if(key == k_info) display_info_switch();
+    if(key == k_display_stroller) display_stroller_switch();
 
     // MISC
+    if(key == k_new_pos_stroller) reset_stroller();
     // if(key == 'p')  close_dead_end(15);
 
     // FREEZE
-    if(key == 'p') freeze();
+    if(key == k_pause) freeze();
 }
 
 
 
+////////////////////////
+// KEY CONTROL FUNCTION
+////////////////////////
+void use_cam_switch() {
+    use_cam_is = !use_cam_is;
+}
+
+boolean use_cam_is() {
+    return use_cam_is;
+}
 
 
 ////////////////////
 // DESIGN
 // INFO
-////////////////////////////////
+/////////////////////
+// aspect
+// stroke
+void aspect_temp_switch() {
+    use_temp_aspect_is = !use_temp_aspect_is;
+}
+
+boolean aspect_temp_is() {
+    return  use_temp_aspect_is;
+}
+// fill
 void use_fill_switch() {
     use_fill_is = !use_fill_is;
 }
@@ -267,6 +298,7 @@ boolean use_fill_is() {
     return  use_fill_is;
 }
 
+// stroke
 void use_stroke_switch() {
     use_stroke_is = !use_stroke_is;
 }
@@ -275,6 +307,15 @@ boolean use_stroke_is() {
     return  use_stroke_is;
 }
 
+void stroke_dark_switch() {
+    stroke_dark_is = !stroke_dark_is;
+}
+
+boolean stroke_dark_is() {
+    return  stroke_dark_is;
+}
+
+// background
 void use_bg_switch() {
     use_bg_is = !use_bg_is;
 }

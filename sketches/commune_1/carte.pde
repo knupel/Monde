@@ -156,12 +156,12 @@ void close_dead_end(int range_to_link) {
 	println("dead end link to network : ", num_possible_links);
 }
 
-void show_map() {
+void show_map(int colour, float thickness) {
 	// draw road map
   	rg.stroke_is(true);
-	rg.stroke(r.BLOOD);
 	rg.fill_is(false);
-	rg.thickness(2);
+	rg.stroke(colour);
+	rg.thickness(thickness);
 	// show segment
 	for(R_Line2D s : segment_monde) {
 		rg.line(s.a(),s.b());

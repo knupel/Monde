@@ -6,15 +6,18 @@
 
 ArrayList<Maison> maisons = new ArrayList();
 
-void create_maisons(ArrayList<R_Shape> cadastre, R_Plate plate) {
+void clear_maisons() {
+  maisons.clear();
+}
+
+void create_maisons(ArrayList<R_Shape> cadastre, R_Plate plate, ivec3 fill, int stroke, float thickness) {
   int surface = 1; // set after with the cadastre
   int max_level = 8;
-  int fill_ground = r.TENEBRE;
-  int stroke = r.LUNE;
-  float thickness = 1;
+  int fill_ground = fill.z();
+
   vec2 center = get_center_commune().xy(); // je suppose que c'est le centre mais je ne me souviens plus de l'algorithme créer il y a 5 ans
 
-  maisons.clear();
+  clear_maisons();
   for(int i = 0 ; i < cadastre.size() ; i++) {
     R_Shape s =  cadastre.get(i);
 
@@ -28,8 +31,16 @@ void create_maisons(ArrayList<R_Shape> cadastre, R_Plate plate) {
     // from_center est utilisé pour la hauter de la maison, plus on est proche du centre plus elle est haut et grand si j'ai bien compris mon vieil algo
     Maison maison = new Maison(this, surface, from_center, max_level);
     maison.pos(pos);
-    int fill_roof = color(random(0,30),random(80,100),random(60,90));
-    int fill_wall = color(random(360),random(0,10),random(50,100));
+    float hue_roof = hue(fill.x());
+    hue_roof = random(hue_roof -15, hue_roof +15);
+    hue_roof = r.cycle(hue_roof, 0,360);
+    int fill_roof = color(hue_roof,random(80,100),random(60,90));
+
+    float hue_wall = hue(fill.y());
+    hue_wall = random(hue_wall -40, hue_wall +40);
+    hue_wall = r.cycle(hue_wall, 0,360);
+    int fill_wall = color(hue_wall,random(0,10),random(50,100));
+
     float peak = random(1);
     peak *= peak;
 
@@ -42,13 +53,13 @@ void create_maisons(ArrayList<R_Shape> cadastre, R_Plate plate) {
 
 
 float dir_x,dir_y;
-void show_commune() {
+void show_commune(ivec3 fill, int stroke, float thickness) {
   rg.push();
   rg.translate(SIZE.x()/2, SIZE.y()/2);
   rg.push();
   rg.rotateXYZ(rotate_town);
   rg.translate(-SIZE.x()/2, -SIZE.y()/2);
-  show_maisons();
+  show_maisons(fill, stroke, thickness);
   rg.pop();
   rg.pop();
 }
@@ -56,12 +67,17 @@ void show_commune() {
 
 
 
-void show_maisons() {
+void show_maisons(ivec3 fill, int stroke, float thickness) {
   // float alt = 0;
   for(Maison m : maisons) {
+    // TRAVAILLER ICI
+    // TRAVAILLER ICI
+    // m.use_temp_aspect(aspect_temp_is());
+        // TRAVAILLER ICI
+    // TRAVAILLER ICI
     m.fill_is(use_fill_is());
     m.stroke_is(use_stroke_is());
-    m.thickness(1);
+    // m.thickness(thickness);
     vec3 buf_pos = m.pos().copy();
     float x = buf_pos.x();
     float y = buf_pos.y();
@@ -70,7 +86,9 @@ void show_maisons() {
     rg.push();
     rg.translate(pos);
     rg.rotateXYZ(rotate_house);
-    m.show();
+    if(aspect_temp_is()) {
+      m.show(fill.x(), fill.y(), fill.z(), stroke, thickness);
+    } else m.show();
     rg.pop();
   }
 }

@@ -22,8 +22,6 @@ R_Graphic rg;
 R_Plate plate;
 ArrayList<R_Face> faces = new ArrayList();
 
-
-
 int CELL = 12;
 float ALTITUDE = 120;
 float NOISE_ALT = 0.02;
@@ -37,41 +35,36 @@ ivec2 SIZE = new ivec2(100);
 * @see https://graphics.ethz.ch/Downloads/Publications/Papers/2001/p_Par01.pdf
 */
 
-
+/////////
+// SETUP
+/////////
 void setup() {
   rg = new R_Graphic(this);
   colorMode(HSB,360,100,100);
   println(r.VERSION);
   background(0);
+  // fullScreen(P3D,2);
   // fullScreen(P3D,1);
   size(1300,800, P3D);
-  // size(1300,800, P2D);
   SIZE.set(int(width*1.5), int(height*1.5));
   tectos = new R_Tectos(this, SIZE.x(), SIZE.y());
 
   init_sol(CELL, ALTITUDE);
   set_sol();
-
-  // BESOIN DE TRAVAILLER SUR LA DISTRIBUTION DE POINTS
-  // BESOIN DE TRAVAILLER SUR LA DISTRIBUTION DE POINTS
-  // BESOIN DE TRAVAILLER SUR LA DISTRIBUTION DE POINTS
-  // BESOIN DE TRAVAILLER SUR LA DISTRIBUTION DE POINTS
-  // BESOIN DE TRAVAILLER SUR LA DISTRIBUTION DE POINTS
   tectonique(tectos, get_grid_Sol(), NOISE_ALT);
-  // BESOIN DE TRAVAILLER SUR LA DISTRIBUTION DE POINTS
-  // BESOIN DE TRAVAILLER SUR LA DISTRIBUTION DE POINTS
-  // BESOIN DE TRAVAILLER SUR LA DISTRIBUTION DE POINTS
-  // BESOIN DE TRAVAILLER SUR LA DISTRIBUTION DE POINTS
   set_sol_altitude();
   init_stroller();
   init_map(get_stroller());
   set_stroller();
   create_surface(plate,faces);
 }
-
+/////////
+// DRAW
+/////////
 void draw() {
   update_info();
   update_gui();
+  update_aspect();
   // info top window
   String title =  "Cartographe | FPS : " + info_fps + 
                   " | Grille : " + info_grid_size + 
@@ -96,7 +89,8 @@ void draw() {
 
   // build maison / commune
   if(build_maison_is()) {
-    create_maisons(get_cadastre(), plate);
+    ivec3 fill_maison = new ivec3(r.BLOOD, r.BLUE, r.TENEBRE);
+    create_maisons(get_cadastre(), plate, fill_maison, r.TENEBRE, 1);
     build_maison(false);
   }
 
@@ -115,9 +109,9 @@ void draw() {
   rg.rotateXYZ(rotate_world);
   rg.translate(-tx_2, -ty_2);
   // 2D
-  if(display_cadastre_is()) show_cadastre();
-  if(display_sol_is()) show_sol(get_grid_Sol(), P3D); // possible to choice P2D
-  if(display_map_is()) show_map();
+  if(display_cadastre_is()) show_cadastre(r.GOLD, get_stroke_color(), 1);
+  if(display_sol_is()) show_sol(get_grid_Sol(), P3D, r.LUNE, 1); // possible to choice P2D
+  if(display_map_is()) show_map(r.GOLD, 1);
   if(display_failure_is()) show_failure();
   
   // INFO 2D
@@ -127,13 +121,18 @@ void draw() {
     show_intersection();
   }
   if(display_stroller_is()) {
-    show_stroller();
+    show_stroller(r.GOLD, get_stroke_color(),1);
   }
 
 
   // 3D
-  if(display_surface_is()) show_surface();
-  if(display_maison_is()) show_commune();
+  if(display_surface_is()) show_surface(r.BLOOD, get_stroke_color(), 0.2);
+  if(display_maison_is()) {
+    // these setting make a global color for the town, 
+    // very diffrent of the one created in function create_maisons()
+    ivec3 fill_maison = new ivec3(r.GOLD, r.BLOOD, r.TENEBRE);
+    show_commune(fill_maison, get_stroke_color(), 1);
+  }
   // end matrix
   rg.pop();
 
@@ -143,36 +142,6 @@ void draw() {
     show_info();
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

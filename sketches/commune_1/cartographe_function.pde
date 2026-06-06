@@ -62,18 +62,17 @@ void run_stroller() {
 }
 
 
-void show_stroller() {
+void show_stroller(int fill, int stroke, float thickness) {
 	rg.fill_is(use_fill_is());
-	rg.fill(r.GOLD);
 	rg.stroke_is(use_stroke_is());
-	rg.stroke(r.TENEBRE);
-	rg.thickness(1);
+	rg.fill(fill);
+	rg.stroke(stroke);
+	rg.thickness(thickness);
 	stroller.show();
 }
 
 
 void show_failure() {
-	// println("total failure ", stroller.get_failure().size());
 	for(R_Line2D line : stroller.get_failure()) {
 		line.thickness(1);
 		if(line.id().a() == r.YELLOW) {
@@ -81,5 +80,4 @@ void show_failure() {
 		}
 		
 	}
-
 }

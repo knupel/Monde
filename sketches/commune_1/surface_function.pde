@@ -55,13 +55,13 @@ void create_surface(R_Plate plate, ArrayList<R_Face> list) {
 
 
 
-void show_surface() {
+void show_surface(int fill, int stroke, float thickness) {
     rg.push();
     rg.translate(SIZE.x()/2, SIZE.y()/2);
 	rg.push();
     rg.rotateXYZ(rotate_surface);
     rg.translate(-SIZE.x()/2, -SIZE.y()/2);
-    render_surface(faces);
+    render_surface(faces, fill, stroke, thickness);
     rg.pop();
     rg.pop();
 }
@@ -69,12 +69,12 @@ void show_surface() {
 
 
 
-void render_surface(ArrayList<R_Face> list) {
-    rg.thickness(1);
-    rg.stroke_is(false);
-    rg.fill_is(true);
-    rg.stroke(r.TENEBRE);
-    rg.fill(r.BLOOD); // need to write this line, if not there is a colour by default :(
+void render_surface(ArrayList<R_Face> list, int fill, int stroke, float thickness) {
+    rg.stroke_is(use_stroke_is());
+    rg.fill_is(use_fill_is());
+    rg.thickness(thickness);
+    rg.stroke(stroke);
+    rg.fill(fill); // need to write this line, if not there is a colour by default :(
     for(R_Face elem : list) {
         elem.show();
     }

@@ -76,21 +76,23 @@ R_Lithos [] get_grid_Sol() {
 }
 
 
-void show_sol(R_Lithos grid[], String render) {
-  rg.fill_is(true);
+void show_sol(R_Lithos grid[], String render, int stroke, float thickness) {
+  // ne pas utliser ici use_fill_is() et use_stroke_is()
+  rg.fill_is(false);
   rg.stroke_is(true);
-  int colour = r.LUNE;
-  vec3 hsb = new vec3(hue(colour), saturation(colour), brightness(colour));
+  vec3 s_hsb = new vec3(hue(stroke), saturation(stroke), brightness(stroke));
 
-  rg.thickness(grid[0].radius());
+  // rg.thickness(grid[0].radius());
+  rg.thickness(thickness);
   for(int i = 0 ; i < grid.length ; i++) {
     float normal_altitude = grid[i].altitude().x();
-    int c = color(hsb.hue(), hsb.sat(), hsb.bri() * normal_altitude);
-    rg.stroke(c);
-    rg.fill(c);
+    int s_col = color(s_hsb.hue(), s_hsb.sat(), s_hsb.bri() * normal_altitude);
+    rg.stroke(s_col);
     if(render == P2D) {
       rg.point(grid[i].pos().xy());
-    } else rg.point(grid[i].pos());
+    } else {
+      rg.point(grid[i].pos());
+    }
     
   }
 }

@@ -9,13 +9,12 @@ ArrayList<R_Shape> get_cadastre() {
   return cadastre_polys;
 }
 
-void show_cadastre() {
-  
+void show_cadastre(int fill, int stroke, float thickness) {
   rg.stroke_is(use_stroke_is());
   rg.fill_is(use_fill_is());
-  rg.thickness(1);
-  rg.fill(r.GOLD);
-  rg.stroke(r.TENEBRE);
+  rg.thickness(thickness);
+  rg.fill(fill);
+  rg.stroke(stroke);
   for(R_Shape shape : cadastre_polys) {
     shape.show();
   }

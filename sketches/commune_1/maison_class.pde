@@ -78,7 +78,7 @@ public class Maison {
     }
   }
 
-  vec3 get_size() {
+  public vec3 get_size() {
     return size;
   }
 
@@ -95,22 +95,23 @@ public class Maison {
   }
 
 
+
   ////////////
   // FILL
   //////////
-  int fill_roof() {
+  public int fill_roof() {
     return this.fill_roof;
   }
 
-  int fill_wall() {
+  public int fill_wall() {
     return this.fill_wall;
   }
 
-  int fill_ground() {
+  public int fill_ground() {
     return this.fill_ground;
   }
 
-  void fill_is(boolean is) {
+  public void fill_is(boolean is) {
     if(house != null) {
       house.fill_is(is);
     }
@@ -121,19 +122,19 @@ public class Maison {
   // STROKE / THICKNESS
   ///////////////////////
 
-  int stroke() {
+  public int stroke() {
     return this.stroke;
   }
 
-  float thickness() {
+   public float thickness() {
     return this.thickness;
   }
 
-  void thickness(float thickness) {
+  public void thickness(float thickness) {
     this.thickness = thickness;
   }
 
-  void stroke_is(boolean is) {
+  public void stroke_is(boolean is) {
     if(house != null) {
       house.stroke_is(is);
     }
@@ -147,16 +148,28 @@ public class Maison {
   ////////////////
   // SHOW
   /////////////////
-  public void show() {
+  public void show(int fill_roof, int fill_wall, int fill_ground, int stroke, float thickness) {
+    aspect(fill_roof, fill_wall, fill_ground, stroke, thickness);
+    show_impl();
+  }
 
-    // PI * 1.5 >>> maison vue du dessus dans ce contexte.
-    float rot_x = 4.712389;
-    // display house
+
+  public void show() {
+    aspect(this.fill_roof, this.fill_wall, this.fill_ground, this.stroke, this.thickness);
+    show_impl();
+  }
+
+  private void aspect(int fill_roof, int fill_wall, int fill_ground, int stroke, float thickness) {
     house.fill_roof(fill_roof);
     house.fill_wall(fill_wall);
     house.fill_ground(fill_ground);
     house.stroke(stroke);
     house.thickness(thickness);
+  }
+
+  private void show_impl() {
+    // PI * 1.5 >>> maison vue du dessus dans ce contexte.
+    float rot_x = 4.712389;
     house.size(size);
     house.mode(BOTTOM);
     if(peak != null) house.set_peak(peak.x,peak.y);
@@ -169,7 +182,7 @@ public class Maison {
   /////////////////
   // UTILS
   ////////////////
-  float get_from_center() {
+  public float get_from_center() {
     return from_center;
   }
 }
