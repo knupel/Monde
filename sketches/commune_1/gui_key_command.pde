@@ -19,11 +19,11 @@ char k_stroke = 'z';
 char k_stroke_dark_is = 'e';
 char k_background = 'r';
 
+// MOVE
+char k_move_rot_house = 'h';
+char k_move_trans_house = 'H'; // NE FONCTIONNE PAS
+char k_move_world = 'j';
 
-// CAMERA
-////////////
-char k_cam = 'c'; // camera monde
-char k_use_cam_lock = 'C'; // camera monde
 
 char k_rot_house_x = '&';
 char k_rot_house_y = 'é';
@@ -35,6 +35,14 @@ char k_rot_town_z = '§';
 
 char k_rot_surface_xz = 'è';
 char k_rot_surface_y = '!';
+
+
+// CAMERA
+////////////
+char k_cam = 'c'; // camera monde
+char k_use_cam_lock = 'C'; // camera monde
+
+
 
 // MAISON et CADASTRE
 ////////////////////////

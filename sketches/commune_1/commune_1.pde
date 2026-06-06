@@ -65,6 +65,7 @@ void draw() {
   update_info();
   update_gui();
   update_aspect();
+  update_move();
   // info top window
   String title =  "Cartographe | FPS : " + info_fps + 
                   " | Grille : " + info_grid_size + 

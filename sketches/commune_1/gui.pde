@@ -27,10 +27,15 @@ boolean use_bg_is = true;
 boolean stroke_dark_is = true;
 // camera
 boolean use_cam_is = false;
+// move
+boolean move_world_is = false;
+boolean move_rot_house_is = false;
+boolean move_trans_house_is = false;
 
 
 
 // variable 3D
+vec3 translate_house = new vec3();
 vec3 rotate_house = new vec3();
 vec3 rotate_town = new vec3();
 vec3 rotate_surface = new vec3();
@@ -46,8 +51,6 @@ float mouse_wheel_count = 0;
 // PROCESSING FUNCTION
 ////////////////////////
 boolean mouse_clicked = false;
-// vec2 mouse_buf = new vec2();
-// vec2 mouse_offset = new vec2();
 // translate world
 vec2 mouse_translate_buf = new vec2();
 vec2 mouse_translate_offset = new vec2();
@@ -226,6 +229,10 @@ void key_pressed_gui() {
 
     // CAMERA
     if(key == k_use_cam_lock) use_cam_switch();
+    // MOVE
+    if(key == k_move_world) move_world_switch();
+    if(key == k_move_rot_house) move_rot_house_switch();
+    if(key == k_move_trans_house) move_trans_house_switch();
 
     
     // OBJECT
@@ -275,6 +282,29 @@ boolean use_cam_is() {
     return use_cam_is;
 }
 
+void move_world_switch() {
+    move_world_is = !move_world_is;
+}
+
+boolean move_world_is() {
+    return move_world_is;
+}
+
+void move_trans_house_switch() {
+    move_trans_house_is = !move_trans_house_is;
+}
+
+boolean move_trans_house_is() {
+    return move_trans_house_is;
+}
+
+void move_rot_house_switch() {
+    move_rot_house_is = !move_rot_house_is;
+}
+
+boolean move_rot_house_is() {
+    return move_rot_house_is;
+}
 
 ////////////////////
 // DESIGN
