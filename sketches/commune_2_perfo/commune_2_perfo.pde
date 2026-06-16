@@ -43,10 +43,12 @@ void setup() {
   colorMode(HSB,360,100,100);
   println(r.VERSION);
   background(0);
+
+  size(1200,800, P3D);
+  surface.setLocation(0,0);
+
   // fullScreen(P3D,1);
-  size(1920,1100, P3D);
-  // surface.setResizable(true);
-  // fullScreen(P3D,1);
+  // secure_screen_place()
   
   SIZE.set(int(width*1.5), int(height*1.5));
   tectos = new R_Tectos(this, SIZE.x(), SIZE.y());

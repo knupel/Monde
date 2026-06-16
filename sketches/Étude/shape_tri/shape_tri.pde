@@ -35,7 +35,7 @@ void draw() {
 
 
 void keyPressed() {
-    if(key == 'a') a_switch();
+  if(key == 'a') a_switch();
   if(key == 'z') z_switch();
   if(key == 'e') e_switch();
 
@@ -191,6 +191,8 @@ void union_shapes(ArrayList<ArrayList> group, ArrayList<R_Shape> union) {
   }
 }
 
+
+
 void union_shape(R_Shape origin, R_Shape target) {
   // cas de départ
   if(target.length() == 0) {
@@ -210,13 +212,17 @@ void union_shape(R_Shape origin, R_Shape target) {
   add_cut_lines(arr_ln_target, new_lines);
 
   // println("0", new_lines.size());
-  // show_line(new_lines, 1);
+  //show_line(new_lines, 1);
   clean_lines(origin, target, new_lines);
-  // show_line(new_lines, 4);
+  show_line(new_lines, 2);
   // println("1", new_lines.size());
 
-  sort_lines(new_lines);
-  show_line(new_lines, 1);
+
+  sort_lines_2(new_lines);
+  rg.push();
+  rg.translate(mouseX,mouseY);
+  show_line(new_lines, 4);
+  rg.pop();
   //  println("2", new_lines.size());
   fusion(new_lines, target);
   // println("3", new_lines.size());
@@ -245,6 +251,101 @@ void fusion(ArrayList<R_Line2D> lines, R_Shape target) {
   }
 }
 
+
+
+int count_recursion_union_sort = 0;
+void sort_lines_2(ArrayList<R_Line2D> src) {
+  // start
+  ArrayList<R_Line2D> sort = new ArrayList();
+  R_Line2D line = src.get(0).copy(); // need to copy to avoid the pointer effect
+  src.remove(0);
+  sort.add(line.copy());
+  // the algorithm
+  // for(int i = 0 ; i < src.size() ; i++) {
+
+  // }
+  int max_recursion = src.size() *100;
+  count_recursion_union_sort = 0;
+  recursive_clean(src , sort, max_recursion);
+  if(src.size() > 0) {
+    println("ÉCHEC", src.size(), sort.size(), count_recursion_union_sort);
+    for(R_Line2D l : src) {
+      println("dist",l.dist());
+
+    }
+
+  }
+  
+
+
+  // the end
+  src.clear();
+  for(R_Line2D l : sort) {
+    src.add(l.copy());
+  }
+}
+
+
+import rope.utils.R_Pair;
+void recursive_clean(ArrayList<R_Line2D> src , ArrayList<R_Line2D> dst, int max) {
+  if(src.size() > 0 && count_recursion_union_sort < max) {
+    // println(count_recursion_union_sort,max);
+    count_recursion_union_sort++;
+    for(int i = 0 ; i < src.size() ; i++) {
+      R_Line2D tmp_src = src.get(i);
+      R_Line2D tmp_dst =  dst.get(dst.size() -1);
+     
+      R_Pair pair_src = tmp_src.get_points();
+      R_Pair pair_dst = tmp_dst.get_points();
+      vec3 last = (vec3)pair_dst.b();
+      vec3 a = (vec3)pair_src.a();
+      vec3 b = (vec3)pair_src.b();
+      float marge = 0.1;
+      // println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+      // println("last", last);
+      // println("---------------------------------------------------------");
+      // println("a", a.x(), a.y(), "B", b.x(), b.y());
+      // println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+      if(last.compare(a, marge)) {
+        // println("BINGO A:",a,"B", b);
+        R_Line2D new_line = new R_Line2D(this, last, b);
+        src.remove(i);
+        dst.add(new_line);
+        break;
+      }
+      if(last.compare(b, marge)) {
+        // println("BINGO B:",b,"A", a);
+        R_Line2D new_line = new R_Line2D(this, last, a);
+        src.remove(i);
+        dst.add(new_line);
+        break;
+      }
+      // println("i",i, src.size(), dst.size());
+
+
+
+
+      // dst.add(tmp_src);
+      // println("i",i, src.size(), dst.size());
+      
+      // src.remove(i);
+      // break;
+    }
+    recursive_clean(src , dst, max);
+  }
+}
+
+int dec_mult(int start) {
+  int inc = 1;
+  start = abs(start);
+  int res = 1;
+  for(int i = start ; i > 0 ; i -=inc) {
+    res *= i;
+  }
+  return res;
+}
+
+  
 void sort_lines(ArrayList<R_Line2D> lines_src) {
   ArrayList<R_Line2D> sort = new ArrayList();
   R_Line2D line = lines_src.get(0);
