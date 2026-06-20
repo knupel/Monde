@@ -56,6 +56,11 @@ void keyPressed() {
     union_shapes(group, union);
 
     // show_shapes(union);
+
+  }
+
+  if(key == 'i') {
+    println("succes", succes, " / ", total);
   }
 
 
@@ -212,18 +217,22 @@ void union_shape(R_Shape origin, R_Shape target) {
   add_cut_lines(arr_ln_target, new_lines);
 
   // println("0", new_lines.size());
-  //show_line(new_lines, 1);
+  //show_line(new_lto_addines, 1);
   clean_lines(origin, target, new_lines);
-  show_line(new_lines, 2);
+  show_line(new_lines, 1);
   // println("1", new_lines.size());
 
-
-  sort_lines_2(new_lines);
+  float limit_detection = 0.1f;
+  // augmenter le range de détection après chaque ronde d'échec complet
+  // puis remttre à la valeur de part après un succès.
+  sort_lines(new_lines, limit_detection);
   rg.push();
   rg.translate(mouseX,mouseY);
   show_line(new_lines, 4);
   rg.pop();
   //  println("2", new_lines.size());
+
+
   fusion(new_lines, target);
   // println("3", new_lines.size());
 
@@ -237,6 +246,7 @@ void union_shape(R_Shape origin, R_Shape target) {
   // for(vec2 v : res) {
   //   println(v);
   // }
+  
 }
 
 /////////////////////////
@@ -252,32 +262,32 @@ void fusion(ArrayList<R_Line2D> lines, R_Shape target) {
 }
 
 
-
+int total = 0;
+int succes = 0;
 int count_recursion_union_sort = 0;
-void sort_lines_2(ArrayList<R_Line2D> src) {
+void sort_lines(ArrayList<R_Line2D> src, float range_detection) {
+  range_detection = 0.1;
   // start
   ArrayList<R_Line2D> sort = new ArrayList();
   R_Line2D line = src.get(0).copy(); // need to copy to avoid the pointer effect
   src.remove(0);
   sort.add(line.copy());
-  // the algorithm
-  // for(int i = 0 ; i < src.size() ; i++) {
-
-  // }
   int max_recursion = src.size() *100;
   count_recursion_union_sort = 0;
-  recursive_clean(src , sort, max_recursion);
-  if(src.size() > 0) {
-    println("ÉCHEC", src.size(), sort.size(), count_recursion_union_sort);
-    for(R_Line2D l : src) {
-      println("dist",l.dist());
-
-    }
-
-  }
+  recursive_clean(src , sort, max_recursion, range_detection);
   
-
-
+  if(src.size() == 0) { 
+    println(frameCount, "BINGO");
+    total++;
+    succes++;
+  } else {
+    total++;
+    println(frameCount, " ÉCHEC", src.size(), sort.size());
+    if(sort.get(0).a().equals(sort.get(sort.size() - 1).b())) {
+      succes++;
+      println("MAIS c'est CLOSE");
+    }
+  }
   // the end
   src.clear();
   for(R_Line2D l : sort) {
@@ -287,7 +297,7 @@ void sort_lines_2(ArrayList<R_Line2D> src) {
 
 
 import rope.utils.R_Pair;
-void recursive_clean(ArrayList<R_Line2D> src , ArrayList<R_Line2D> dst, int max) {
+void recursive_clean(ArrayList<R_Line2D> src , ArrayList<R_Line2D> dst, int max, float range) {
   if(src.size() > 0 && count_recursion_union_sort < max) {
     // println(count_recursion_union_sort,max);
     count_recursion_union_sort++;
@@ -295,144 +305,55 @@ void recursive_clean(ArrayList<R_Line2D> src , ArrayList<R_Line2D> dst, int max)
       R_Line2D tmp_src = src.get(i);
       R_Line2D tmp_dst =  dst.get(dst.size() -1);
      
-      R_Pair pair_src = tmp_src.get_points();
-      R_Pair pair_dst = tmp_dst.get_points();
+      R_Pair pair_src = tmp_src.get_pair();
+      R_Pair pair_dst = tmp_dst.get_pair();
       vec3 last = (vec3)pair_dst.b();
       vec3 a = (vec3)pair_src.a();
       vec3 b = (vec3)pair_src.b();
-      float marge = 0.1;
-      // println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-      // println("last", last);
-      // println("---------------------------------------------------------");
-      // println("a", a.x(), a.y(), "B", b.x(), b.y());
-      // println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
-      if(last.compare(a, marge)) {
-        // println("BINGO A:",a,"B", b);
+      if(last.compare(a, range)) {
+        //
+        //
+        // PROBLEME à REGLER ICI
+        //
+        //
+      // if(last.compare(a, range) && tmp_src.equals(tmp_dst, false)) {
         R_Line2D new_line = new R_Line2D(this, last, b);
-        src.remove(i);
-        dst.add(new_line);
-        break;
+        // if(check_whether_line_exist(new_line, src)) {
+          src.remove(i);
+          dst.add(new_line);
+          // if(close(dst.get(0).a(), new_line.b())) println(frameCount," CLOSE dif", src.size(), dst.size());
+          break;
+        // }
       }
-      if(last.compare(b, marge)) {
-        // println("BINGO B:",b,"A", a);
+      if(last.compare(b, range)) {
+      // if(last.compare(b, range) && tmp_src.equals(tmp_dst, false)) {
         R_Line2D new_line = new R_Line2D(this, last, a);
         src.remove(i);
         dst.add(new_line);
+        // if(close(dst.get(0).a(), new_line.b())) println(frameCount," CLOSE dif", src.size(), dst.size());
         break;
       }
-      // println("i",i, src.size(), dst.size());
-
-
-
-
-      // dst.add(tmp_src);
-      // println("i",i, src.size(), dst.size());
-      
-      // src.remove(i);
-      // break;
     }
-    recursive_clean(src , dst, max);
+    recursive_clean(src , dst, max, range +=0.1);
   }
 }
 
-int dec_mult(int start) {
-  int inc = 1;
-  start = abs(start);
-  int res = 1;
-  for(int i = start ; i > 0 ; i -=inc) {
-    res *= i;
-  }
-  return res;
-}
-
-  
-void sort_lines(ArrayList<R_Line2D> lines_src) {
-  ArrayList<R_Line2D> sort = new ArrayList();
-  R_Line2D line = lines_src.get(0);
-  sort.add(line.copy());
-  
-  // int index = 1;
-  // int index_sort = 0;
-
-  // println("0 je suis là");
-  //r.print_array(lines_src);
-  int len = sort.size();
-  int max_iter = lines_src.size() *10;
-  int iter = 0;
-  // while(lines_src.size() < 1 && iter < max_iter) {
-  // while(sort.size() < lines_src.size() && iter < max_iter) {
-  int goal = lines_src.size();
-  println("goal", goal);
-  while(sort.size() >= goal && iter < max_iter) {
-    if(sort.size() != len) {
-      len = sort.size();
-      line = sort.get(len -1);
-    }
-    iter++;
-    for(int i = 1 ; i < lines_src.size() ; i++) {
-      vec2 a = line.a().copy();
-      vec2 b = line.b().copy();
-      R_Line2D test = lines_src.get(i);
-      if(!line.equals(test,false)) {
-        float marge = 0.2;
-        if(a.compare(test.a(), marge)) {
-          sort.add(test.copy());
-          lines_src.remove(i);
-          println("AA reste", lines_src.size());
-          break;
-        }
-        if(a.compare(test.b(), marge)) {
-          sort.add(test.copy());
-          lines_src.remove(i);
-          println("AB reste", lines_src.size());
-          break;
-        }
-        if(b.compare(test.a(), marge)) {
-          sort.add(test.copy());
-          lines_src.remove(i);
-          println("BA reste", lines_src.size());
-          break;
-        }
-        if(b.compare(test.b(), marge)) {
-          sort.add(test.copy());
-          lines_src.remove(i);
-          println("BB reste", lines_src.size());
-          break;
-        }
-      }
-    }
-  }
-  println("goal", goal, "sort.size()", sort.size());
-  // vec2 first = sort.get(0).a();
-  // vec2 last = sort.get(sort.size()-1).b(); // this point can be a b()
+// boolean check_whether_line_exist(R_Line2D line, ArrayList<R_Line2D> list) {
+//   for(R_Line2D l : list) {
+//     if(l.equals(line,false)) return true;
+//   }
+//   return false;
+// }
 
 
-
-
-  // if(sort.size() == lines_src.size()) {
-  //   println("BINGO");
-  // } else {
-  //   println("ÉCHEC");
-  //   println("src len", lines_src.size());
-  //   r.print_array(lines_src);
-  //   println("sort len", sort.size());
-  //   r.print_array(sort);
-  // }
-
-  // R_Line2D [] buf = new R_Line2D[sort.size()];
-  // return sort.toArray(buf);
-  println("reste à la fin", lines_src.size());
-  lines_src.clear();
-  for(R_Line2D l : sort) {
-    // println(l);
-    lines_src.add(l.copy());
-  }
-
-}
 
 /////////////////////////
 // END SORT
 /////////////////////////
+boolean close(vec2 start, vec2 end) {
+  if(start.equals(end)) return true;
+  return false;
+}
 
 
 
@@ -451,13 +372,28 @@ void clean_lines(R_Shape origin, R_Shape target, ArrayList<R_Line2D> lines) {
   for(R_Line2D l : lines) {
     vec2 barycenter = l.barycenter();
     boolean is = false;
-    if(origin.in_polygon(barycenter, 2)) is = true;
-    if(target.in_polygon(barycenter, 2)) is = true;
+    if(origin.in_polygon(barycenter, 1)) is = true;
+    if(target.in_polygon(barycenter, 1)) is = true;
     if(!is) buf.add(l);
   }
   lines.clear();
+  float min_dist = 2.5;
   for(R_Line2D l : buf) {
-    lines.add(l);
+    // lines.add(l);
+    if(l.dist() > min_dist) {
+      lines.add(l);
+    } else {
+      // println("REMOVE", l.dist(), l.a());
+      rg.fill_is(false);
+      rg.stroke_is(true);
+      rg.thickness(1);
+      rg.stroke(r.BLOOD);
+      rg.fill(r.YELLOW);
+      String str = "          dist " + (int)l.dist() + "  coord " + (int)l.a().x() + " / " + (int)l.a().y();
+      rg.text(str, l.a());
+      rg.circle(l.a(),30);
+      // deuxième check
+    }
   }
 }
 
