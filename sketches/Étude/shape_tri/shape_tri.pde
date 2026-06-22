@@ -34,6 +34,7 @@ void draw() {
 }
 
 
+
 void keyPressed() {
   if(key == 'a') a_switch();
   if(key == 'z') z_switch();
@@ -60,7 +61,11 @@ void keyPressed() {
   }
 
   if(key == 'i') {
-    println("succes", succes, " / ", total);
+    println("succes", echec, " / ", succes, " / ", total);
+  }
+
+  if(key == 'e') {
+    echec++;
   }
 
 
@@ -225,7 +230,9 @@ void union_shape(R_Shape origin, R_Shape target) {
   float limit_detection = 0.1f;
   // augmenter le range de détection après chaque ronde d'échec complet
   // puis remttre à la valeur de part après un succès.
-  sort_lines(new_lines, limit_detection);
+  build_new_lines(new_lines, limit_detection);
+  clean_new_lines(origin, target, new_lines);
+
   rg.push();
   rg.translate(mouseX,mouseY);
   show_line(new_lines, 4);
@@ -261,11 +268,26 @@ void fusion(ArrayList<R_Line2D> lines, R_Shape target) {
   }
 }
 
+void clean_new_lines(R_Shape p1, R_Shape p2, ArrayList<R_Line2D> list) {
+  for(int i = list.size() -1 ; i > 0 ; i-- ) {
+    R_Line2D line = list.get(i);
+    vec2 b = line.barycenter();
+    byte res1 = rg.in_polygon(p1, b, -1);
+    byte res2 = rg.in_polygon(p2, b, -1);
+    if(res1 >= 0 && res2 >= 0) {
+    // if(!rg.in_polygon(p1, b) && !rg.in_polygon(p2, b)) {
+      println("mais qu'est-ce tu fous là, dégages de P1");
+      list.remove(i);
+    }
+  }
+}
+
 
 int total = 0;
 int succes = 0;
+int echec = 0;
 int count_recursion_union_sort = 0;
-void sort_lines(ArrayList<R_Line2D> src, float range_detection) {
+void build_new_lines(ArrayList<R_Line2D> src, float range_detection) {
   range_detection = 0.1;
   // start
   ArrayList<R_Line2D> sort = new ArrayList();
@@ -310,24 +332,32 @@ void recursive_clean(ArrayList<R_Line2D> src , ArrayList<R_Line2D> dst, int max,
       vec3 last = (vec3)pair_dst.b();
       vec3 a = (vec3)pair_src.a();
       vec3 b = (vec3)pair_src.b();
+      
       if(last.compare(a, range)) {
-        //
-        //
-        // PROBLEME à REGLER ICI
-        //
-        //
+      // if(tmp_src.equals(tmp_dst, false)) {
       // if(last.compare(a, range) && tmp_src.equals(tmp_dst, false)) {
         R_Line2D new_line = new R_Line2D(this, last, b);
-        // if(check_whether_line_exist(new_line, src)) {
+          // if(check_whether_line_exist(new_line, src)) {
+          //   // println("cette ligne existe");
+          // } else {
+          //   println("Elle existe dans tes rêves");
+          // }
           src.remove(i);
           dst.add(new_line);
           // if(close(dst.get(0).a(), new_line.b())) println(frameCount," CLOSE dif", src.size(), dst.size());
           break;
         // }
       }
+      
       if(last.compare(b, range)) {
+      // if(tmp_src.equals(tmp_dst, false)) {
       // if(last.compare(b, range) && tmp_src.equals(tmp_dst, false)) {
         R_Line2D new_line = new R_Line2D(this, last, a);
+          //  if(check_whether_line_exist(new_line, src)) {
+          //   // println("cette ligne existe");
+          // } else {
+          //   println("Elle existe dans tes rêves");
+          // }
         src.remove(i);
         dst.add(new_line);
         // if(close(dst.get(0).a(), new_line.b())) println(frameCount," CLOSE dif", src.size(), dst.size());
@@ -338,12 +368,12 @@ void recursive_clean(ArrayList<R_Line2D> src , ArrayList<R_Line2D> dst, int max,
   }
 }
 
-// boolean check_whether_line_exist(R_Line2D line, ArrayList<R_Line2D> list) {
-//   for(R_Line2D l : list) {
-//     if(l.equals(line,false)) return true;
-//   }
-//   return false;
-// }
+boolean check_whether_line_exist(R_Line2D line, ArrayList<R_Line2D> list) {
+  for(R_Line2D l : list) {
+    if(l.equals(line,false)) return true;
+  }
+  return false;
+}
 
 
 
@@ -515,49 +545,49 @@ void show_shape(R_Shape s) {
 
 
 
-void sort_lines_old(ArrayList<R_Line2D> lines_src, ArrayList<vec2> res, int id) {
-  R_Line2D l1 = new R_Line2D(this);
-  println("0000 lines_src.size()", lines_src.size());
-  for(int i = 0 ; i < lines_src.size() ; i++) {
-    R_Line2D l = lines_src.get(i);
+// void sort_lines_old(ArrayList<R_Line2D> lines_src, ArrayList<vec2> res, int id) {
+//   R_Line2D l1 = new R_Line2D(this);
+//   println("0000 lines_src.size()", lines_src.size());
+//   for(int i = 0 ; i < lines_src.size() ; i++) {
+//     R_Line2D l = lines_src.get(i);
    
-    if(l.id().a() == id) {
-      l1 = l.copy();
-      lines_src.remove(i);
-      break;
-    }
-  }
-  println("1111 lines_src.size()", lines_src.size(), l1.id().a(), lines_src.get(0).id().a());
-  // println("l.id().a()", l1.id().a(), "id", id);
-  // println("size lines_src", lines_src.size());
-  int index = 0;
-  // int id = 0;
-  for( ; index < lines_src.size() ; index++) {
-    R_Line2D l2 = lines_src.get(index);
-    if(l1.id().a() == l2.id().a()) {
-      // LE SOUCIS EST LA, c'est ici que ça fait tourner en rond
-      // id = l2.id().a();
-      println("--- l1.id().a() == l2.id().a()");
-      continue;
-    }
-    // peut-être pas besoin de la ligne ci-dessus normalement elle a été supprimée
+//     if(l.id().a() == id) {
+//       l1 = l.copy();
+//       lines_src.remove(i);
+//       break;
+//     }
+//   }
+//   println("1111 lines_src.size()", lines_src.size(), l1.id().a(), lines_src.get(0).id().a());
+//   // println("l.id().a()", l1.id().a(), "id", id);
+//   // println("size lines_src", lines_src.size());
+//   int index = 0;
+//   // int id = 0;
+//   for( ; index < lines_src.size() ; index++) {
+//     R_Line2D l2 = lines_src.get(index);
+//     if(l1.id().a() == l2.id().a()) {
+//       // LE SOUCIS EST LA, c'est ici que ça fait tourner en rond
+//       // id = l2.id().a();
+//       println("--- l1.id().a() == l2.id().a()");
+//       continue;
+//     }
+//     // peut-être pas besoin de la ligne ci-dessus normalement elle a été supprimée
 
-    if(l1.b() == l2.a()) {
-      id = l2.id().a();
-      println("*** l1.b() == l2.a()");
-      res.add(l2.a().copy());
-      break;
-    }
-    if(l1.b() == l2.b()) {
-      println("/// l1.b() == l2.b()");
-      id = l2.id().a();
-      res.add(l2.b().copy());
-      // besoin d'inverser le segment AB
-      vec2 buf = l2.a().copy();
-      l2.a(l2.b());
-      l2.b(buf.x(), buf.y());
-      break;
-    }
-  }
-  sort_lines_old(lines_src, res, id);
-}
+//     if(l1.b() == l2.a()) {
+//       id = l2.id().a();
+//       println("*** l1.b() == l2.a()");
+//       res.add(l2.a().copy());
+//       break;
+//     }
+//     if(l1.b() == l2.b()) {
+//       println("/// l1.b() == l2.b()");
+//       id = l2.id().a();
+//       res.add(l2.b().copy());
+//       // besoin d'inverser le segment AB
+//       vec2 buf = l2.a().copy();
+//       l2.a(l2.b());
+//       l2.b(buf.x(), buf.y());
+//       break;
+//     }
+//   }
+//   sort_lines_old(lines_src, res, id);
+// }
