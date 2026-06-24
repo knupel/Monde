@@ -17,6 +17,11 @@ ArrayList<R_Shape> union = new ArrayList();
 Rope r = new Rope();
 R_Graphic rg;
 
+
+int echec_manuel = 0;
+
+
+
 void setup() {
   size(600,600);
   rg = new R_Graphic(this);
@@ -61,14 +66,12 @@ void keyPressed() {
   }
 
   if(key == 'i') {
-    println("succes", echec, " / ", succes, " / ", total);
+    println("succes", echec_manuel, " / ", succes, " / ", total);
   }
 
   if(key == 'e') {
-    echec++;
+    echec_manuel++;
   }
-
-
 }
 
 
@@ -224,36 +227,28 @@ void union_shape(R_Shape origin, R_Shape target) {
   // println("0", new_lines.size());
   //show_line(new_lto_addines, 1);
   clean_lines(origin, target, new_lines);
-  show_line(new_lines, 1);
+  // show_lines(new_lines, 1);
   // println("1", new_lines.size());
 
-  float limit_detection = 0.1f;
+  
   // augmenter le range de détection après chaque ronde d'échec complet
   // puis remttre à la valeur de part après un succès.
-  build_new_lines(new_lines, limit_detection);
+  int start_index = 0;
+  build_new_lines(new_lines, start_index);
+
   clean_new_lines(origin, target, new_lines);
 
-  rg.push();
-  rg.translate(mouseX,mouseY);
-  show_line(new_lines, 4);
-  rg.pop();
-  //  println("2", new_lines.size());
+  // int ox = mouseX;
+  // int oy = mouseY;
+    int ox = 0;
+  int oy = 0;
+  show_lines(new_lines, 1, ox, oy);
+  show_shape(origin); show_shape(target);
+  show_barycenter(new_lines, 5);
 
 
   fusion(new_lines, target);
-  // println("3", new_lines.size());
 
-
-  // show_shape(target);
-  // show_line(new_lines, 4);
-
-  // ArrayList<vec2> res = new ArrayList();
-
-  // println("new points", res.size());
-  // for(vec2 v : res) {
-  //   println(v);
-  // }
-  
 }
 
 /////////////////////////
@@ -269,14 +264,18 @@ void fusion(ArrayList<R_Line2D> lines, R_Shape target) {
 }
 
 void clean_new_lines(R_Shape p1, R_Shape p2, ArrayList<R_Line2D> list) {
+  // retirer les lignes qui ne sont pas sur les lignes
+  // ça se voir car les barycentres sont soit à l'intérieur des formes soit à l'extérieurs
+  int marge = 1;
   for(int i = list.size() -1 ; i > 0 ; i-- ) {
     R_Line2D line = list.get(i);
     vec2 b = line.barycenter();
-    byte res1 = rg.in_polygon(p1, b, -1);
-    byte res2 = rg.in_polygon(p2, b, -1);
-    if(res1 >= 0 && res2 >= 0) {
+    byte res1 = rg.in_polygon(p1, b, marge);
+    byte res2 = rg.in_polygon(p2, b, marge);
+    if((res1 == -1 && res2 == -1) || (res1 == 1 && res2 == 1)) {
     // if(!rg.in_polygon(p1, b) && !rg.in_polygon(p2, b)) {
-      println("mais qu'est-ce tu fous là, dégages de P1");
+      rg.circle(b, 20);
+      println("mais qu'est-ce tu fous là, dégages de P1", res1, res2);
       list.remove(i);
     }
   }
@@ -285,31 +284,50 @@ void clean_new_lines(R_Shape p1, R_Shape p2, ArrayList<R_Line2D> list) {
 
 int total = 0;
 int succes = 0;
-int echec = 0;
+
 int count_recursion_union_sort = 0;
-void build_new_lines(ArrayList<R_Line2D> src, float range_detection) {
-  range_detection = 0.1;
-  // start
-  ArrayList<R_Line2D> sort = new ArrayList();
-  R_Line2D line = src.get(0).copy(); // need to copy to avoid the pointer effect
-  src.remove(0);
-  sort.add(line.copy());
-  int max_recursion = src.size() *100;
-  count_recursion_union_sort = 0;
-  recursive_clean(src , sort, max_recursion, range_detection);
+void build_new_lines(ArrayList<R_Line2D> src, int start_index) {
+  // init
+  ArrayList<R_Line2D> src_copy = new ArrayList();
+  for(R_Line2D line : src) {
+    src_copy.add(line.copy());
+  }
   
-  if(src.size() == 0) { 
-    println(frameCount, "BINGO");
+  // start
+  float range_detection = 0.1;
+  ArrayList<R_Line2D> sort = new ArrayList();
+  R_Line2D line = src_copy.get(start_index).copy(); // need to copy to avoid the pointer effect
+  src_copy.remove(start_index);
+  sort.add(line.copy());
+  int max_recursion = src_copy.size() *100;
+  count_recursion_union_sort = 0;
+  recursive_clean(src_copy, sort, max_recursion, range_detection);
+  
+
+  // check
+  // boolean fail = false
+  if(src_copy.size() == 0) { 
+    println(frameCount, "BINGO [", src.size(), sort.size(), start_index, "]");
     total++;
     succes++;
   } else {
     total++;
-    println(frameCount, " ÉCHEC", src.size(), sort.size());
-    if(sort.get(0).a().equals(sort.get(sort.size() - 1).b())) {
-      succes++;
-      println("MAIS c'est CLOSE");
+    start_index++;
+    if(start_index < src.size()) {
+      if(!chain_close_is(sort)) {
+        println(frameCount, " OUVERTE ECHEC [", src.size(), src_copy.size(), sort.size(), start_index, "]");
+        build_new_lines(src, start_index);
+      } else {
+        // succes++;
+        println(frameCount, " FERMÉE ECHEC [", src.size(), src_copy.size(), sort.size(), start_index, "]");
+        build_new_lines(src, start_index);
+      }
+    } else {
+      println(frameCount, " ÉCHEC TOTAL [", src.size(), src_copy.size(), sort.size(), start_index, "]");
     }
   }
+
+
   // the end
   src.clear();
   for(R_Line2D l : sort) {
@@ -317,11 +335,23 @@ void build_new_lines(ArrayList<R_Line2D> src, float range_detection) {
   }
 }
 
+boolean chain_close_is(ArrayList<R_Line2D> list) {
+  for(int current = 0 ; current < list.size() ; current++) {
+    int next = current + 1;
+    if(current == list.size() - 1) next = 0;
+    R_Line2D line_current = list.get(current);
+    R_Line2D line_next = list.get(next);
+    vec2 b = line_current.b();
+    vec2 a = line_next.a();
+    if(!b.equals(a)) return false;
+  }
+  return true;
+}
+
 
 import rope.utils.R_Pair;
-void recursive_clean(ArrayList<R_Line2D> src , ArrayList<R_Line2D> dst, int max, float range) {
+void recursive_clean(ArrayList<R_Line2D> src, ArrayList<R_Line2D> dst, int max, float range) {
   if(src.size() > 0 && count_recursion_union_sort < max) {
-    // println(count_recursion_union_sort,max);
     count_recursion_union_sort++;
     for(int i = 0 ; i < src.size() ; i++) {
       R_Line2D tmp_src = src.get(i);
@@ -334,33 +364,16 @@ void recursive_clean(ArrayList<R_Line2D> src , ArrayList<R_Line2D> dst, int max,
       vec3 b = (vec3)pair_src.b();
       
       if(last.compare(a, range)) {
-      // if(tmp_src.equals(tmp_dst, false)) {
-      // if(last.compare(a, range) && tmp_src.equals(tmp_dst, false)) {
         R_Line2D new_line = new R_Line2D(this, last, b);
-          // if(check_whether_line_exist(new_line, src)) {
-          //   // println("cette ligne existe");
-          // } else {
-          //   println("Elle existe dans tes rêves");
-          // }
-          src.remove(i);
-          dst.add(new_line);
-          // if(close(dst.get(0).a(), new_line.b())) println(frameCount," CLOSE dif", src.size(), dst.size());
-          break;
-        // }
+        src.remove(i);
+        dst.add(new_line);
+        break;
       }
       
       if(last.compare(b, range)) {
-      // if(tmp_src.equals(tmp_dst, false)) {
-      // if(last.compare(b, range) && tmp_src.equals(tmp_dst, false)) {
         R_Line2D new_line = new R_Line2D(this, last, a);
-          //  if(check_whether_line_exist(new_line, src)) {
-          //   // println("cette ligne existe");
-          // } else {
-          //   println("Elle existe dans tes rêves");
-          // }
         src.remove(i);
         dst.add(new_line);
-        // if(close(dst.get(0).a(), new_line.b())) println(frameCount," CLOSE dif", src.size(), dst.size());
         break;
       }
     }
@@ -414,14 +427,7 @@ void clean_lines(R_Shape origin, R_Shape target, ArrayList<R_Line2D> lines) {
       lines.add(l);
     } else {
       // println("REMOVE", l.dist(), l.a());
-      rg.fill_is(false);
-      rg.stroke_is(true);
-      rg.thickness(1);
-      rg.stroke(r.BLOOD);
-      rg.fill(r.YELLOW);
-      String str = "          dist " + (int)l.dist() + "  coord " + (int)l.a().x() + " / " + (int)l.a().y();
-      rg.text(str, l.a());
-      rg.circle(l.a(),30);
+      // show_info_line(l);
       // deuxième check
     }
   }
@@ -498,96 +504,6 @@ int get_color(int index) {
 
 
 
-// UTILS SHOW
-void show_line(ArrayList<R_Line2D> lines, int thickness) {
-  for(int i = 0 ; i < lines.size(); i++) {
-    R_Line2D l = lines.get(i);
-    // println(l);
-    l.fill_is(true);
-    l.fill(r.BLACK);
-    l.text(i, l.barycenter());
-    l.fill_is(false);
-    l.thickness(thickness);
-    l.stroke_is(true);
-
-
-    l.show(0);
-  }
-  rg.stroke_is(false);
-}
-
-
-void show_shape(R_Shape s) {
-  s.thickness(0);
-  s.stroke_is(false);
-  s.fill_is(true);
-  s.fill(r.PINK);
-  s.show();
-}
 
 
 
-
-
-
-
-
-// OLD
-
-
-// boolean meet_is(R_Line2D ln, R_Shape shape) {
-//   R_Line2D [] arr = shape.get_lines();
-//   for(R_Line2D line : arr) {
-//     if(line.intersection_is(ln, ln.a(), ln.b())) return true;
-//   }
-//   return false;
-// }
-
-
-
-// void sort_lines_old(ArrayList<R_Line2D> lines_src, ArrayList<vec2> res, int id) {
-//   R_Line2D l1 = new R_Line2D(this);
-//   println("0000 lines_src.size()", lines_src.size());
-//   for(int i = 0 ; i < lines_src.size() ; i++) {
-//     R_Line2D l = lines_src.get(i);
-   
-//     if(l.id().a() == id) {
-//       l1 = l.copy();
-//       lines_src.remove(i);
-//       break;
-//     }
-//   }
-//   println("1111 lines_src.size()", lines_src.size(), l1.id().a(), lines_src.get(0).id().a());
-//   // println("l.id().a()", l1.id().a(), "id", id);
-//   // println("size lines_src", lines_src.size());
-//   int index = 0;
-//   // int id = 0;
-//   for( ; index < lines_src.size() ; index++) {
-//     R_Line2D l2 = lines_src.get(index);
-//     if(l1.id().a() == l2.id().a()) {
-//       // LE SOUCIS EST LA, c'est ici que ça fait tourner en rond
-//       // id = l2.id().a();
-//       println("--- l1.id().a() == l2.id().a()");
-//       continue;
-//     }
-//     // peut-être pas besoin de la ligne ci-dessus normalement elle a été supprimée
-
-//     if(l1.b() == l2.a()) {
-//       id = l2.id().a();
-//       println("*** l1.b() == l2.a()");
-//       res.add(l2.a().copy());
-//       break;
-//     }
-//     if(l1.b() == l2.b()) {
-//       println("/// l1.b() == l2.b()");
-//       id = l2.id().a();
-//       res.add(l2.b().copy());
-//       // besoin d'inverser le segment AB
-//       vec2 buf = l2.a().copy();
-//       l2.a(l2.b());
-//       l2.b(buf.x(), buf.y());
-//       break;
-//     }
-//   }
-//   sort_lines_old(lines_src, res, id);
-// }
