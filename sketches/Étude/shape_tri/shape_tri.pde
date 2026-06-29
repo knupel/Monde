@@ -10,6 +10,8 @@ import rope.vector.vec2;
 import rope.vector.vec3;
 import rope.mesh.R_Line2D;
 
+// https://stackoverflow.com/questions/2667748/how-do-i-combine-complex-polygons
+
 ArrayList<R_Shape> start_list = new ArrayList();
 ArrayList<R_Shape> end_list = new ArrayList();
 ArrayList<ArrayList> group = new ArrayList();
@@ -234,9 +236,9 @@ void union_shape(R_Shape origin, R_Shape target) {
   // augmenter le range de détection après chaque ronde d'échec complet
   // puis remttre à la valeur de part après un succès.
   int start_index = 0;
-  build_new_lines(new_lines, start_index);
+  build_new_lines(origin, target, new_lines, start_index);
 
-  clean_new_lines(origin, target, new_lines);
+  // remove_lines_not_on_perimeter(origin, target, new_lines);
 
   // int ox = mouseX;
   // int oy = mouseY;
@@ -263,22 +265,26 @@ void fusion(ArrayList<R_Line2D> lines, R_Shape target) {
   }
 }
 
-void clean_new_lines(R_Shape p1, R_Shape p2, ArrayList<R_Line2D> list) {
-  // retirer les lignes qui ne sont pas sur les lignes
-  // ça se voir car les barycentres sont soit à l'intérieur des formes soit à l'extérieurs
-  int marge = 1;
+void remove_lines_not_on_perimeter(R_Shape p1, R_Shape p2, ArrayList<R_Line2D> list) {
   for(int i = list.size() -1 ; i > 0 ; i-- ) {
     R_Line2D line = list.get(i);
-    vec2 b = line.barycenter();
-    byte res1 = rg.in_polygon(p1, b, marge);
-    byte res2 = rg.in_polygon(p2, b, marge);
-    if((res1 == -1 && res2 == -1) || (res1 == 1 && res2 == 1)) {
-    // if(!rg.in_polygon(p1, b) && !rg.in_polygon(p2, b)) {
-      rg.circle(b, 20);
-      println("mais qu'est-ce tu fous là, dégages de P1", res1, res2);
+    if(!line_on_perimter_is(p1, p2, line)) {
       list.remove(i);
     }
   }
+}
+
+boolean line_on_perimter_is(R_Shape p1, R_Shape p2, R_Line2D line) {
+  int marge = 1;
+  vec2 b = line.barycenter();
+    byte res1 = rg.in_polygon(p1, b, marge);
+    byte res2 = rg.in_polygon(p2, b, marge);
+    if((res1 == -1 && res2 == -1) || (res1 == 1 && res2 == 1)) {
+      rg.circle(b, 20);
+      println("INAPTE POUR LE SERVICE", res1, res2);
+      return false;
+    }
+    return true;
 }
 
 
@@ -286,7 +292,7 @@ int total = 0;
 int succes = 0;
 
 int count_recursion_union_sort = 0;
-void build_new_lines(ArrayList<R_Line2D> src, int start_index) {
+void build_new_lines(R_Shape shape_1, R_Shape shape_2, ArrayList<R_Line2D> src, int start_index) {
   // init
   ArrayList<R_Line2D> src_copy = new ArrayList();
   for(R_Line2D line : src) {
@@ -301,7 +307,7 @@ void build_new_lines(ArrayList<R_Line2D> src, int start_index) {
   sort.add(line.copy());
   int max_recursion = src_copy.size() *100;
   count_recursion_union_sort = 0;
-  recursive_clean(src_copy, sort, max_recursion, range_detection);
+  recursive_clean(shape_1, shape_2, src_copy, sort, max_recursion, range_detection);
   
 
   // check
@@ -316,11 +322,11 @@ void build_new_lines(ArrayList<R_Line2D> src, int start_index) {
     if(start_index < src.size()) {
       if(!chain_close_is(sort)) {
         println(frameCount, " OUVERTE ECHEC [", src.size(), src_copy.size(), sort.size(), start_index, "]");
-        build_new_lines(src, start_index);
+        build_new_lines(shape_1, shape_2, src, start_index);
       } else {
         // succes++;
         println(frameCount, " FERMÉE ECHEC [", src.size(), src_copy.size(), sort.size(), start_index, "]");
-        build_new_lines(src, start_index);
+        build_new_lines(shape_1, shape_2, src, start_index);
       }
     } else {
       println(frameCount, " ÉCHEC TOTAL [", src.size(), src_copy.size(), sort.size(), start_index, "]");
@@ -350,7 +356,7 @@ boolean chain_close_is(ArrayList<R_Line2D> list) {
 
 
 import rope.utils.R_Pair;
-void recursive_clean(ArrayList<R_Line2D> src, ArrayList<R_Line2D> dst, int max, float range) {
+void recursive_clean(R_Shape shape_1, R_Shape shape_2, ArrayList<R_Line2D> src, ArrayList<R_Line2D> dst, int max, float range) {
   if(src.size() > 0 && count_recursion_union_sort < max) {
     count_recursion_union_sort++;
     for(int i = 0 ; i < src.size() ; i++) {
@@ -365,19 +371,34 @@ void recursive_clean(ArrayList<R_Line2D> src, ArrayList<R_Line2D> dst, int max, 
       
       if(last.compare(a, range)) {
         R_Line2D new_line = new R_Line2D(this, last, b);
-        src.remove(i);
-        dst.add(new_line);
-        break;
+        // check if the created line is on perimeter
+        if(line_on_perimter_is(shape_1, shape_2, new_line)) {
+          src.remove(i);
+          dst.add(new_line);
+          break;
+
+        }
+        // if it's ok we can add and remove from the pool
+        // src.remove(i);
+        // dst.add(new_line);
+        // break;
       }
       
       if(last.compare(b, range)) {
         R_Line2D new_line = new R_Line2D(this, last, a);
-        src.remove(i);
-        dst.add(new_line);
-        break;
+        // check if the created line is on perimeter
+        if(line_on_perimter_is(shape_1, shape_2, new_line)) {
+          src.remove(i);
+          dst.add(new_line);
+          break;
+        }
+        // if it's ok we can add and remove from the pool
+        // src.remove(i);
+        // dst.add(new_line);
+        // break;
       }
     }
-    recursive_clean(src , dst, max, range +=0.1);
+    recursive_clean(shape_1, shape_2, src , dst, max, range +=0.1);
   }
 }
 
