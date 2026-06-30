@@ -22,11 +22,11 @@ void show_lines(ArrayList<R_Line2D> lines, int thickness) {
 }
 
 
-void show_shape(R_Shape s) {
+void show_shape(R_Shape s, int opacity) {
   s.thickness(0);
   s.stroke_is(false);
   s.fill_is(true);
-  s.fill(r.PINK,50);
+  s.fill(r.PINK, opacity);
   s.show();
 }
 

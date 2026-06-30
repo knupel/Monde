@@ -40,6 +40,10 @@ void draw() {
 
 }
 
+void mousePressed() {
+  println("mouse", mouseX, mouseY);
+}
+
 
 
 void keyPressed() {
@@ -230,7 +234,6 @@ void union_shape(R_Shape origin, R_Shape target) {
   //show_line(new_lto_addines, 1);
   clean_lines(origin, target, new_lines);
   // show_lines(new_lines, 1);
-  // println("1", new_lines.size());
 
   
   // augmenter le range de détection après chaque ronde d'échec complet
@@ -245,13 +248,18 @@ void union_shape(R_Shape origin, R_Shape target) {
     int ox = 0;
   int oy = 0;
   show_lines(new_lines, 1, ox, oy);
-  show_shape(origin); show_shape(target);
+  show_shape(origin, 30); show_shape(target, 30);
   show_barycenter(new_lines, 5);
 
-
-  fusion(new_lines, target);
-
+  // fusion(new_lines, target);
 }
+
+
+
+
+
+
+
 
 /////////////////////////
 // SORT
@@ -265,14 +273,14 @@ void fusion(ArrayList<R_Line2D> lines, R_Shape target) {
   }
 }
 
-void remove_lines_not_on_perimeter(R_Shape p1, R_Shape p2, ArrayList<R_Line2D> list) {
-  for(int i = list.size() -1 ; i > 0 ; i-- ) {
-    R_Line2D line = list.get(i);
-    if(!line_on_perimter_is(p1, p2, line)) {
-      list.remove(i);
-    }
-  }
-}
+// void remove_lines_not_on_perimeter(R_Shape p1, R_Shape p2, ArrayList<R_Line2D> list) {
+//   for(int i = list.size() -1 ; i > 0 ; i-- ) {
+//     R_Line2D line = list.get(i);
+//     if(!line_on_perimter_is(p1, p2, line)) {
+//       list.remove(i);
+//     }
+//   }
+// }
 
 
 
@@ -296,13 +304,17 @@ void build_new_lines(R_Shape shape_1, R_Shape shape_2, ArrayList<R_Line2D> src, 
   sort.add(line.copy());
   int max_recursion = src_copy.size() *100;
   count_recursion_union_sort = 0;
+  // int recursion_current = 0;
+  // recursion_current = recursive_clean(shape_1, shape_2, src_copy, sort, max_recursion, range_detection);
   recursive_clean(shape_1, shape_2, src_copy, sort, max_recursion, range_detection);
-  
 
   // check
   // boolean fail = false
   if(src_copy.size() == 0) { 
     println(frameCount, "BINGO [", src.size(), sort.size(), start_index, "]");
+    if(start_index > 0) {
+      r.print_array(sort.toArray());
+    }
     total++;
     succes++;
   } else {
@@ -310,15 +322,15 @@ void build_new_lines(R_Shape shape_1, R_Shape shape_2, ArrayList<R_Line2D> src, 
     start_index++;
     if(start_index < src.size()) {
       if(!chain_close_is(sort)) {
-        println(frameCount, " OUVERTE ECHEC [", src.size(), src_copy.size(), sort.size(), start_index, "]");
+        println(frameCount, " OUVERTE src / src_copy / sort / tour  [", src.size(), src_copy.size(), sort.size(),start_index, "] recursion / max" , count_recursion_union_sort, max_recursion, "]");
         build_new_lines(shape_1, shape_2, src, start_index);
       } else {
         // succes++;
-        println(frameCount, " FERMÉE ECHEC [", src.size(), src_copy.size(), sort.size(), start_index, "]");
+        println(frameCount, " FERMÉE src / src_copy / sort / tour[", src.size(), src_copy.size(), sort.size(),start_index,"] recursion / max" ,  count_recursion_union_sort, max_recursion, "]");
         build_new_lines(shape_1, shape_2, src, start_index);
       }
     } else {
-      println(frameCount, " ÉCHEC TOTAL [", src.size(), src_copy.size(), sort.size(), start_index, "]");
+      println(frameCount, " ÉCHEC TOTAL src / src_copy / sort / tour [", src.size(), src_copy.size(), sort.size(),start_index, "] recursion / max" ,  count_recursion_union_sort, max_recursion, "]");
     }
   }
 
@@ -334,53 +346,49 @@ void build_new_lines(R_Shape shape_1, R_Shape shape_2, ArrayList<R_Line2D> src, 
 
 
 import rope.utils.R_Pair;
-void recursive_clean(R_Shape shape_1, R_Shape shape_2, ArrayList<R_Line2D> src, ArrayList<R_Line2D> dst, int max, float range) {
+int recursive_clean(R_Shape shape_1, R_Shape shape_2, ArrayList<R_Line2D> src, ArrayList<R_Line2D> dst, int max, float range) {
   if(src.size() > 0 && count_recursion_union_sort < max) {
     count_recursion_union_sort++;
     for(int i = 0 ; i < src.size() ; i++) {
       R_Line2D tmp_src = src.get(i);
-      R_Line2D tmp_dst =  dst.get(dst.size() -1);
-     
+      R_Line2D tmp_dst =  dst.get(dst.size() -1); 
       R_Pair pair_src = tmp_src.get_pair();
       R_Pair pair_dst = tmp_dst.get_pair();
       vec3 last = (vec3)pair_dst.b();
       vec3 a = (vec3)pair_src.a();
       vec3 b = (vec3)pair_src.b();
-      // info
-      
       
       if(last.compare(a, range)) {
         R_Line2D new_line = new R_Line2D(this, last, b);
         if(count_recursion_union_sort > max-10) println("BCP d'essais BBB", count_recursion_union_sort, new_line);
         // check if the created line is on perimeter
-        if(line_on_perimter_is(shape_1, shape_2, new_line)) {
+        if(line_on_perimter_is(shape_1, shape_2, new_line, src, count_recursion_union_sort, max)) {
+          // if it's ok we can add and remove from the pool
           src.remove(i);
+          println("add BBB", new_line);
           dst.add(new_line);
+          // return count_recursion_union_sort;
           break;
         }
-        // if it's ok we can add and remove from the pool
-        // src.remove(i);
-        // dst.add(new_line);
-        // break;
       }
       
       if(last.compare(b, range)) {
         R_Line2D new_line = new R_Line2D(this, last, a);
         if(count_recursion_union_sort > max-10) println("BCP d'essais AAA", count_recursion_union_sort, new_line);
         // check if the created line is on perimeter
-        if(line_on_perimter_is(shape_1, shape_2, new_line)) {
+        if(line_on_perimter_is(shape_1, shape_2, new_line, src, count_recursion_union_sort, max)) {
+          // if it's ok we can add and remove from the pool
           src.remove(i);
+          println("add AAA", new_line);
           dst.add(new_line);
+          // return count_recursion_union_sort;
           break;
         }
-        // if it's ok we can add and remove from the pool
-        // src.remove(i);
-        // dst.add(new_line);
-        // break;
       }
     }
     recursive_clean(shape_1, shape_2, src , dst, max, range +=0.1);
   }
+  return -1;
 }
 
 
