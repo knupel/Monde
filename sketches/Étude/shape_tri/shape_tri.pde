@@ -274,18 +274,7 @@ void remove_lines_not_on_perimeter(R_Shape p1, R_Shape p2, ArrayList<R_Line2D> l
   }
 }
 
-boolean line_on_perimter_is(R_Shape p1, R_Shape p2, R_Line2D line) {
-  int marge = 1;
-  vec2 b = line.barycenter();
-    byte res1 = rg.in_polygon(p1, b, marge);
-    byte res2 = rg.in_polygon(p2, b, marge);
-    if((res1 == -1 && res2 == -1) || (res1 == 1 && res2 == 1)) {
-      rg.circle(b, 20);
-      println("INAPTE POUR LE SERVICE", res1, res2);
-      return false;
-    }
-    return true;
-}
+
 
 
 int total = 0;
@@ -341,18 +330,7 @@ void build_new_lines(R_Shape shape_1, R_Shape shape_2, ArrayList<R_Line2D> src, 
   }
 }
 
-boolean chain_close_is(ArrayList<R_Line2D> list) {
-  for(int current = 0 ; current < list.size() ; current++) {
-    int next = current + 1;
-    if(current == list.size() - 1) next = 0;
-    R_Line2D line_current = list.get(current);
-    R_Line2D line_next = list.get(next);
-    vec2 b = line_current.b();
-    vec2 a = line_next.a();
-    if(!b.equals(a)) return false;
-  }
-  return true;
-}
+
 
 
 import rope.utils.R_Pair;
@@ -368,15 +346,17 @@ void recursive_clean(R_Shape shape_1, R_Shape shape_2, ArrayList<R_Line2D> src, 
       vec3 last = (vec3)pair_dst.b();
       vec3 a = (vec3)pair_src.a();
       vec3 b = (vec3)pair_src.b();
+      // info
+      
       
       if(last.compare(a, range)) {
         R_Line2D new_line = new R_Line2D(this, last, b);
+        if(count_recursion_union_sort > max-10) println("BCP d'essais BBB", count_recursion_union_sort, new_line);
         // check if the created line is on perimeter
         if(line_on_perimter_is(shape_1, shape_2, new_line)) {
           src.remove(i);
           dst.add(new_line);
           break;
-
         }
         // if it's ok we can add and remove from the pool
         // src.remove(i);
@@ -386,6 +366,7 @@ void recursive_clean(R_Shape shape_1, R_Shape shape_2, ArrayList<R_Line2D> src, 
       
       if(last.compare(b, range)) {
         R_Line2D new_line = new R_Line2D(this, last, a);
+        if(count_recursion_union_sort > max-10) println("BCP d'essais AAA", count_recursion_union_sort, new_line);
         // check if the created line is on perimeter
         if(line_on_perimter_is(shape_1, shape_2, new_line)) {
           src.remove(i);
@@ -402,22 +383,12 @@ void recursive_clean(R_Shape shape_1, R_Shape shape_2, ArrayList<R_Line2D> src, 
   }
 }
 
-boolean check_whether_line_exist(R_Line2D line, ArrayList<R_Line2D> list) {
-  for(R_Line2D l : list) {
-    if(l.equals(line,false)) return true;
-  }
-  return false;
-}
-
 
 
 /////////////////////////
 // END SORT
 /////////////////////////
-boolean close(vec2 start, vec2 end) {
-  if(start.equals(end)) return true;
-  return false;
-}
+
 
 
 
